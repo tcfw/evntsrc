@@ -1,4 +1,15 @@
 package: github.com/tcfw/evntsrc
 import:
+- package: github.com/globalsign/mgo
+- package: github.com/google/uuid
+  version: ^1.0.0
+- package: github.com/gorilla/websocket
+  version: ^1.4.0
+- package: github.com/nats-io/go-nats
+  version: ^1.6.0
+- package: github.com/simplereach/timeutils
+  version: ^1.2.0
 - package: github.com/spf13/cobra
   version: ^0.0.3
+- package: github.com/spf13/viper
+  version: ^1.2.0

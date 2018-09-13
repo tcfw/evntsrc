@@ -21,8 +21,8 @@ func startHTTPServer(port int) {
 }
 
 //Run connects to NAT and start web server
-func Run(webPort int) {
-	connectNats("127.0.0.1:30858")
+func Run(webPort int, natsEndpoint string) {
+	connectNats(natsEndpoint)
 	defer func() {
 		natsConn.Close()
 	}()

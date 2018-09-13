@@ -149,78 +149,81 @@ func (c *Client) readPump() {
 				ackBytes, _ := json.Marshal(ack)
 				c.send <- ackBytes
 			} else {
-
-				switch command.Command {
-				case commandSubscribe:
-					subcommand := &SubscribeCommand{}
-					json.Unmarshal(message, subcommand)
-					c.subscribe(subcommand.Channel)
-				case commandUnsubscribe:
-					subcommand := &UnsubscribeCommand{}
-					json.Unmarshal(message, subcommand)
-					c.unsubscribe(subcommand.Channel)
-				case commandPublish:
-					subcommand := &PublishCommand{}
-					json.Unmarshal(message, subcommand)
-
-					event := &event.Event{}
-					event.SetID()
-					event.Stream = c.auth.Stream
-					event.Source = subcommand.Source
-					if event.Source == "" {
-						event.Source = "ws"
-					}
-					event.Subject = subcommand.Channel
-					event.CEVersion = "0.1"
-					event.Type = subcommand.Type
-					event.TypeVersion = subcommand.TypeVersion
-					event.ContentType = subcommand.ContentType
-					event.Data = []byte(subcommand.Data)
-					event.Time = time.Now()
-					event.Metadata = map[string]interface{}{}
-					event.Metadata["ws.source_ip"] = c.conn.RemoteAddr().String()
-
-					eventJSONBytes, _ := json.Marshal(event)
-
-					natsConn.Publish(fmt.Sprintf("_USER.%d.%s", c.auth.Stream, subcommand.Channel), eventJSONBytes)
-				case commandAuth:
-					subcommand := &AuthCommand{}
-					json.Unmarshal(message, subcommand)
-
-					//TODO verify auth info
-					c.auth = subcommand
-					ack := &AckSubUnSucCommand{
-						Acktype: "OK",
-					}
-					ackBytes, _ := json.Marshal(ack)
-					c.send <- ackBytes
-				case commandReplay:
-					subcommand := &ReplayCommand{}
-					json.Unmarshal(message, subcommand)
-					subcommand.Stream = c.auth.Stream
-
-					fmt.Printf("%v\n", subcommand)
-
-					repubBytes, _ := json.Marshal(subcommand)
-
-					msg, err := natsConn.Request("replay.broadcast", repubBytes, time.Second*10)
-					if err != nil {
-						ack := &AckSubUnSucCommand{
-							Acktype: "err",
-							Error:   err.Error(),
-						}
-						ackBytes, _ := json.Marshal(ack)
-						c.send <- ackBytes
-					} else {
-						ack := &AckSubUnSucCommand{
-							Acktype: "err",
-							Error:   string(msg.Data),
-						}
-						ackBytes, _ := json.Marshal(ack)
-						c.send <- ackBytes
-					}
-				}
+				c.processCommand(command, message)
 			}
+		}
+	}
+}
+
+func (c *Client) processCommand(command *InboundCommand, message []byte) {
+	switch command.Command {
+	case commandSubscribe:
+		subcommand := &SubscribeCommand{}
+		json.Unmarshal(message, subcommand)
+		c.subscribe(subcommand.Channel)
+	case commandUnsubscribe:
+		subcommand := &UnsubscribeCommand{}
+		json.Unmarshal(message, subcommand)
+		c.unsubscribe(subcommand.Channel)
+	case commandPublish:
+		subcommand := &PublishCommand{}
+		json.Unmarshal(message, subcommand)
+
+		event := &event.Event{}
+		event.SetID()
+		event.Stream = c.auth.Stream
+		event.Source = subcommand.Source
+		if event.Source == "" {
+			event.Source = "ws"
+		}
+		event.Subject = subcommand.Channel
+		event.CEVersion = "0.1"
+		event.Type = subcommand.Type
+		event.TypeVersion = subcommand.TypeVersion
+		event.ContentType = subcommand.ContentType
+		event.Data = []byte(subcommand.Data)
+		event.Time = time.Now()
+		event.Metadata = map[string]interface{}{}
+		event.Metadata["ws.source_ip"] = c.conn.RemoteAddr().String()
+
+		eventJSONBytes, _ := json.Marshal(event)
+
+		natsConn.Publish(fmt.Sprintf("_USER.%d.%s", c.auth.Stream, subcommand.Channel), eventJSONBytes)
+	case commandAuth:
+		subcommand := &AuthCommand{}
+		json.Unmarshal(message, subcommand)
+
+		//TODO verify auth info
+		c.auth = subcommand
+		ack := &AckSubUnSucCommand{
+			Acktype: "OK",
+		}
+		ackBytes, _ := json.Marshal(ack)
+		c.send <- ackBytes
+	case commandReplay:
+		subcommand := &ReplayCommand{}
+		json.Unmarshal(message, subcommand)
+		subcommand.Stream = c.auth.Stream
+
+		fmt.Printf("%v\n", subcommand)
+
+		repubBytes, _ := json.Marshal(subcommand)
+
+		msg, err := natsConn.Request("replay.broadcast", repubBytes, time.Second*10)
+		if err != nil {
+			ack := &AckSubUnSucCommand{
+				Acktype: "err",
+				Error:   err.Error(),
+			}
+			ackBytes, _ := json.Marshal(ack)
+			c.send <- ackBytes
+		} else {
+			ack := &AckSubUnSucCommand{
+				Acktype: "err",
+				Error:   string(msg.Data),
+			}
+			ackBytes, _ := json.Marshal(ack)
+			c.send <- ackBytes
 		}
 	}
 }

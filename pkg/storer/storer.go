@@ -38,6 +38,10 @@ func monitorUserStreams() {
 			return
 		}
 
+		if isReplay, ok := event.Metadata["replay"]; ok && isReplay.(bool) {
+			return
+		}
+
 		event.Store()
 	})
 }
@@ -66,6 +70,7 @@ func monitorReplayRequests() {
 			iter := query.Iter()
 			event := event.Event{}
 			for iter.Next(&event) {
+				event.Metadata["replay"] = true
 				jsonBytes, _ := json.Marshal(event)
 				natsConn.Publish("_USER."+string(command.Stream)+"."+command.Channel, jsonBytes)
 			}

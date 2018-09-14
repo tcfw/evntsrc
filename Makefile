@@ -30,3 +30,6 @@ websocks:
 push: 
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/storer:latest
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/websocks:latest
+
+protos:
+	@scripts/protos.sh

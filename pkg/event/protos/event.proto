@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package evntsrc.event;
+
+import "google/protobuf/timestamp.proto";
+
+message Event {
+	string ID = 1;
+	int32 Stream = 2;
+	google.protobuf.Timestamp Time = 3;
+	string Type = 4;
+	string TypeVersion = 5;
+	string CEVersion = 6;
+	string Source = 7;
+	string Subject = 8;
+	google.protobuf.Timestamp Acknowledged = 9;
+	map<string,bytes> Metadata = 10;
+	string ContentType = 11;
+	bytes Data = 12;
+}

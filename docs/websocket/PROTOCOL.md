@@ -56,5 +56,8 @@ Replays are rebroadcasted to all subscribers through the related channel
   "cmd":"replay",
   "channel":"evntsrc.github.com", //Channel to replay from (no wildcards)
   "startTime": "2018-01-01 00:00:00 +1000" //Time to start replays from (flexible format using github.com/simplereach/timeutils)
+  "filter": { //Filter the replay (optional)
+    // TBC
+  }
 }
 ```

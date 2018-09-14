@@ -1,4 +1,11 @@
 package: github.com/tcfw/evntsrc
+homepage: https://evntsrc.io
+license: MIT
+owners:
+- name: Tom Worrall
+excluseDirs:
+- docs
+- web/node_modules
 import:
 - package: github.com/globalsign/mgo
 - package: github.com/google/uuid

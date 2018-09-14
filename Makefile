@@ -1,4 +1,4 @@
-DOCKER_REGISTRY   ?= gcr.io
+DOCKER_REGISTRY   ?= asia.gcr.io
 IMAGE_PREFIX      ?= evntsrc-io
 
 GO        ?= go
@@ -9,7 +9,7 @@ BINDIR    := $(CURDIR)/bin
 # Required for globs to work correctly
 SHELL=/bin/bash
 
-.PHONY: bootstrap storer websocks
+.PHONY: bootstrap
 bootstrap:
 ifndef HAS_GLIDE
 	${GO} get -u github.com/Masterminds/glide
@@ -18,10 +18,15 @@ endif
 
 .DEFAULT_GOAL := all
 .PHONY: all
-all: storer websocks
+all: storer websocks push
 
 storer:
 	docker build -f ./build/storer/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/storer:latest .
 
 websocks:
 	docker build -f ./build/websocks/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/websocks:latest .
+
+.PHONY: push
+push: 
+	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/storer:latest
+	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/websockets:latest

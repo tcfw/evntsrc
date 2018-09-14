@@ -29,4 +29,4 @@ websocks:
 .PHONY: push
 push: 
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/storer:latest
-	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/websockets:latest
+	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/websocks:latest

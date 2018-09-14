@@ -20,4 +20,9 @@ spec:
         imagePullPolicy: Never
         image: asia.gcr.io/evntsrc-io/storer:latest
         args:
+        - storer
+        - start
         - --nats=nats:4222
+        env:
+        - name: DB_HOST
+          value: "mongo:27017"

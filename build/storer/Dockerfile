@@ -14,6 +14,7 @@ RUN go build -ldflags="-w -s" -o storer ./cmd/storer
 
 FROM ubuntu:latest
 
-COPY --from=builder /go/src/github.com/tcfw/evntsrc/storer /storer
+WORKDIR /bin
+COPY --from=builder /go/src/github.com/tcfw/evntsrc/storer storer
 
-CMD [ "/storer" ]
+CMD [ "storer" ]

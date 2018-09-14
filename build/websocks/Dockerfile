@@ -16,6 +16,7 @@ FROM ubuntu:latest
 
 RUN apt-get update && apt-get install -y ca-certificates
 
-COPY --from=builder /go/src/github.com/tcfw/evntsrc/websocks /websocks
+WORKDIR /bin
+COPY --from=builder /go/src/github.com/tcfw/evntsrc/websocks websocks
 
-CMD [ "/websocks" ]
+CMD [ "websocks" ]

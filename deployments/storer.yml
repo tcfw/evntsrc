@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: storer
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        version: v1
+        run: storer
+        app: storer
+        service: storer
+        tier: backend
+      annotations:
+        prometheus.io/scrape: "false"
+    spec:
+      containers:
+      - name: storer
+        imagePullPolicy: Never
+        image: asia.gcr.io/evntsrc-io/storer:latest
+        args:
+        - --nats=nats:4222

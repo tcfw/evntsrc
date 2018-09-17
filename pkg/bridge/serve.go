@@ -10,7 +10,11 @@ import (
 )
 
 //RunGRPC starts the GRPC server
-func RunGRPC(port int) {
+func RunGRPC(port int, natsEndpoint string) {
+
+	connectNats(natsEndpoint)
+	defer natsConn.Close()
+
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		panic(err)

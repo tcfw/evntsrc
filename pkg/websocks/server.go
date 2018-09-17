@@ -23,9 +23,7 @@ func startHTTPServer(port int) {
 //Run connects to NAT and start web server
 func Run(webPort int, natsEndpoint string) {
 	connectNats(natsEndpoint)
-	defer func() {
-		natsConn.Close()
-	}()
+	defer natsConn.Close()
 
 	startHTTPServer(webPort)
 }

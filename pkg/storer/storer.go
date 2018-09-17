@@ -21,6 +21,7 @@ type ReplayCommand struct {
 //StartMonitor subscripts to all user channels
 func StartMonitor(nats string) {
 	connectNats(nats)
+	defer natsConn.Close()
 
 	monitorUserStreams()
 	monitorReplayRequests()

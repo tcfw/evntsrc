@@ -3,18 +3,22 @@ package stsmetrics
 import (
 	"encoding/json"
 
-	"gopkg.in/mgo.v2/bson"
+	"github.com/globalsign/mgo/bson"
 )
 
 //JobRequest takes in a stream (or all) and sends a request to process timeseries info
 func JobRequest(natsEndpoint string, stream int32) {
 	connectNats(natsEndpoint)
+	defer natsConn.Close()
+	findJobs(stream)
+}
+
+func findJobs(stream int32) {
 	db, err := NewDBSession()
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
-	defer natsConn.Close()
 
 	if stream > 0 {
 		err := requestForStream(stream)

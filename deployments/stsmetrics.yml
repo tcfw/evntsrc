@@ -1,0 +1,57 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: stsmetrics-cron
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        version: v1
+        run: stsmetrics-cron
+        app: stsmetrics-cron
+        service: stsmetrics-cron
+        tier: backend
+      annotations:
+        prometheus.io/scrape: "false"
+    spec:
+      containers:
+      - name: stsmetrics
+        imagePullPolicy: Never
+        image: asia.gcr.io/evntsrc-io/stsmetrics:latest
+        args:
+        - stsmetrics
+        - cron
+        - --nats=nats 
+        env:
+        - name: DB_HOST
+          value: "mongo-mongodb.default:27017"
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: stsmetrics
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        version: v1
+        run: stsmetrics
+        app: stsmetrics
+        service: stsmetrics
+        tier: backend
+      annotations:
+        prometheus.io/scrape: "false"
+    spec:
+      containers:
+      - name: stsmetrics
+        imagePullPolicy: Never
+        image: asia.gcr.io/evntsrc-io/stsmetrics:latest
+        args:
+        - stsmetrics
+        - watch
+        - --nats=nats:4222
+        env:
+        - name: DB_HOST
+          value: "mongo-mongodb.default:27017"

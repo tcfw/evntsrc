@@ -2,12 +2,12 @@ package stsmetrics
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"time"
 
 	"github.com/globalsign/mgo"
+	"github.com/globalsign/mgo/bson"
 	nats "github.com/nats-io/go-nats"
-	"gopkg.in/mgo.v2/bson"
 )
 
 //StartWatch monitors timeseries requests
@@ -18,6 +18,8 @@ func StartWatch(natsEndpoint string) {
 		panic(err)
 	}
 	defer db.Close()
+
+	log.Println("Starting watch...")
 
 	natsConn.QueueSubscribe("analytics.timeseries", "analytics_watchers", func(m *nats.Msg) {
 		request := &STSRequest{}
@@ -30,7 +32,7 @@ func StartWatch(natsEndpoint string) {
 
 		count, err := query.Count()
 		if err != nil {
-			fmt.Printf("Failed to get count: %s", err.Error())
+			log.Printf("Failed to get count: %s", err.Error())
 			if m.Reply != "" {
 				natsConn.Publish(m.Reply, []byte(err.Error()))
 			}
@@ -43,7 +45,7 @@ func StartWatch(natsEndpoint string) {
 			Time:   time.Now(),
 		}
 
-		metricsCollection := db.DB("events").C("tsmetrics")
+		metricsCollection := db.DB("metrics").C("storage_count")
 
 		err = metricsCollection.Insert(metric)
 		if err != nil && m.Reply != "" {
@@ -56,7 +58,7 @@ func StartWatch(natsEndpoint string) {
 			Unique: false,
 		})
 		if err != nil {
-			fmt.Printf("Failed to ensure index: %s", err.Error())
+			log.Printf("Failed to ensure index: %s", err.Error())
 		}
 
 		err = metricsCollection.EnsureIndex(mgo.Index{
@@ -64,7 +66,7 @@ func StartWatch(natsEndpoint string) {
 			Unique: false,
 		})
 		if err != nil {
-			fmt.Printf("Failed to ensure index: %s", err.Error())
+			log.Printf("Failed to ensure index: %s", err.Error())
 		}
 	})
 

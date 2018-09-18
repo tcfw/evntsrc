@@ -18,6 +18,7 @@ func NewDefaultCommand() *cobra.Command {
 
 	cmds.AddCommand(NewWatchCmd())
 	cmds.AddCommand(NewJobCmd())
+	cmds.AddCommand(NewCronCmd())
 
 	return cmds
 }

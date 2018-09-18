@@ -25,4 +25,4 @@ spec:
         - --nats=nats:4222
         env:
         - name: DB_HOST
-          value: "mongo:27017"
+          value: "mongo-mongodb.default:27017"

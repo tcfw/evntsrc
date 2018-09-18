@@ -18,7 +18,7 @@ endif
 
 .DEFAULT_GOAL := all
 .PHONY: all
-all: storer websocks push
+all: storer websocks stsmetrics push
 
 storer:
 	docker build -f ./build/storer/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/storer:latest .
@@ -26,10 +26,14 @@ storer:
 websocks:
 	docker build -f ./build/websocks/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/websocks:latest .
 
+stsmetrics:
+	docker build -f ./build/stsmetrics/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/stsmetrics:latest .
+
 .PHONY: push
 push: 
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/storer:latest
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/websocks:latest
+	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/stsmetrics:latest
 
 protos:
 	@scripts/protos.sh

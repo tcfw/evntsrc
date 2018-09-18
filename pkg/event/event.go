@@ -2,7 +2,7 @@ package event
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"time"
 
 	"github.com/globalsign/mgo"
@@ -67,7 +67,7 @@ func (e *Event) Store() error {
 		Unique: false,
 	})
 	if err != nil {
-		fmt.Printf("Error ensuring stream index: %s\n", err.Error())
+		log.Printf("Error ensuring stream index: %s\n", err.Error())
 	}
 
 	return nil

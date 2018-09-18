@@ -14,6 +14,7 @@ func startHTTPServer(port int) {
 
 	addr := fmt.Sprintf(":%d", port)
 
+	log.Println("Starting HTTP server...")
 	err := http.ListenAndServe(addr, nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)

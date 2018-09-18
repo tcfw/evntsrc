@@ -3,11 +3,12 @@ package storer
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 
+	"github.com/globalsign/mgo/bson"
 	nats "github.com/nats-io/go-nats"
 	"github.com/simplereach/timeutils"
 	event "github.com/tcfw/evntsrc/pkg/event"
-	"gopkg.in/mgo.v2/bson"
 )
 
 //ReplayCommand instructs events to rebroadcast all events stored since time
@@ -31,11 +32,12 @@ func StartMonitor(nats string) {
 }
 
 func monitorUserStreams() {
+	log.Println("Watching for user streams...")
 	natsConn.QueueSubscribe("_USER.>", "storers", func(m *nats.Msg) {
 		event := &event.Event{}
 		err := json.Unmarshal(m.Data, event)
 		if err != nil {
-			fmt.Printf("%s\n", err.Error())
+			log.Printf("%s\n", err.Error())
 			return
 		}
 
@@ -48,6 +50,7 @@ func monitorUserStreams() {
 }
 
 func monitorReplayRequests() {
+	log.Println("Watching for replay requests...")
 	natsConn.QueueSubscribe("replay.broadcast", "replayers", func(m *nats.Msg) {
 		command := &ReplayCommand{}
 		json.Unmarshal(m.Data, command)

@@ -205,8 +205,6 @@ func (c *Client) processCommand(command *InboundCommand, message []byte) {
 		json.Unmarshal(message, subcommand)
 		subcommand.Stream = c.auth.Stream
 
-		fmt.Printf("%v\n", subcommand)
-
 		repubBytes, _ := json.Marshal(subcommand)
 
 		msg, err := natsConn.Request("replay.broadcast", repubBytes, time.Second*10)

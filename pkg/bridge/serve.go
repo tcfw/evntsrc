@@ -23,6 +23,6 @@ func RunGRPC(port int, natsEndpoint string) {
 	grpcServer := grpc.NewServer() //tracing.GRPCServerOptions()...)
 	pb.RegisterBridgeServiceServer(grpcServer, newServer())
 
-	log.Println("Starting gRPC server")
+	log.Println("Starting gRPC server...")
 	grpcServer.Serve(lis)
 }

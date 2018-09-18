@@ -1,6 +1,7 @@
 import Vue from "vue";
 import Router from "vue-router";
 import Dashboard from "./views/Dashboard.vue";
+import Streams from "./views/Streams.vue";
 
 Vue.use(Router);
 
@@ -15,6 +16,11 @@ export default new Router({
       path: "/dashboard",
       name: "dashboard",
       component: Dashboard
+    },
+    {
+      path: "/streams",
+      name: "streams",
+      component: Streams
     },
     {
       path: "/about",

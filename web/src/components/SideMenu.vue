@@ -26,7 +26,7 @@ export default {
 	.menu {
 		a {
 			color: white;
-			padding: 13px;
+			padding: 15px;
 			font-weight: 100;
 			font-size: 12px;
 			text-decoration: none;
@@ -39,8 +39,8 @@ export default {
 
 			&.router-link-active {
 				background: rgba(255,255,255,0.12);
-				border-left: 3px solid #636D97;
-				padding-left: 10px;
+				border-left: 4px solid #636D97;
+				padding-left: 11px;
 			}
 		}
 	}

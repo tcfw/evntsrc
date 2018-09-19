@@ -40,7 +40,7 @@ export default {
 			this.isSearchResults = false;
 			let url = this.$config.API+"/streams";
 			if (this.searchInput != "") {
-				url += "/search?q="+this.searchInput
+				url += "/search?query="+this.searchInput
 			}
 			axios.get(url).then(d => {
 				this.buildList(d.data)

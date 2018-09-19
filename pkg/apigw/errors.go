@@ -3,7 +3,6 @@ package apigw
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -16,7 +15,6 @@ type errorBody struct {
 
 //CustomHTTPError formats errors in a slightly nicer way
 func CustomHTTPError(ctx context.Context, _ *runtime.ServeMux, marshaler runtime.Marshaler, w http.ResponseWriter, _ *http.Request, err error) {
-	log.Printf("Attempting to format error")
 	const fallback = `{"error": "failed to marshal error message"}`
 
 	w.Header().Set("Content-type", marshaler.ContentType())

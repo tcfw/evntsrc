@@ -17,4 +17,4 @@ FROM ubuntu:latest
 WORKDIR /bin
 COPY --from=builder /go/src/github.com/tcfw/evntsrc/streams streams
 
-CMD [ "streams" ]
+CMD [ "streams", "serve" ]

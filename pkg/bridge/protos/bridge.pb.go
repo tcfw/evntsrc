@@ -10,6 +10,7 @@
 	It has these top-level messages:
 		PublishRequest
 		SubscribeRequest
+		ReplayRequest
 		GeneralResponse
 */
 package evntsrc_bridge
@@ -18,6 +19,7 @@ import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
 import evntsrc_event "github.com/tcfw/evntsrc/pkg/event/protos"
+import google_protobuf "github.com/gogo/protobuf/types"
 
 import context "golang.org/x/net/context"
 import grpc "google.golang.org/grpc"
@@ -83,17 +85,50 @@ func (m *SubscribeRequest) GetChannel() string {
 	return ""
 }
 
+type ReplayRequest struct {
+	Stream    int32                      `protobuf:"varint,1,opt,name=Stream,proto3" json:"Stream,omitempty"`
+	Channel   string                     `protobuf:"bytes,2,opt,name=Channel,proto3" json:"Channel,omitempty"`
+	StartFrom *google_protobuf.Timestamp `protobuf:"bytes,3,opt,name=startFrom" json:"startFrom,omitempty"`
+}
+
+func (m *ReplayRequest) Reset()                    { *m = ReplayRequest{} }
+func (m *ReplayRequest) String() string            { return proto.CompactTextString(m) }
+func (*ReplayRequest) ProtoMessage()               {}
+func (*ReplayRequest) Descriptor() ([]byte, []int) { return fileDescriptorBridge, []int{2} }
+
+func (m *ReplayRequest) GetStream() int32 {
+	if m != nil {
+		return m.Stream
+	}
+	return 0
+}
+
+func (m *ReplayRequest) GetChannel() string {
+	if m != nil {
+		return m.Channel
+	}
+	return ""
+}
+
+func (m *ReplayRequest) GetStartFrom() *google_protobuf.Timestamp {
+	if m != nil {
+		return m.StartFrom
+	}
+	return nil
+}
+
 type GeneralResponse struct {
 }
 
 func (m *GeneralResponse) Reset()                    { *m = GeneralResponse{} }
 func (m *GeneralResponse) String() string            { return proto.CompactTextString(m) }
 func (*GeneralResponse) ProtoMessage()               {}
-func (*GeneralResponse) Descriptor() ([]byte, []int) { return fileDescriptorBridge, []int{2} }
+func (*GeneralResponse) Descriptor() ([]byte, []int) { return fileDescriptorBridge, []int{3} }
 
 func init() {
 	proto.RegisterType((*PublishRequest)(nil), "evntsrc.bridge.PublishRequest")
 	proto.RegisterType((*SubscribeRequest)(nil), "evntsrc.bridge.SubscribeRequest")
+	proto.RegisterType((*ReplayRequest)(nil), "evntsrc.bridge.ReplayRequest")
 	proto.RegisterType((*GeneralResponse)(nil), "evntsrc.bridge.GeneralResponse")
 }
 
@@ -110,6 +145,7 @@ const _ = grpc.SupportPackageIsVersion4
 type BridgeServiceClient interface {
 	Publish(ctx context.Context, in *PublishRequest, opts ...grpc.CallOption) (*GeneralResponse, error)
 	Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (BridgeService_SubscribeClient, error)
+	Replay(ctx context.Context, in *ReplayRequest, opts ...grpc.CallOption) (*GeneralResponse, error)
 }
 
 type bridgeServiceClient struct {
@@ -161,11 +197,21 @@ func (x *bridgeServiceSubscribeClient) Recv() (*evntsrc_event.Event, error) {
 	return m, nil
 }
 
+func (c *bridgeServiceClient) Replay(ctx context.Context, in *ReplayRequest, opts ...grpc.CallOption) (*GeneralResponse, error) {
+	out := new(GeneralResponse)
+	err := grpc.Invoke(ctx, "/evntsrc.bridge.BridgeService/Replay", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for BridgeService service
 
 type BridgeServiceServer interface {
 	Publish(context.Context, *PublishRequest) (*GeneralResponse, error)
 	Subscribe(*SubscribeRequest, BridgeService_SubscribeServer) error
+	Replay(context.Context, *ReplayRequest) (*GeneralResponse, error)
 }
 
 func RegisterBridgeServiceServer(s *grpc.Server, srv BridgeServiceServer) {
@@ -211,6 +257,24 @@ func (x *bridgeServiceSubscribeServer) Send(m *evntsrc_event.Event) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _BridgeService_Replay_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReplayRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BridgeServiceServer).Replay(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/evntsrc.bridge.BridgeService/Replay",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BridgeServiceServer).Replay(ctx, req.(*ReplayRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _BridgeService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "evntsrc.bridge.BridgeService",
 	HandlerType: (*BridgeServiceServer)(nil),
@@ -218,6 +282,10 @@ var _BridgeService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Publish",
 			Handler:    _BridgeService_Publish_Handler,
+		},
+		{
+			MethodName: "Replay",
+			Handler:    _BridgeService_Replay_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
@@ -292,6 +360,45 @@ func (m *SubscribeRequest) MarshalTo(dAtA []byte) (int, error) {
 	return i, nil
 }
 
+func (m *ReplayRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalTo(dAtA)
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ReplayRequest) MarshalTo(dAtA []byte) (int, error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
+	if m.Stream != 0 {
+		dAtA[i] = 0x8
+		i++
+		i = encodeVarintBridge(dAtA, i, uint64(m.Stream))
+	}
+	if len(m.Channel) > 0 {
+		dAtA[i] = 0x12
+		i++
+		i = encodeVarintBridge(dAtA, i, uint64(len(m.Channel)))
+		i += copy(dAtA[i:], m.Channel)
+	}
+	if m.StartFrom != nil {
+		dAtA[i] = 0x1a
+		i++
+		i = encodeVarintBridge(dAtA, i, uint64(m.StartFrom.Size()))
+		n2, err := m.StartFrom.MarshalTo(dAtA[i:])
+		if err != nil {
+			return 0, err
+		}
+		i += n2
+	}
+	return i, nil
+}
+
 func (m *GeneralResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -340,6 +447,23 @@ func (m *SubscribeRequest) Size() (n int) {
 	}
 	l = len(m.Channel)
 	if l > 0 {
+		n += 1 + l + sovBridge(uint64(l))
+	}
+	return n
+}
+
+func (m *ReplayRequest) Size() (n int) {
+	var l int
+	_ = l
+	if m.Stream != 0 {
+		n += 1 + sovBridge(uint64(m.Stream))
+	}
+	l = len(m.Channel)
+	if l > 0 {
+		n += 1 + l + sovBridge(uint64(l))
+	}
+	if m.StartFrom != nil {
+		l = m.StartFrom.Size()
 		n += 1 + l + sovBridge(uint64(l))
 	}
 	return n
@@ -564,6 +688,137 @@ func (m *SubscribeRequest) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+func (m *ReplayRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowBridge
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= (uint64(b) & 0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ReplayRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ReplayRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Stream", wireType)
+			}
+			m.Stream = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowBridge
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Stream |= (int32(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Channel", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowBridge
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthBridge
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Channel = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field StartFrom", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowBridge
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= (int(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthBridge
+			}
+			postIndex := iNdEx + msglen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.StartFrom == nil {
+				m.StartFrom = &google_protobuf.Timestamp{}
+			}
+			if err := m.StartFrom.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipBridge(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthBridge
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
 func (m *GeneralResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -722,23 +977,28 @@ var (
 func init() { proto.RegisterFile("bridge.proto", fileDescriptorBridge) }
 
 var fileDescriptorBridge = []byte{
-	// 283 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x49, 0x2a, 0xca, 0x4c,
-	0x49, 0x4f, 0xd5, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2, 0x4b, 0x2d, 0xcb, 0x2b, 0x29, 0x2e,
-	0x4a, 0xd6, 0x83, 0x88, 0x4a, 0x99, 0xa4, 0x67, 0x96, 0x64, 0x94, 0x26, 0xe9, 0x25, 0xe7, 0xe7,
-	0xea, 0x97, 0x24, 0xa7, 0x95, 0xeb, 0x43, 0xe5, 0xf5, 0x0b, 0xb2, 0xd3, 0xf5, 0x53, 0xcb, 0x52,
-	0xf3, 0x4a, 0xf4, 0xc1, 0x1a, 0x8b, 0x21, 0x1c, 0x88, 0x29, 0x4a, 0x21, 0x5c, 0x7c, 0x01, 0xa5,
-	0x49, 0x39, 0x99, 0xc5, 0x19, 0x41, 0xa9, 0x85, 0xa5, 0xa9, 0xc5, 0x25, 0x42, 0x62, 0x5c, 0x6c,
-	0xc1, 0x25, 0x45, 0xa9, 0x89, 0xb9, 0x12, 0x8c, 0x0a, 0x8c, 0x1a, 0xac, 0x41, 0x50, 0x9e, 0x90,
-	0x16, 0x17, 0x2b, 0x58, 0xa3, 0x04, 0x93, 0x02, 0xa3, 0x06, 0xb7, 0x91, 0x88, 0x1e, 0xcc, 0x7e,
-	0x88, 0x71, 0xae, 0x20, 0x32, 0x08, 0xa2, 0x44, 0xc9, 0x85, 0x4b, 0x20, 0xb8, 0x34, 0xa9, 0x38,
-	0xb9, 0x28, 0x33, 0x29, 0x95, 0x90, 0xb9, 0x12, 0x5c, 0xec, 0xce, 0x19, 0x89, 0x79, 0x79, 0xa9,
-	0x39, 0x60, 0x93, 0x39, 0x83, 0x60, 0x5c, 0x25, 0x41, 0x2e, 0x7e, 0xf7, 0xd4, 0xbc, 0xd4, 0xa2,
-	0xc4, 0x9c, 0xa0, 0xd4, 0xe2, 0x82, 0xfc, 0xbc, 0xe2, 0x54, 0xa3, 0x65, 0x8c, 0x5c, 0xbc, 0x4e,
-	0x60, 0xff, 0x06, 0xa7, 0x16, 0x95, 0x65, 0x26, 0xa7, 0x0a, 0xf9, 0x70, 0xb1, 0x43, 0x3d, 0x20,
-	0x24, 0xa7, 0x87, 0x1a, 0x24, 0x7a, 0xa8, 0x3e, 0x93, 0x92, 0x47, 0x97, 0x47, 0x33, 0x5d, 0x89,
-	0x41, 0xc8, 0x9d, 0x8b, 0x13, 0xee, 0x70, 0x21, 0x05, 0x74, 0xf5, 0xe8, 0x7e, 0x92, 0xc2, 0x1a,
-	0x08, 0x4a, 0x0c, 0x06, 0x8c, 0x4e, 0x02, 0x27, 0x1e, 0xc9, 0x31, 0x5e, 0x78, 0x24, 0xc7, 0xf8,
-	0xe0, 0x91, 0x1c, 0xe3, 0x8c, 0xc7, 0x72, 0x0c, 0x49, 0x6c, 0xe0, 0x00, 0x37, 0x06, 0x04, 0x00,
-	0x00, 0xff, 0xff, 0xa2, 0x93, 0x61, 0xdf, 0xc6, 0x01, 0x00, 0x00,
+	// 358 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x91, 0xdf, 0x4a, 0xfb, 0x30,
+	0x14, 0xc7, 0x97, 0xdf, 0x8f, 0x6d, 0x2c, 0xba, 0x39, 0x83, 0x48, 0x29, 0xd8, 0x8d, 0x5e, 0x0d,
+	0x2f, 0x52, 0x99, 0x5e, 0x78, 0x3d, 0xff, 0x0c, 0xc4, 0x0b, 0xc9, 0xf6, 0x02, 0x4d, 0x3d, 0xeb,
+	0x8a, 0x6d, 0x53, 0x93, 0x74, 0x22, 0xbe, 0x88, 0x8f, 0xe4, 0xa5, 0x8f, 0x20, 0xf3, 0x0d, 0x7c,
+	0x02, 0xb1, 0x59, 0x95, 0x15, 0x41, 0xf1, 0x26, 0x70, 0x72, 0xbe, 0xf9, 0xe4, 0xf0, 0x39, 0x78,
+	0x93, 0xcb, 0xe8, 0x3a, 0x04, 0x9a, 0x49, 0xa1, 0x05, 0xe9, 0xc0, 0x22, 0xd5, 0x4a, 0x06, 0xd4,
+	0xdc, 0xda, 0x47, 0x61, 0xa4, 0xe7, 0x39, 0xa7, 0x81, 0x48, 0x3c, 0x1d, 0xcc, 0xee, 0xbc, 0x55,
+	0xdf, 0xcb, 0x6e, 0x42, 0x0f, 0x16, 0x90, 0x6a, 0xaf, 0x78, 0xa8, 0x4c, 0x61, 0x28, 0x76, 0x2f,
+	0x14, 0x22, 0x8c, 0xc1, 0xb4, 0x78, 0x3e, 0xf3, 0x74, 0x94, 0x80, 0xd2, 0x7e, 0x92, 0x99, 0x80,
+	0x3b, 0xc5, 0x9d, 0xab, 0x9c, 0xc7, 0x91, 0x9a, 0x33, 0xb8, 0xcd, 0x41, 0x69, 0xb2, 0x8b, 0x1b,
+	0x13, 0x2d, 0xc1, 0x4f, 0x2c, 0xd4, 0x47, 0x83, 0x3a, 0x5b, 0x55, 0x64, 0x1f, 0xd7, 0x0b, 0xb2,
+	0xf5, 0xaf, 0x8f, 0x06, 0x1b, 0xc3, 0x1d, 0x5a, 0x0e, 0x68, 0xfe, 0x3b, 0xfb, 0x38, 0x99, 0x89,
+	0xb8, 0xa7, 0xb8, 0x3b, 0xc9, 0xb9, 0x0a, 0x64, 0xc4, 0xe1, 0x27, 0xae, 0x85, 0x9b, 0x27, 0x73,
+	0x3f, 0x4d, 0x21, 0x2e, 0xc8, 0x2d, 0x56, 0x96, 0xee, 0x03, 0x6e, 0x33, 0xc8, 0x62, 0xff, 0xfe,
+	0xcf, 0x08, 0x72, 0x8c, 0x5b, 0x4a, 0xfb, 0x52, 0x9f, 0x4b, 0x91, 0x58, 0xff, 0x8b, 0xc1, 0x6d,
+	0x6a, 0x9c, 0xd0, 0xd2, 0x09, 0x9d, 0x96, 0x4e, 0xd8, 0x57, 0xd8, 0xdd, 0xc6, 0x5b, 0x63, 0x48,
+	0x41, 0xfa, 0x31, 0x03, 0x95, 0x89, 0x54, 0xc1, 0xf0, 0x0d, 0xe1, 0xf6, 0xa8, 0xd8, 0xc6, 0x04,
+	0xe4, 0x22, 0x0a, 0x80, 0x5c, 0xe2, 0xe6, 0xca, 0x1e, 0x71, 0xe8, 0xfa, 0xc2, 0xe8, 0xba, 0x56,
+	0xbb, 0x57, 0xed, 0x57, 0xe8, 0x6e, 0x8d, 0x8c, 0x71, 0xeb, 0xd3, 0x1a, 0xe9, 0x57, 0xf3, 0x55,
+	0xa1, 0xf6, 0xb7, 0x1b, 0x70, 0x6b, 0x07, 0x88, 0x5c, 0xe0, 0x86, 0x11, 0x47, 0xf6, 0xaa, 0x94,
+	0x35, 0xa1, 0xbf, 0x18, 0x6a, 0xd4, 0x7d, 0x5a, 0x3a, 0xe8, 0x79, 0xe9, 0xa0, 0x97, 0xa5, 0x83,
+	0x1e, 0x5f, 0x9d, 0x1a, 0x6f, 0x14, 0xe2, 0x0e, 0xdf, 0x03, 0x00, 0x00, 0xff, 0xff, 0xea, 0xb0,
+	0x2e, 0x2c, 0xb0, 0x02, 0x00, 0x00,
 }

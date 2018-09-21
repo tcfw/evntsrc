@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/go-http-utils/logger"
-	protoutil "github.com/gogo/gateway"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/rs/cors"
 	"google.golang.org/grpc"
@@ -21,18 +20,21 @@ func Run(port int) error {
 
 	runtime.HTTPError = CustomHTTPError
 
-	defaultMarshaler := runtime.WithMarshalerOption(runtime.MIMEWildcard, &protoutil.JSONPb{OrigName: true})
+	// defaultMarshaler := runtime.WithMarshalerOption(runtime.MIMEWildcard, &protoutil.JSONPb{OrigName: true})
 	protobufMarshaler := runtime.WithMarshalerOption("application/protobuf", &runtime.ProtoMarshaller{})
 
-	mux := runtime.NewServeMux(defaultMarshaler, protobufMarshaler)
+	mux := runtime.NewServeMux(protobufMarshaler)
 	opts := []grpc.DialOption{
 		grpc.WithInsecure(),
 	}
 
+	registerPassport(ctx, mux, opts)
+	registerUsers(ctx, mux, opts)
 	registerStreams(ctx, mux, opts)
 
-	handler := logger.Handler(mux, os.Stdout, logger.DevLoggerType)
-	handler = tracingWrapper(handler)
+	handler := tracingWrapper(mux)
+	handler = authGuard(handler)
+	handler = logger.Handler(handler, os.Stdout, logger.CommonLoggerType)
 	handler = cors.Default().Handler(handler)
 
 	fmt.Printf("Starting API GW (port %d)\n", port)

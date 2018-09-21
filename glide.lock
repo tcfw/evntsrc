@@ -1,6 +1,12 @@
 hash: 7358b0f70f33e79313b3e8e1f6fd57c93aa1fb5064186ec6b0c4f4fb11db8b9c
-updated: 2018-09-19T13:28:34.513223+10:00
+updated: 2018-09-20T10:08:09.515693+10:00
 imports:
+- name: github.com/beorn7/perks
+  version: 3a771d992973f24aa725d07868b467d1ddfceafb
+  subpackages:
+  - quantile
+- name: github.com/dgrijalva/jwt-go
+  version: 06ea1031745cb8b3dab3f6a236daf2b0aa468b7e
 - name: github.com/fsnotify/fsnotify
   version: ccc981bf80385c528a65fbfdd49bf2d8da22aa23
 - name: github.com/globalsign/mgo
@@ -12,6 +18,16 @@ imports:
   - internal/scram
 - name: github.com/go-http-utils/logger
   version: f3a42dcdeae6e445c9e986b7fda289d98db10414
+- name: github.com/go-redis/redis
+  version: f3bba01df2026fc865f7782948845db9cf44cf23
+  subpackages:
+  - internal
+  - internal/consistenthash
+  - internal/hashtag
+  - internal/pool
+  - internal/proto
+  - internal/singleflight
+  - internal/util
 - name: github.com/gogo/gateway
   version: 6d3dfbe4e3b52add3800488f526462e69bce526a
 - name: github.com/gogo/googleapis
@@ -63,6 +79,10 @@ imports:
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/magiconair/properties
   version: c2353362d570a7bfa228149c62842019201cfb71
+- name: github.com/matttproud/golang_protobuf_extensions
+  version: c12348ce28de40eed0136aa2b644d0ee0650e56c
+  subpackages:
+  - pbutil
 - name: github.com/mitchellh/mapstructure
   version: fa473d140ef3c6adf42d6b391fe76707f1f243c8
 - name: github.com/nats-io/go-nats
@@ -70,6 +90,10 @@ imports:
   subpackages:
   - encoders/builtin
   - util
+- name: github.com/nats-io/go-nats-streaming
+  version: e54893da22a81e79edb70d3b1e3ebda61ce731a0
+  subpackages:
+  - pb
 - name: github.com/nats-io/nuid
   version: 3024a71c3cbe30667286099921591e6fcc328230
 - name: github.com/opentracing/opentracing-go
@@ -79,6 +103,27 @@ imports:
   - log
 - name: github.com/pelletier/go-toml
   version: c2dbbc24a97911339e01bda0b8cabdbd8f13b602
+- name: github.com/prometheus/client_golang
+  version: 73edb9af667d9467d99b2001722770062a0086c3
+  subpackages:
+  - prometheus
+  - prometheus/internal
+- name: github.com/prometheus/client_model
+  version: 5c3871d89910bfb32f5fcab2aa4b9ec68e65a99f
+  subpackages:
+  - go
+- name: github.com/prometheus/common
+  version: c7de2306084e37d54b8be01f3541a8464345e9a5
+  subpackages:
+  - expfmt
+  - internal/bitbucket.org/ww/goautoneg
+  - model
+- name: github.com/prometheus/procfs
+  version: 05ee40e3a273f7245e8777337fc7b46e533a9a92
+  subpackages:
+  - internal/util
+  - nfs
+  - xfs
 - name: github.com/robfig/cron
   version: b41be1df696709bb6395fe435af20370037c0b4c
 - name: github.com/rs/cors
@@ -99,6 +144,11 @@ imports:
   version: 3ebe029320b2676d667ae88da602a5f854788a8a
 - name: github.com/spf13/viper
   version: 8fb642006536c8d3760c99d4fa2389f5e2205631
+- name: golang.org/x/crypto
+  version: a49355c7e3f8fe157a85be2f77e6e269a0f89602
+  subpackages:
+  - bcrypt
+  - blowfish
 - name: golang.org/x/net
   version: a337091b0525af65de94df2eb7e98bd9962dcbe2
   subpackages:
@@ -159,4 +209,20 @@ imports:
   - internal/json
 - name: gopkg.in/yaml.v2
   version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
-testImports: []
+testImports:
+- name: github.com/corpix/uarand
+  version: 2b8494104d86337cdd41d0a49cbed8e4583c0ab4
+- name: github.com/davecgh/go-spew
+  version: d8f796af33cc11cb798c1aaeb27a4ebc5099927d
+  subpackages:
+  - spew
+- name: github.com/icrowley/fake
+  version: 4178557ae428460c3780a381c824a1f3aceb6325
+- name: github.com/pmezard/go-difflib
+  version: 792786c7400a136282c1664665ae0a8db921c6c2
+  subpackages:
+  - difflib
+- name: github.com/stretchr/testify
+  version: f35b8ab0b5a2cef36673838d662e249dd9c94686
+  subpackages:
+  - assert

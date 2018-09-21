@@ -1,0 +1,99 @@
+syntax = "proto3";
+package evntsrc.passport;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+
+// Enable custom Marshal method.
+option (gogoproto.marshaler_all) = true;
+// Enable custom Unmarshal method.
+option (gogoproto.unmarshaler_all) = true;
+// Enable custom Size method (Required by Marshal and Unmarshal).
+option (gogoproto.sizer_all) = true;
+// Enable registration with golang/protobuf for the grpc-gateway.
+option (gogoproto.goproto_registration) = true;
+// Enable generation of XXX_MessageName methods for grpc-go/status.
+option (gogoproto.messagename_all) = true;
+
+message Timestamp {
+  int64 seconds = 1;
+  int32 nanos = 2;
+}
+
+message Tokens {
+    string token = 1;
+    Timestamp tokenExpire = 2;
+    string refreshToken = 3;
+    Timestamp refreshExpire = 4;
+}
+
+message VerifyTokenRequest {
+    string token = 1;
+}
+
+message VerifyTokenResponse {
+    bool valid = 1;
+    bool revoked = 2;
+    Timestamp tokenExpire = 3;
+    Timestamp refreshExpire = 4;
+}
+
+message UserCreds {
+    string username = 1;
+    string password = 2;
+}
+
+message OAuthClientSecretCreds {
+    string key = 1;
+    string secret = 2;
+    repeated string scopes = 3;
+}
+
+message OAuthCodeCreds {
+    string code = 1;
+}
+
+message AuthRequest {
+    reserved 4 to 50;
+    oneof creds {
+        UserCreds userCreds = 1;
+        OAuthClientSecretCreds oauthClientSecretCreds = 2;
+        OAuthCodeCreds OAuthCodeCreds = 3;
+    }
+}
+
+message AuthResponse {
+    bool success = 1;
+    Tokens tokens = 2;
+}
+
+message RefreshRequest {
+    string refreshToken = 1;
+}
+
+message SocialRequest {
+    string provider = 1;
+    Tokens idpTokens = 2;
+}
+
+service AuthSevice {
+    rpc verifyToken(VerifyTokenRequest) returns (VerifyTokenResponse) {
+        option (google.api.http) = {
+            post: "/v1/auth/verify"
+            body: "*"
+        };
+    };
+    rpc authenticate(AuthRequest) returns (AuthResponse) {
+        option (google.api.http) = {
+            post: "/v1/auth/login"
+            body: "*"
+        };
+    };
+    rpc refresh(RefreshRequest) returns (AuthResponse) {};
+    rpc socialLogin(SocialRequest) returns (AuthResponse) {
+        option (google.api.http) = {
+            post: "/v1/auth/social",
+            body: "*"
+        };
+    };
+}

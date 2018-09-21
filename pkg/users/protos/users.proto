@@ -1,0 +1,75 @@
+syntax="proto3";
+package evntsrc.users;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+// Enable custom Marshal method.
+option (gogoproto.marshaler_all) = true;
+// Enable custom Unmarshal method.
+option (gogoproto.unmarshaler_all) = true;
+// Enable custom Size method (Required by Marshal and Unmarshal).
+option (gogoproto.sizer_all) = true;
+// Enable registration with golang/protobuf for the grpc-gateway.
+option (gogoproto.goproto_registration) = true;
+// Enable generation of XXX_MessageName methods for grpc-go/status.
+option (gogoproto.messagename_all) = true;
+
+message User {
+    string id = 1 [(gogoproto.moretags) = "bson:\"_id\""];
+    string name = 2;
+    string email = 3;
+    google.protobuf.Timestamp createdAt = 4 [(gogoproto.stdtime) = true];
+    string password = 5;
+    map<string, bytes> metadata = 6;
+    string picture = 7;
+}
+
+message UserRequest {
+    oneof query {
+        string id = 1 [(gogoproto.moretags) = "bson:\"_id\""];
+        string email = 2;
+    }
+}
+
+message UserList {
+    repeated User users = 1;
+}
+
+message PasswordUpdateRequest {
+    string id = 1 [(gogoproto.moretags) = "bson:\"_id\""];
+    string password = 2;
+}
+
+message UserUpdateRequest {
+    string id = 1 [(gogoproto.moretags) = "bson:\"_id\""];
+    User user = 2;
+}
+
+message AuthRequest {
+    string email = 1;
+    string password = 2;
+}
+
+message Empty {}
+
+service UserService {
+    rpc Create(User) returns (User) {};
+    rpc Delete(UserRequest) returns (Empty) {};
+    rpc Get(UserRequest) returns (User) {
+        option (google.api.http) = {
+            get: "/v1/users/{id}"
+        };
+    };
+    rpc Find(UserRequest) returns (User) {};
+    rpc FindUsers(UserRequest) returns (stream User) {};
+    rpc List(Empty) returns (UserList) {};
+    rpc SetPassword(PasswordUpdateRequest) returns (Empty) {};
+    rpc Update(UserUpdateRequest) returns (User) {};
+    rpc Me(Empty) returns (User) {
+        option (google.api.http) = {
+            get: "/v1/me"
+        };
+    };
+}

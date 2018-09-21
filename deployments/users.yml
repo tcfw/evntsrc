@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: users
+spec:
+  ports:
+  - port: 443
+    name: grpc
+  selector:
+    run: users
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: users
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        version: v1
+        run: users
+        app: users
+        service: users
+        tier: backend
+      annotations:
+        prometheus.io/scrape: "false"
+    spec:
+      containers:
+      - name: users
+        imagePullPolicy: Never
+        image: asia.gcr.io/evntsrc-io/users:latest
+        ports:
+        - containerPort: 443
+        env:
+        - name: NATS_HOST
+          value: "nats:4222"
+        - name: DB_HOST
+          value: "mongo-mongodb.default:27017"

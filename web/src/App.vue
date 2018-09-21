@@ -3,10 +3,10 @@
     <el-container :style="{height: '100%'}">
       <el-aside width="220px"><side-menu></side-menu></el-aside>
       <el-container>
-        <el-header>
+        <el-header :style="{zIndex: 2}">
           <page-header></page-header>
         </el-header>
-        <el-main><router-view></router-view></el-main>
+        <el-main :style="{zIndex: 1}"><router-view></router-view></el-main>
       </el-container>
     </el-container>
 

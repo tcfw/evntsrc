@@ -2,6 +2,7 @@ import Vue from "vue";
 import Router from "vue-router";
 import Dashboard from "./views/Dashboard.vue";
 import Streams from "./views/Streams.vue";
+import Stream from "./views/Stream.vue";
 
 Vue.use(Router);
 
@@ -20,7 +21,20 @@ export default new Router({
     {
       path: "/streams",
       name: "streams",
-      component: Streams
+      component: Streams,
+      children: [
+        {
+          path: ":id",
+          name: "stream",
+          component: Stream,
+          children: [
+            {
+              path: "settings",
+              name: "stream-settings"
+            }
+          ]
+        }
+      ]
     },
     {
       path: "/about",

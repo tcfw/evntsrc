@@ -83,7 +83,7 @@ func request_StreamsService_Get_0(ctx context.Context, marshaler runtime.Marshal
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "ID")
 	}
 
-	protoReq.ID, err = runtime.String(val)
+	protoReq.ID, err = runtime.Int32(val)
 
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "ID", err)

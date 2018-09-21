@@ -17,7 +17,7 @@ option (gogoproto.goproto_registration) = true;
 option (gogoproto.messagename_all) = true;
 
 message Stream {
-	string ID = 1 [(gogoproto.moretags) = "bson:\"_id\""];
+	int32 ID = 1 [(gogoproto.moretags) = "bson:\"_id\""];
 	string Cluster = 2;
 	string Name = 3;
 	string Owner = 4;
@@ -36,7 +36,7 @@ message StreamList {
 message Empty {}
 
 message GetRequest {
-	string ID = 1;
+	int32 ID = 1;
 }
 
 service StreamsService {

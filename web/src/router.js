@@ -1,5 +1,6 @@
 import Vue from "vue";
 import Router from "vue-router";
+import Login from "./views/Login.vue";
 import Dashboard from "./views/Dashboard.vue";
 import Streams from "./views/Streams.vue";
 import Stream from "./views/Stream.vue";
@@ -12,6 +13,11 @@ export default new Router({
       path: "/",
       name: "home",
       redirect: "/dashboard"
+    },
+    {
+      path: "/login",
+      name: "login",
+      component: Login
     },
     {
       path: "/dashboard",

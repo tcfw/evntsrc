@@ -1,55 +1,68 @@
 <template>
 	<div v-loading.lock="loading" :style="{height: '100%', width: '100%'}">
-		<el-tabs class="stream-tabs">
-			<el-tab-pane label="STATS" name="stats">Stats</el-tab-pane>
-			<el-tab-pane label="HISTORY" name="history">History</el-tab-pane>
-			<el-tab-pane label="AUTH" name="auth">Auth</el-tab-pane>
-			<el-tab-pane label="INGRESS" name="ingress">Ingress</el-tab-pane>
-			<el-tab-pane label="WEBHOOKS" name="webhooks">Webhooks</el-tab-pane>
-			<el-tab-pane label="SETTINGS" name="settings">Settings</el-tab-pane>
-		</el-tabs>
+		<el-menu ref="menu" class="stream-tabs" mode="horizontal" :default-active="activeIndex" menu-trigger="click" @select="menuSelect">
+			<el-menu-item disabled index="stats">Stats</el-menu-item>
+			<el-menu-item index="history">History</el-menu-item>
+			<el-menu-item disabled index="auth">Auth</el-menu-item>
+			<el-menu-item disabled index="ingress">Ingress</el-menu-item>
+			<el-menu-item disabled index="webhooks">Webhooks</el-menu-item>
+			<el-menu-item index="settings">Settings</el-menu-item>
+		</el-menu>
+		<router-view></router-view>
 	</div>
 </template>
 <script>
 export default {
 	name: "stream",
+	props: {
+		'id': String
+	},
 	data() {
 		return {
-			loading: true,
+			loading: false,
 			error: "",
 			stream: null,
+			activeIndex: null,
 		}
+	},
+	watch: {
+		'$route': 'setActiveMenu'
 	},
 	methods: {
 		load() {
 			// this.loading = false;
+			
+		},
+		setActiveMenu() {
+			this.activeIndex = this.$route.matched.length >= 3 ? this.$route.matched[2].name.substr("stream-".length) : "";
+			this.$refs.menu.activeIndex = this.activeIndex;
+		},
+		menuSelect(key, kp) {
+			this.$router.push({name: "stream-"+key, params: {id: this.id}});
 		}
 	},
 	mounted() {
 		this.load();
-	}
+		this.setActiveMenu();
+	},
 }
 </script>
 <style lang="scss">
 .stream-tabs {
-	.el-tabs__nav-wrap {
-		padding: 6px 0px 0px 15px;
-		background: white;
-		box-shadow: 0 2px 3px 0 rgba(0,0,0,0.10);
-		
-		.el-tabs__item {
-			font-size: 13px;
-			font-weight: 300;
-			color: #50566F;
-			padding-bottom: 45px;
+	padding: 6px 0px 0px 15px;
+	background: white;
+	box-shadow: 0 2px 3px 0 rgba(0,0,0,0.10);
+	
+	.el-menu-item {
+		font-size: 13px;
+		font-weight: 300;
+		color: #50566F;
+		padding-bottom: 45px;
+		text-transform: uppercase;
 
-			&.is-active {
-				font-weight: 400;
-			}
-		}
-
-		&::after {
-			display: none;
+		&.is-active {
+			font-weight: 400;
+			padding-right: 18px;
 		}
 	}
 }

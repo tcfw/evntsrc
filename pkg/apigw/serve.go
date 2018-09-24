@@ -35,7 +35,7 @@ func Run(port int) error {
 	handler := tracingWrapper(mux)
 	handler = authGuard(handler)
 	handler = logger.Handler(handler, os.Stdout, logger.CommonLoggerType)
-	handler = cors.Default().Handler(handler)
+	handler = cors.AllowAll().Handler(handler)
 
 	fmt.Printf("Starting API GW (port %d)\n", port)
 	return http.ListenAndServe(fmt.Sprintf(":%d", port), handler)

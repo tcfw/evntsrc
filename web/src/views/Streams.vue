@@ -1,5 +1,5 @@
 <template>
-	<el-container :style="{height: 'calc(100% - 60px)', position: 'absolute', width: 'calc(100% - 220px)'}">
+	<el-container :style="{height: '100%', width: '100%', position: 'absolute'}">
 		<el-aside width="220px">
 			<stream-side-menu></stream-side-menu>
 		</el-aside>

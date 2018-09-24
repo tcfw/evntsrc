@@ -110,7 +110,7 @@ func (s *Server) Authenticate(ctx context.Context, request *pb.AuthRequest) (*pb
 			grpc.SendHeader(ctx, metadata.Pairs("Grpc-Metadata-X-RateLimit-Remaining", fmt.Sprintf("%d", remaining+1)))
 			events.BroadcastNonStreamingEvent(ctx, events.AuthenticateEvent{Event: &events.Event{Type: "io.evntsrc.passport.limite_increased"}, Err: fmt.Sprintf("limit increased"), IP: remoteIP.String(), User: username})
 			incRateLimit(username, remoteIP)
-			return &pb.AuthResponse{Success: false}, status.Errorf(codes.Unauthenticated, "incorrect username or password")
+			return &pb.AuthResponse{Success: false}, status.Errorf(codes.Unauthenticated, "unknown username or password")
 		}
 
 		//Validate password hash

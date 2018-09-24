@@ -32,3 +32,6 @@ spec:
         image: asia.gcr.io/evntsrc-io/streams:latest
         ports:
         - containerPort: 443
+        env:
+        - name: DB_HOST
+          value: "mongo-mongodb.default:27017"

@@ -1,12 +1,12 @@
 <template>
-  <div id="app">
+  <div id="app" ref="App" :class="appClass">
     <el-container :style="{height: '100%'}">
-      <el-aside width="220px"><side-menu></side-menu></el-aside>
+      <el-aside width="220px" v-if="$root.loggedIn()"><side-menu></side-menu></el-aside>
       <el-container>
-        <el-header :style="{zIndex: 2}">
+        <el-header v-if="$root.loggedIn()" :style="{zIndex: 2}">
           <page-header></page-header>
         </el-header>
-        <el-main :style="{zIndex: 1}"><router-view></router-view></el-main>
+        <el-main :style="$root.loggedIn() ? {zIndex: 1, position: 'absolute', top: '62px', width: 'calc(100% - 220px)', height: 'calc(100% - 62px)'} : {zIndex: 1}"><router-view></router-view></el-main>
       </el-container>
     </el-container>
 
@@ -24,6 +24,20 @@ export default {
   components: {
     pageHeader,
     sideMenu
+  },
+  data() {
+    return {
+      appClass: ""
+    }
+  },
+  created() {
+    this.$root.$refs.App = this;
   }
 }
 </script>
+<style lang="scss">
+a {
+  color: #4A90E2;
+  text-decoration: none;
+}
+</style>

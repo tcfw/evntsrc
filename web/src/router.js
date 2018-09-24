@@ -4,6 +4,7 @@ import Login from "./views/Login.vue";
 import Dashboard from "./views/Dashboard.vue";
 import Streams from "./views/Streams.vue";
 import Stream from "./views/Stream.vue";
+import StreamHistory from "./views/Stream/History.vue";
 
 Vue.use(Router);
 
@@ -33,10 +34,16 @@ export default new Router({
           path: ":id",
           name: "stream",
           component: Stream,
+          props: true,
           children: [
             {
               path: "settings",
               name: "stream-settings"
+            },
+            {
+              path: "history",
+              name: "stream-history",
+              component: StreamHistory
             }
           ]
         }

@@ -1,36 +1,38 @@
 <template>
-	<Row type="flex" justify="center" align="middle" :style='{height: "100vh"}'>
-		<Col :md="10" :lg="7" :xs="24" :xlg="5">
-			<Card :style='{padding: "25px"}' id="login-wrapper">
-				<img src="../assets/logo.png" />
-				<Form ref="loginForm" :model="loginForm" :rules="loginFormValidationRules">
+	<el-row type="flex" justify="center" align="middle" :style='{height: "100vh"}'>
+		<el-col :md="10" :lg="7" :xs="24" :xlg="5">
+			<el-card :style='{padding: "25px"}' id="login-wrapper">
+				<div :style="{textAlign: 'center', marginBottom: '45px', marginTop: '5px'}">
+					<img src="../assets/logo_b.png" :style="{height: '25px'}" />
+				</div>
+				<el-form ref="loginForm" :model="loginForm" :rules="loginFormValidationRules" @submit.native.prevent="login">
 					<div v-if="hasPriorKnowledge">
-						<Row>
-							<Col span=5 offset=5>
+						<el-row>
+							<el-col :span=5 :offset=5>
 								<Avatar :src="profileKnowledge.photo" size="large">{{profileKnowledge.name}}</Avatar>
-							</Col>
-							<Col span=12 offset=1>
+							</el-col>
+							<el-col :span=12 :offset=1>
 								<div id="welcome-back">Welcome Back</div>
 								<div id="profile-knowledge">
-									<i class="fab google" v-if="profileKnowledge.provider == 'google'" :style='{marginRight: "5px"}'></i>
-									<i class="fab facebook" v-if="profileKnowledge.provider == 'facebook'" :style='{marginRight: "5px"}'></i>
+									<i class="fab fa-google" v-if="profileKnowledge.provider == 'google'" :style='{marginRight: "5px"}'></i>
+									<i class="fab fa-facebook" v-if="profileKnowledge.provider == 'facebook'" :style='{marginRight: "5px"}'></i>
 									{{profileKnowledge.email}}
 								</div>
 								<div id="not-you" @click="clearKnowledge">Not you?</div>
-							</Col>
-						</Row>
+							</el-col>
+						</el-row>
 					</div>
-					<FormItem prop="email" v-if="!hasPriorKnowledge">
-						<Input type="text" v-model="loginForm.email" placeholder="Email" />
-					</FormItem>
-					<FormItem prop="password" v-if="!hasPriorKnowledge || profileKnowledge.provider=='storage'">
-						<Input type="password" v-model="loginForm.password" placeholder="Password" />
-					</FormItem>
-					<FormItem>
-						<Button :loading="submitting" ref="loginSubmitBtn" size="large" type="primary" @click="login()" id="login-btn">Log in</Button>
+					<el-form-item prop="email" v-if="!hasPriorKnowledge">
+						<el-input type="text" v-model="loginForm.email" placeholder="Email" />
+					</el-form-item>
+					<el-form-item prop="password" v-if="!hasPriorKnowledge || profileKnowledge.provider=='storage'">
+						<el-input type="password" v-model="loginForm.password" placeholder="Password" />
+					</el-form-item>
+					<el-form-item>
+						<el-button :loading="submitting" size="medium" ref="loginSubmitBtn" type="primary" @click="login()" id="login-btn">Log in</el-button>
 						<router-link to="/forgot" id="forgot-btn" v-if="!hasPriorKnowledge || profileKnowledge.provider=='storage'">Forgot your password?</router-link>
-					</FormItem>
-				</Form>
+					</el-form-item>
+				</el-form>
 				<div v-show="profileKnowledge.provider == 'storage' || !hasPriorKnowledge">
 					<div class="login-divider"></div>
 					<div id="social-btns">
@@ -50,16 +52,20 @@
 						<div>Loading...</div>
 					</Spin>
 				</div>
-			</Card>
-		</Col>
-	</Row>
+			</el-card>
+		</el-col>
+	</el-row>
 </template>
 <script>
 import passport from '@/protos/passport_pb.js';
 import errorReader from '@/protos/error.js';
+import Avatar from '@/components/Avatar';
 
 export default {
 	name: 'Login',
+	components: {
+		Avatar	
+	},
 	data () {
 		return {
 			submitting: false,
@@ -89,7 +95,7 @@ export default {
 		}
 	},
 	mounted() {
-		this.$root.$refs.App.bodyClass="pg-login";
+		this.$root.$refs.App.appClass = "pg-login";
 		this.$root.$on('gapi.loaded', () => {
 			gapi.signin2.render('gapi-signin2', {
 				scope: 'profile email',
@@ -192,10 +198,15 @@ export default {
 		fbLoginCallback(callback) {
 			FB.getLoginStatus(r => {
 				FB.api('/me?fields=name,email,picture', r => {
+					if (r.error) {
+						return;
+					}
 					this.profileKnowledge.provider = "facebook";
 					this.profileKnowledge.name = r.name;
 					this.profileKnowledge.email = r.email;
-					this.profileKnowledge.photo = r.picture.data.url;
+					if (r.picture) {
+						this.profileKnowledge.photo = r.picture.data.url;
+					}
 					this.profileKnowledge.tokens = FB.getAuthResponse();
 
 					this.hasPriorKnowledge = true;
@@ -226,7 +237,7 @@ export default {
 			socialRequest.setProvider(this.profileKnowledge.provider);
 			socialRequest.setIdptokens(socialTokens);
 
-			axios.post(this.$root.rootEndpoint+"auth/social", socialRequest.serializeBinary(),{
+			axios.post(this.$config.API+"/auth/social", socialRequest.serializeBinary(),{
 				headers:{'Content-Type':'application/protobuf'},
 				transformResponse: [function (data) {
 					return data;
@@ -293,7 +304,7 @@ export default {
 						var authRequest = new passport.AuthRequest;
 						authRequest.setUsercreds(userCreds);
 
-						axios.post(this.$root.rootEndpoint+"auth/login", authRequest.serializeBinary(),{
+						axios.post(this.$config.API+"/auth/login", authRequest.serializeBinary(),{
 							headers:{'Content-Type':'application/protobuf'},
 							transformResponse: [function (data) {
 								return data;
@@ -308,19 +319,19 @@ export default {
 							if ("response" in de) { 
 								var error = JSON.parse(new TextDecoder("utf-8").decode(de.response.data))
 								if(de.response.status == 429) {
-									app.$Message.destroy()
-									this.$Message.error({
-										content: error.error,
-										duration: 30
+									this.$message({
+										message: error.error,
+										duration: 30000,
+										type:"error"
 									});
 								} else {
 									if (error.error.includes("no reachable servers")) {
 										msg = "Unable to log you in. Please try again.";
 									}
-									app.$Message.destroy()
-									this.$Message.error({
-										content: msg, 
-										duration: 10
+									this.$message({
+										message: msg,
+										duration: 30000,
+										type:"error"
 									});
 									throw error.message;
 								}
@@ -338,7 +349,6 @@ export default {
 	&:after { //bg
 		content: "";
 		display: block;
-		z-index: -1;
 		position: fixed;
 		top: -10px;
 		left: -10px;
@@ -346,16 +356,19 @@ export default {
 		width: calc(100% + 20px);
 		background:
 			linear-gradient(
-				rgba(255, 255,255,0.4), 
-				rgba(255, 255,255,0.4)
+				rgba(0, 0,0,0.4), 
+				rgba(255, 255,255,0.1)
 			),
-			url("https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=3f6e5055d9ad1d603fd364c11823d026&auto=format&fit=crop&w=1952&q=80") no-repeat center;
+			url("https://images.unsplash.com/photo-1515524738708-327f6b0037a7?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=ff90e72db15176afc516fac82d04f14f&auto=format&fit=crop&w=1950&q=80") no-repeat center;
 		background-size: cover;
-		filter: blur(5px);
+		filter: blur(3px);
 	}
 
 	#login-btn {
 		float: right;
+		background: #1A1E30;
+		border-color: #1A1E30;
+		font-weight: 100;
 
 		@media(max-width: 768px) {
 			width: 100%;
@@ -364,6 +377,7 @@ export default {
 
 	#forgot-btn {
 		float: left;
+		font-size: 11px;
 
 		@media(max-width: 768px) {
 			padding-top: 75px;
@@ -376,6 +390,7 @@ export default {
 
 	#create-btn {
 		margin-top: 20px;
+		font-size: 14px;
 
 		@media(max-width: 768px) {
 			margin-top: 35px;
@@ -465,7 +480,7 @@ export default {
 		}
 	}
 
-	.ivu-avatar-large {
+	.el-avatar-large {
 		width: 60px;
 		height: 60px;
 		border-radius: 60px;
@@ -473,13 +488,13 @@ export default {
 	}
 
 	@media(max-width: 768px) {
-		.ivu-card {
+		.el-card {
 			background: transparent;
 			border: none;
 			box-shadow: none;
 		}
 
-		.ivu-input {
+		.el-input {
 			box-shadow: none;
 		}
 	}

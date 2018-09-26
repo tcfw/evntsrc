@@ -51,7 +51,8 @@ spec:
         args:
         - stsmetrics
         - watch
-        - --nats=nats:4222
         env:
         - name: DB_HOST
           value: "mongo-mongodb.default:27017"
+        - name: NATS_HOST
+          value: "nats:4222"

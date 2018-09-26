@@ -59,6 +59,7 @@ func (e *Event) Store() error {
 
 	err = collection.Insert(e)
 	if err != nil {
+		log.Println(err.Error())
 		return err
 	}
 

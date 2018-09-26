@@ -35,4 +35,6 @@ spec:
         args:
         - websocks
         - serve
-        - --nats=nats:4222
+        env:
+        - name: NATS_HOST
+          value: "nats:4222"

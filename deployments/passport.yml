@@ -35,6 +35,8 @@ spec:
         env:
         - name: NATS_HOST
           value: "nats:4222"
+        - name: REDIS_HOST
+          value: "redis:6379"
         volumeMounts:
         - name: certs
           mountPath: "/certs"

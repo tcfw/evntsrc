@@ -188,7 +188,8 @@ func (c *Client) processCommand(command *InboundCommand, message []byte) {
 
 		eventJSONBytes, _ := json.Marshal(event)
 
-		natsConn.Publish(fmt.Sprintf("_USER.%d.%s", c.auth.Stream, subcommand.Channel), eventJSONBytes)
+		channel := fmt.Sprintf("_USER.%d.%s", c.auth.Stream, subcommand.Channel)
+		natsConn.Publish(channel, eventJSONBytes)
 	case commandAuth:
 		subcommand := &AuthCommand{}
 		json.Unmarshal(message, subcommand)

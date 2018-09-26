@@ -135,6 +135,7 @@ func (s *server) Find(ctx context.Context, request *protos.UserRequest) (*protos
 	}
 
 	if c, _ := query.Count(); c == 0 {
+		log.Printf("No users found for query: %v", request)
 		return nil, fmt.Errorf("Failed to find user")
 	}
 

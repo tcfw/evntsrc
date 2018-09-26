@@ -6,6 +6,7 @@ import (
 
 	"github.com/globalsign/mgo/bson"
 	pb "github.com/tcfw/evntsrc/pkg/streams/protos"
+	utils "github.com/tcfw/evntsrc/pkg/utils/authorization"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -44,7 +45,12 @@ func (s *server) List(ctx context.Context, request *pb.Empty) (*pb.StreamList, e
 
 	collection := db.DB(dBName).C(collectionName)
 
-	bsonq := bson.M{"owner": 1}
+	userClaims, err := utils.TokenClaimsFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	bsonq := bson.M{"owner": userClaims["sub"]}
 	query := collection.Find(bsonq)
 
 	if c, _ := query.Count(); c == 0 {

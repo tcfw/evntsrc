@@ -55,7 +55,8 @@ Replays are rebroadcasted to all subscribers through the related subject
 {
   "cmd":"replay",
   "subject":"evntsrc.github.com", //subject to replay from (no wildcards)
-  "startTime": "2018-01-01 00:00:00 +1000" //Time to start replays from (flexible format using github.com/simplereach/timeutils)
+  "startTime": "2018-01-01 00:00:00 +1000", //Time to start replays from (flexible format using github.com/simplereach/timeutils)
+  "justme": true || false, //Send the replays just to the current socket
   "filter": { //Filter the replay (optional)
     // TBC
   }

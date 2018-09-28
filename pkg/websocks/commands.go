@@ -57,4 +57,5 @@ type ReplayCommand struct {
 	*SubscribeCommand
 	Time   timeutils.Time `json:"startTime"`
 	Stream int32          `json:"stream"`
+	JustMe bool           `json:"justme"`
 }

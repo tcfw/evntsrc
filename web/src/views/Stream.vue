@@ -3,7 +3,7 @@
 		<el-menu ref="menu" class="stream-tabs" mode="horizontal" :default-active="activeIndex" menu-trigger="click" @select="menuSelect">
 			<el-menu-item disabled index="stats">Stats</el-menu-item>
 			<el-menu-item index="history">History</el-menu-item>
-			<el-menu-item disabled index="auth">Auth</el-menu-item>
+			<el-menu-item disabled index="auth">API Keys</el-menu-item>
 			<el-menu-item disabled index="ingress">Ingress</el-menu-item>
 			<el-menu-item disabled index="webhooks">Webhooks</el-menu-item>
 			<el-menu-item index="settings">Settings</el-menu-item>

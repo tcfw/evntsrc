@@ -7,6 +7,7 @@
 </template>
 <script>
 const prefixCls = 'avatar';
+const md5 = require('md5');
 
 export default {
 	name: "Avatar",
@@ -83,12 +84,23 @@ export default {
 					this.scale = 1;
 				}
 			}
+		},
+		gravatarURL() {
+			if('email' in this.$root.me) {
+				return "https://www.gravatar.com/avatar/" + md5(this.$root.me.email) + "?d=404&s=90";
+			}
+		},
+		setGravatar() {
+			if(this.src == undefined) {
+				this.src = this.gravatarURL();
+			}
 		}
 	},
-	mounted () {
+	mounted() {
 		this.setScale();
+		this.setGravatar();
 	},
-	updated () {
+	updated() {
 		this.setScale();
 	}
 }

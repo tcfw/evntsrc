@@ -23,21 +23,21 @@ The auth command is used to initate the websocket client and identifty/authentic
 ```
 
 ## Subscribe
-The subscribe commands instructs the websocket server to subscribe to a user stream channel (w/ NATS compatible channel wildcards)
-> channels are prefixed in backend with `_USER.{stream_id}.` to maintain account seperation
+The subscribe commands instructs the websocket server to subscribe to a user stream subject (w/ NATS compatible channel wildcards)
+> subjects are prefixed in backend with `_USER.{stream_id}.` to maintain account seperation
 ```
 {
   "cmd":"sub",
-  "channel":"*.github.com" //The channel to subscribe to (w/ support for wildcards)
+  "subject":"*.github.com" //The subject to subscribe to (w/ support for wildcards)
 }
 ```
 
 ## Publish
-The publish command instructs the websocket server to publish data into a channel
+The publish command instructs the websocket server to publish data into a subject
 ```
 {
   "cmd":"pub",
-  "channel": "envtsrc.github.com", //The channel to publish to
+  "subject": "envtsrc.github.com", //The subject to publish to
   "type":"repo_push", //The event type
   "data": { //The event data
     "branch":"master",
@@ -50,11 +50,11 @@ The publish command instructs the websocket server to publish data into a channe
 
 ## Replay
 The replay command passes a request to start replaying events starting at a particular timestamp.
-Replays are rebroadcasted to all subscribers through the related channel
+Replays are rebroadcasted to all subscribers through the related subject
 ```
 {
   "cmd":"replay",
-  "channel":"evntsrc.github.com", //Channel to replay from (no wildcards)
+  "subject":"evntsrc.github.com", //subject to replay from (no wildcards)
   "startTime": "2018-01-01 00:00:00 +1000" //Time to start replays from (flexible format using github.com/simplereach/timeutils)
   "filter": { //Filter the replay (optional)
     // TBC

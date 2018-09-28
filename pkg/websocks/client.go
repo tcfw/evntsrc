@@ -160,11 +160,11 @@ func (c *Client) processCommand(command *InboundCommand, message []byte) {
 	case commandSubscribe:
 		subcommand := &SubscribeCommand{}
 		json.Unmarshal(message, subcommand)
-		c.subscribe(subcommand.Channel)
+		c.subscribe(subcommand.Subject)
 	case commandUnsubscribe:
 		subcommand := &UnsubscribeCommand{}
 		json.Unmarshal(message, subcommand)
-		c.unsubscribe(subcommand.Channel)
+		c.unsubscribe(subcommand.Subject)
 	case commandPublish:
 		subcommand := &PublishCommand{}
 		json.Unmarshal(message, subcommand)
@@ -176,7 +176,7 @@ func (c *Client) processCommand(command *InboundCommand, message []byte) {
 		if event.Source == "" {
 			event.Source = "ws"
 		}
-		event.Subject = subcommand.Channel
+		event.Subject = subcommand.Subject
 		event.CEVersion = "0.1"
 		event.Type = subcommand.Type
 		event.TypeVersion = subcommand.TypeVersion
@@ -188,7 +188,7 @@ func (c *Client) processCommand(command *InboundCommand, message []byte) {
 
 		eventJSONBytes, _ := json.Marshal(event)
 
-		channel := fmt.Sprintf("_USER.%d.%s", c.auth.Stream, subcommand.Channel)
+		channel := fmt.Sprintf("_USER.%d.%s", c.auth.Stream, subcommand.Subject)
 		natsConn.Publish(channel, eventJSONBytes)
 	case commandAuth:
 		subcommand := &AuthCommand{}

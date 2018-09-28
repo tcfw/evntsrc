@@ -152,7 +152,7 @@ proto.evntsrc.event.Event.deserializeBinaryFromReader = function(msg, reader) {
     case 10:
       var value = msg.getMetadataMap();
       reader.readMessage(value, function(message, reader) {
-        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readBytes, null, "");
+        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "");
          });
       break;
     case 11:
@@ -259,7 +259,7 @@ proto.evntsrc.event.Event.serializeBinaryToWriter = function(message, writer) {
   }
   f = message.getMetadataMap(true);
   if (f && f.getLength() > 0) {
-    f.serializeBinary(10, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeBytes);
+    f.serializeBinary(10, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
   }
   f = message.getContenttype();
   if (f.length > 0) {
@@ -444,13 +444,13 @@ proto.evntsrc.event.Event.prototype.hasAcknowledged = function() {
 
 
 /**
- * map<string, bytes> Metadata = 10;
+ * map<string, string> Metadata = 10;
  * @param {boolean=} opt_noLazyCreate Do not create the map if
  * empty, instead returning `undefined`
- * @return {!jspb.Map<string,!(string|Uint8Array)>}
+ * @return {!jspb.Map<string,string>}
  */
 proto.evntsrc.event.Event.prototype.getMetadataMap = function(opt_noLazyCreate) {
-  return /** @type {!jspb.Map<string,!(string|Uint8Array)>} */ (
+  return /** @type {!jspb.Map<string,string>} */ (
       jspb.Message.getMapField(this, 10, opt_noLazyCreate,
       null));
 };

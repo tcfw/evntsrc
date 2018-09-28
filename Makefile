@@ -41,6 +41,9 @@ passport:
 users:
 	docker build -f ./build/users/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/users:latest .
 
+bridge:
+	docker build -f ./build/bridge/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/bridge:latest .
+
 .PHONY: push
 push: 
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/storer:latest
@@ -50,6 +53,7 @@ push:
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/passport:latest
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/users:latest
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/apigw:latest
+	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/bridge:latest
 
 
 protos:

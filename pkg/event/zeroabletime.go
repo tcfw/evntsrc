@@ -9,7 +9,6 @@ type ZeroableTime struct {
 func (t ZeroableTime) MarshalJSON() ([]byte, error) {
 	if t.IsZero() {
 		return []byte("null"), nil
-	} else {
-		return t.Time.MarshalJSON()
 	}
+	return t.Time.MarshalJSON()
 }

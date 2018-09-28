@@ -3,7 +3,6 @@ package event
 import (
 	"encoding/json"
 	"log"
-	"time"
 
 	"github.com/globalsign/mgo"
 	"github.com/google/uuid"
@@ -12,18 +11,18 @@ import (
 //Event is the main event structure for all events throughout the system
 // @TODO move to protobuf?
 type Event struct {
-	ID           string                 `json:"eventId" bson:"_id"`
-	Stream       int32                  `json:"stream"`
-	Time         time.Time              `json:"eventTime"`
-	Type         string                 `json:"eventType"`
-	TypeVersion  string                 `json:"eventTypeVersion"`
-	CEVersion    string                 `json:"cloudEventVersion"`
-	Source       string                 `json:"eventSource"`
-	Subject      string                 `json:"eventSubject"`
-	Acknowledged ZeroableTime           `json:"eventAcknowledged,omitempty"`
-	Metadata     map[string]interface{} `json:"extensions,omitempty"`
-	ContentType  string                 `json:"contentType,omitempty"`
-	Data         []byte                 `json:"data,omitempty"`
+	ID           string            `json:"eventId" bson:"_id"`
+	Stream       int32             `json:"stream"`
+	Time         ZeroableTime      `json:"eventTime"`
+	Type         string            `json:"eventType"`
+	TypeVersion  string            `json:"eventTypeVersion"`
+	CEVersion    string            `json:"cloudEventVersion"`
+	Source       string            `json:"eventSource"`
+	Subject      string            `json:"eventSubject"`
+	Acknowledged ZeroableTime      `json:"eventAcknowledged,omitempty"`
+	Metadata     map[string]string `json:"extensions,omitempty"`
+	ContentType  string            `json:"contentType,omitempty"`
+	Data         []byte            `json:"data,omitempty"`
 }
 
 //SetID sets a new ID for the event based on UUID

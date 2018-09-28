@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 
 	pb "github.com/tcfw/evntsrc/pkg/bridge/protos"
 	"google.golang.org/grpc"
@@ -20,9 +23,18 @@ func RunGRPC(port int, natsEndpoint string) {
 		panic(err)
 	}
 
-	grpcServer := grpc.NewServer() //tracing.GRPCServerOptions()...)
+	grpcServer := grpc.NewServer()
 	pb.RegisterBridgeServiceServer(grpcServer, newServer())
 
 	log.Println("Starting gRPC server...")
-	grpcServer.Serve(lis)
+	go func() {
+		grpcServer.Serve(lis)
+	}()
+
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
+	<-signalChan
+
+	log.Println("Shutdown signal received, exiting...")
+	grpcServer.GracefulStop()
 }

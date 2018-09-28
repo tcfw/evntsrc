@@ -13,7 +13,7 @@ func connectNats(addr string) {
 	if exists {
 		addr = envHost
 	}
-	nc, err := nats.Connect(addr)
+	nc, err := nats.Connect(addr, nats.MaxReconnects(10))
 	if err != nil {
 		panic(err)
 	}

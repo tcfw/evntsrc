@@ -26,7 +26,7 @@ type AuthCommand struct {
 //SubscribeCommand starts a subscription
 type SubscribeCommand struct {
 	*InboundCommand
-	Channel string `json:"channel"`
+	Subject string `json:"subject"`
 }
 
 //PublishCommand sends data through to NATS
@@ -42,7 +42,7 @@ type PublishCommand struct {
 //UnsubscribeCommand starts a subscription
 type UnsubscribeCommand struct {
 	*InboundCommand
-	Channel string `json:"channel"`
+	Subject string `json:"subject"`
 }
 
 //AckSubUnSucCommand provides error responses to WS clients

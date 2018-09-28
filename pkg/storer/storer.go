@@ -15,7 +15,7 @@ import (
 type ReplayCommand struct {
 	Command string         `json:"cmd"`
 	Stream  int32          `json:"stream"`
-	Channel string         `json:"channel"`
+	Subject string         `json:"subject"`
 	Time    timeutils.Time `json:"startTime"`
 }
 
@@ -41,7 +41,7 @@ func monitorUserStreams() {
 			return
 		}
 
-		if isReplay, ok := event.Metadata["replay"]; ok && isReplay.(bool) {
+		if isReplay, ok := event.Metadata["replay"]; ok && isReplay == "true" {
 			return
 		}
 
@@ -74,9 +74,9 @@ func monitorReplayRequests() {
 			iter := query.Iter()
 			event := event.Event{}
 			for iter.Next(&event) {
-				event.Metadata["replay"] = true
+				event.Metadata["replay"] = "true"
 				jsonBytes, _ := json.Marshal(event)
-				natsConn.Publish("_USER."+string(command.Stream)+"."+command.Channel, jsonBytes)
+				natsConn.Publish("_USER."+string(command.Stream)+"."+command.Subject, jsonBytes)
 			}
 		}
 	})

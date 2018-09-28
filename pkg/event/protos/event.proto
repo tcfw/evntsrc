@@ -2,19 +2,31 @@ syntax = "proto3";
 
 package evntsrc.event;
 
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
 import "google/protobuf/timestamp.proto";
 
+// Enable custom Marshal method.
+option (gogoproto.marshaler_all) = true;
+// Enable custom Unmarshal method.
+option (gogoproto.unmarshaler_all) = true;
+// Enable custom Size method (Required by Marshal and Unmarshal).
+option (gogoproto.sizer_all) = true;
+// Enable registration with golang/protobuf for the grpc-gateway.
+option (gogoproto.goproto_registration) = true;
+// Enable generation of XXX_MessageName methods for grpc-go/status.
+option (gogoproto.messagename_all) = true;
+
 message Event {
-	string ID = 1;
-	int32 Stream = 2;
-	google.protobuf.Timestamp Time = 3;
-	string Type = 4;
-	string TypeVersion = 5;
-	string CEVersion = 6;
-	string Source = 7;
-	string Subject = 8;
-	google.protobuf.Timestamp Acknowledged = 9;
-	map<string,bytes> Metadata = 10;
-	string ContentType = 11;
-	bytes Data = 12;
+	string ID = 1 [(gogoproto.moretags) = "bson:\"_id\"", (gogoproto.jsontag) = "eventId"];
+	int32 Stream = 2 [(gogoproto.jsontag) = "stream"];
+	google.protobuf.Timestamp Time = 3 [(gogoproto.jsontag) = "eventTime", (gogoproto.stdtime) = true];
+	string Type = 4 [(gogoproto.jsontag) = "eventType"];
+	string TypeVersion = 5 [(gogoproto.jsontag) = "eventTypeVersion"];
+	string CEVersion = 6 [(gogoproto.jsontag) = "cloudEventVersion"];
+	string Source = 7 [(gogoproto.jsontag) = "eventSource"];
+	string Subject = 8 [(gogoproto.jsontag) = "eventSubject"];
+	google.protobuf.Timestamp Acknowledged = 9 [(gogoproto.jsontag) = "eventAcknowledged", (gogoproto.stdtime) = true];
+	map<string,string> Metadata = 10 [(gogoproto.jsontag) = "extensions"];
+	string ContentType = 11 [(gogoproto.jsontag) = "contentType"];
+	bytes Data = 12 [(gogoproto.jsontag) = "data,string"];
 }

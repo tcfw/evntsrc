@@ -27,4 +27,5 @@ service BridgeService {
 	rpc Publish(PublishRequest) returns (GeneralResponse) {};
 	rpc Subscribe(SubscribeRequest) returns (stream evntsrc.event.Event) {};
 	rpc Replay(ReplayRequest) returns (GeneralResponse) {};
+	rpc RelayEvents(stream evntsrc.event.Event) returns  (stream evntsrc.event.Event) {};
 }

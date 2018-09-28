@@ -45,7 +45,10 @@ func monitorUserStreams() {
 			return
 		}
 
-		event.Store()
+		err = event.Store()
+		if err != nil {
+			log.Printf("%s\n", err.Error())
+		}
 	})
 }
 

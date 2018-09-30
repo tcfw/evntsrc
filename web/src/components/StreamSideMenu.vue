@@ -6,7 +6,7 @@
 			<i class="fas fa-times clear-search" v-if="isSearchResults" @click="clearSearch"></i>
 		</div>
 		<div class="stream-list" v-if="!loading">
-			<router-link :to="'/streams/'+stream.ID" v-for="stream in streams" :key="stream.ID" class="stream">
+			<router-link :to="'/streams/'+stream.ID" v-for="stream in filteredStreams" :key="stream.ID" class="stream">
 				<div class="icon" :style="iconStyling(stream)">
 					<i v-if="'Icon' in stream && stream.Icon==''" :class="'fas fa-'+stream.Icon"></i>
 					<i v-else class="fas fa-bolt"></i>
@@ -82,6 +82,14 @@ export default {
 			}
 		}
 	},
+	computed: {
+		filteredStreams() {
+			if (this.searchInput == "") {
+				return this.streams;
+			}
+			return _.filter(this.streams, stream => stream.Name.search(new RegExp(this.searchInput, "gi")) >= 0);
+		}
+	},
 	mounted() {
 		this.load();
 	},
@@ -105,6 +113,7 @@ export default {
 	background: #787E99;
 	position: absolute;	
 	box-shadow: inset 0 1px 3px 0 rgba(0,0,0,0.1);
+	z-index: 2;
 
 	input[type="text"] {
 		background: none;

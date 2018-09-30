@@ -30,11 +30,6 @@ func (s *server) Create(ctx context.Context, request *pb.Stream) (*pb.Stream, er
 	return nil, status.Errorf(codes.Unavailable, "Not implemented")
 }
 
-//Search @TODO
-func (s *server) Search(ctx context.Context, request *pb.SearchRequest) (*pb.StreamList, error) {
-	return nil, status.Errorf(codes.Unavailable, "Not implemented")
-}
-
 //List @TODO
 func (s *server) List(ctx context.Context, request *pb.Empty) (*pb.StreamList, error) {
 	db, err := NewDBSession()

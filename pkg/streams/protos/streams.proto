@@ -46,13 +46,7 @@ service StreamsService {
             body: "*"
         };
 	};
-
-	rpc Search(SearchRequest) returns (StreamList) {
-		option (google.api.http) = {
-			get: "/v1/streams/search",
-		};
-	};
-
+	
 	rpc List(Empty) returns (StreamList) {
 		option (google.api.http) = {
 			get: "/v1/streams",

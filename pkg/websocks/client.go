@@ -169,24 +169,24 @@ func (c *Client) processCommand(command *InboundCommand, message []byte) {
 		subcommand := &PublishCommand{}
 		json.Unmarshal(message, subcommand)
 
-		event := &event.Event{}
-		event.SetID()
-		event.Stream = c.auth.Stream
-		event.Source = subcommand.Source
-		if event.Source == "" {
-			event.Source = "ws"
+		rEvent := &event.Event{}
+		rEvent.SetID()
+		rEvent.Stream = c.auth.Stream
+		rEvent.Source = subcommand.Source
+		if rEvent.Source == "" {
+			rEvent.Source = "ws"
 		}
-		event.Subject = subcommand.Subject
-		event.CEVersion = "0.1"
-		event.Type = subcommand.Type
-		event.TypeVersion = subcommand.TypeVersion
-		event.ContentType = subcommand.ContentType
-		event.Data = []byte(subcommand.Data)
-		event.Time = time.Now()
-		event.Metadata = map[string]interface{}{}
-		event.Metadata["ws.source_ip"] = c.conn.RemoteAddr().String()
+		rEvent.Subject = subcommand.Subject
+		rEvent.CEVersion = "0.1"
+		rEvent.Type = subcommand.Type
+		rEvent.TypeVersion = subcommand.TypeVersion
+		rEvent.ContentType = subcommand.ContentType
+		rEvent.Data = []byte(subcommand.Data)
+		rEvent.Time = event.ZeroableTime{Time: time.Now()}
+		rEvent.Metadata = map[string]string{}
+		rEvent.Metadata["ws.source_ip"] = c.conn.RemoteAddr().String()
 
-		eventJSONBytes, _ := json.Marshal(event)
+		eventJSONBytes, _ := json.Marshal(rEvent)
 
 		channel := fmt.Sprintf("_USER.%d.%s", c.auth.Stream, subcommand.Subject)
 		natsConn.Publish(channel, eventJSONBytes)

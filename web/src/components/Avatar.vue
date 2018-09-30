@@ -1,6 +1,6 @@
 <template>
 	<span :class="classes">
-        <img :src="src" v-if="src">
+        <img :src="rSrc" v-if="src || rSrc">
         <i :class="customIcon" v-else-if="icon || customIcon"></i>
         <span ref="children" :class="[prefixCls + '-string']" :style="childrenStyle" v-else><slot></slot></span>
     </span>
@@ -68,6 +68,12 @@ export default {
 				};
 			}
 			return style;
+		},
+		rSrc() {
+			if(this.src == undefined) {
+				return this.gravatarURL();
+			}
+			return this.src;
 		}
 	},
 	methods: {
@@ -89,16 +95,10 @@ export default {
 			if('email' in this.$root.me) {
 				return "https://www.gravatar.com/avatar/" + md5(this.$root.me.email) + "?d=404&s=90";
 			}
-		},
-		setGravatar() {
-			if(this.src == undefined) {
-				this.src = this.gravatarURL();
-			}
 		}
 	},
 	mounted() {
 		this.setScale();
-		this.setGravatar();
 	},
 	updated() {
 		this.setScale();

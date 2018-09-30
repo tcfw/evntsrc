@@ -124,6 +124,10 @@ export default {
 		if("FB" in window) {
 			this.$root.$emit("fb.loaded");
 		}
+
+		if(this.$root.loggedIn()) {
+			this.$router.push("/");
+		}
 	},
 	computed: {
 		logoColor() {

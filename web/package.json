@@ -12,9 +12,11 @@
     "axios-retry": "^3.1.1",
     "element-ui": "^2.4.5",
     "google-protobuf": "^3.6.1",
+    "lodash": "^4.17.11",
     "md5": "^2.2.1",
     "vue": "^2.5.17",
     "vue-config": "^1.0.0",
+    "vue-cookie": "^1.1.4",
     "vue-router": "^3.0.1"
   },
   "devDependencies": {

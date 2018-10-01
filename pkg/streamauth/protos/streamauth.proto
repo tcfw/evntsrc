@@ -1,0 +1,83 @@
+syntax="proto3";
+
+package evntsrc.streamauth;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+
+// Enable custom Marshal method.
+option (gogoproto.marshaler_all) = true;
+// Enable custom Unmarshal method.
+option (gogoproto.unmarshaler_all) = true;
+// Enable custom Size method (Required by Marshal and Unmarshal).
+option (gogoproto.sizer_all) = true;
+// Enable registration with golang/protobuf for the grpc-gateway.
+option (gogoproto.goproto_registration) = true;
+// Enable generation of XXX_MessageName methods for grpc-go/status.
+option (gogoproto.messagename_all) = true;
+
+message APIPermissions {
+	bool Publish = 1;
+	bool Subscribe = 2;
+	bool Replay = 3;
+}
+
+message Empty {}
+
+message ListRequest {
+	int32 stream = 1;
+}
+
+message GetRequest {
+	int32 stream = 1;
+	string id = 2 [(gogoproto.moretags) = "bson:\"_id\""];
+}
+
+message StreamKey {
+	string id = 1 [(gogoproto.moretags) = "bson:\"_id\""];
+	string label = 2;
+	int32 stream = 3;
+	string key = 4;
+	string secret = 5;
+	string restrictionFilter = 6;
+	APIPermissions permissions = 7;
+}
+
+message KeyList {
+	repeated StreamKey keys = 1;
+}
+
+service StreamAuthService {
+	rpc Create(StreamKey) returns (StreamKey) {
+		option (google.api.http) = {
+            post: "/v1/stream/{stream}/keys",
+            body: "*"
+        };
+	};
+
+	rpc List(ListRequest) returns (KeyList) {
+        option (google.api.http) = {
+            get: "/v1/streams/{stream}/keys"
+        };
+	};
+
+	rpc ListAll(Empty) returns (KeyList) {};
+	
+	rpc Get(GetRequest) returns (StreamKey) {
+		option (google.api.http) = {
+			get: "/v1/stream/{stream}/key/{id}"
+		};
+	};
+
+	rpc Update(StreamKey) returns (StreamKey) {
+		option (google.api.http) = {
+			patch: "/v1/stream/{stream}/key/{id}"
+		};
+	};
+
+	rpc Delete(StreamKey) returns (Empty) {
+		option (google.api.http) = {
+			delete: "/v1/stream/{stream}/key/{id}"
+		};
+	};
+}

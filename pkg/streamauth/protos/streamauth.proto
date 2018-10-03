@@ -57,7 +57,7 @@ service StreamAuthService {
 
 	rpc List(ListRequest) returns (KeyList) {
         option (google.api.http) = {
-            get: "/v1/streams/{stream}/keys"
+            get: "/v1/stream/{stream}/keys"
         };
 	};
 

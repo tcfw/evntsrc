@@ -31,6 +31,7 @@ func Run(port int) error {
 	registerPassport(ctx, mux, opts)
 	registerUsers(ctx, mux, opts)
 	registerStreams(ctx, mux, opts)
+	registerStreamAuth(ctx, mux, opts)
 
 	handler := tracingWrapper(mux)
 	handler = authGuard(handler)

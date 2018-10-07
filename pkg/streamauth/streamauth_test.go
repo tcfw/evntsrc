@@ -2,6 +2,7 @@ package streamauth
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 
@@ -24,13 +25,7 @@ func TestCreate(t *testing.T) {
 	md := metadata.Pairs("authorization", jwtToken)
 	ctx := metadata.NewIncomingContext(context.Background(), md)
 
-	stream, err := s.streamConn.Create(ctx, &evntsrc_streams.Stream{
-		Cluster: "test",
-		Name:    "test",
-	})
-	if err != nil {
-		t.Error(err)
-	}
+	stream, _ := s.streamConn.Get(ctx, &evntsrc_streams.GetRequest{ID: 0})
 
 	sk, err := s.Create(ctx, &pb.StreamKey{Stream: stream.GetID(), Label: "test"})
 	if err != nil {
@@ -41,7 +36,26 @@ func TestCreate(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	s.streamConn.Delete(ctx, stream)
+}
+
+func TestInvalidCreate(t *testing.T) {
+	s := &server{}
+	s.streamConn = NewMockStreamClient()
+
+	invalidRequests := []*pb.StreamKey{
+		&pb.StreamKey{},
+		&pb.StreamKey{Stream: 0},
+		&pb.StreamKey{Label: "hi"},
+	}
+
+	for tk, key := range invalidRequests {
+		t.Run(fmt.Sprintf("InvalidRequest(%d)", tk), func(t *testing.T) {
+			_, err := s.Create(context.Background(), key)
+			if err == nil {
+				t.Errorf("R(%d) Invalid request still passed (%v)", tk, key)
+			}
+		})
+	}
 }
 
 func TestGet(t *testing.T) {
@@ -55,13 +69,7 @@ func TestGet(t *testing.T) {
 	md := metadata.Pairs("authorization", jwtToken)
 	ctx := metadata.NewIncomingContext(context.Background(), md)
 
-	stream, err := s.streamConn.Create(ctx, &evntsrc_streams.Stream{
-		Cluster: "test",
-		Name:    "test",
-	})
-	if err != nil {
-		t.Error(err)
-	}
+	stream, _ := s.streamConn.Get(ctx, &evntsrc_streams.GetRequest{ID: 0})
 
 	sk, err := s.Create(ctx, &pb.StreamKey{Stream: stream.GetID(), Label: "test"})
 	if err != nil {
@@ -77,7 +85,6 @@ func TestGet(t *testing.T) {
 	}
 
 	s.Delete(ctx, sk)
-	s.streamConn.Delete(ctx, stream)
 }
 func TestList(t *testing.T) {
 	os.Setenv("DB_HOST", "192.168.99.100:32577")
@@ -90,13 +97,7 @@ func TestList(t *testing.T) {
 	md := metadata.Pairs("authorization", jwtToken)
 	ctx := metadata.NewIncomingContext(context.Background(), md)
 
-	stream, err := s.streamConn.Create(ctx, &evntsrc_streams.Stream{
-		Cluster: "test",
-		Name:    "test",
-	})
-	if err != nil {
-		t.Error(err)
-	}
+	stream, _ := s.streamConn.Get(ctx, &evntsrc_streams.GetRequest{ID: 0})
 
 	sk, err := s.Create(ctx, &pb.StreamKey{Stream: stream.GetID(), Label: "test"})
 	if err != nil {
@@ -120,7 +121,6 @@ func TestList(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	s.streamConn.Delete(ctx, stream)
 }
 
 //TestValidateOwnership tests remove validation of stream ownership
@@ -136,22 +136,15 @@ func TestValidateOwnership(t *testing.T) {
 	md := metadata.Pairs("authorization", jwtToken)
 	ctx := metadata.NewIncomingContext(context.Background(), md)
 
-	stream, err := s.streamConn.Create(ctx, &evntsrc_streams.Stream{
-		Cluster: "test",
-		Name:    "test",
-	})
-	if err != nil {
-		t.Error(err)
-	}
+	stream, _ := s.streamConn.Get(ctx, &evntsrc_streams.GetRequest{ID: 0})
 
 	ctx = metadata.NewIncomingContext(context.Background(), md)
 
-	err = s.validateOwnership(ctx, stream.GetID())
+	err := s.validateOwnership(ctx, stream.GetID())
 	if err != nil {
 		t.Error(err)
 	}
 
-	s.streamConn.Delete(ctx, stream)
 }
 
 func TestListAll(t *testing.T) {
@@ -174,17 +167,36 @@ type MockStreamClient struct {
 }
 
 func (s *MockStreamClient) Get(ctx context.Context, in *evntsrc_streams.GetRequest, opts ...grpc.CallOption) (*evntsrc_streams.Stream, error) {
-	return s.Server.Get(ctx, in)
+	return &evntsrc_streams.Stream{
+		ID:      999999999,
+		Cluster: "test",
+		Name:    "test",
+		Owner:   "000000000000000000000000",
+	}, nil
 }
 
 func (s *MockStreamClient) Create(ctx context.Context, in *evntsrc_streams.Stream, opts ...grpc.CallOption) (*evntsrc_streams.Stream, error) {
-	return s.Server.Create(ctx, in)
+	return &evntsrc_streams.Stream{
+		ID:      999999999,
+		Cluster: in.Cluster,
+		Name:    in.Name,
+		Owner:   "000000000000000000000000",
+	}, nil
 }
 
 func (s *MockStreamClient) List(ctx context.Context, in *evntsrc_streams.Empty, opts ...grpc.CallOption) (*evntsrc_streams.StreamList, error) {
-	return s.Server.List(ctx, in)
+	return &evntsrc_streams.StreamList{
+		Streams: []*evntsrc_streams.Stream{
+			&evntsrc_streams.Stream{
+				ID:      999999999,
+				Cluster: "test",
+				Name:    "test",
+				Owner:   "000000000000000000000000",
+			},
+		},
+	}, nil
 }
 
 func (s *MockStreamClient) Delete(ctx context.Context, in *evntsrc_streams.Stream, opts ...grpc.CallOption) (*evntsrc_streams.Empty, error) {
-	return s.Server.Delete(ctx, in)
+	return nil, nil
 }

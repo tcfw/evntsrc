@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/globalsign/mgo/bson"
+	"github.com/tcfw/evntsrc/pkg/utils/db"
 )
 
 //JobRequest takes in a stream (or all) and sends a request to process timeseries info
@@ -14,11 +15,11 @@ func JobRequest(natsEndpoint string, stream int32) {
 }
 
 func findJobs(stream int32) {
-	db, err := NewDBSession()
+	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
 		panic(err)
 	}
-	defer db.Close()
+	defer dbConn.Close()
 
 	if stream > 0 {
 		err := requestForStream(stream)
@@ -26,7 +27,7 @@ func findJobs(stream int32) {
 			panic(err)
 		}
 	} else {
-		eventCollection := db.DB("events").C("store")
+		eventCollection := dbConn.DB("events").C("store")
 
 		streams := eventCollection.Find(bson.M{})
 		streamIds := []int32{}

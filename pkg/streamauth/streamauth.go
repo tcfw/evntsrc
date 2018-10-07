@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	pb "github.com/tcfw/evntsrc/pkg/streamauth/protos"
 	streams "github.com/tcfw/evntsrc/pkg/streams/protos"
+	"github.com/tcfw/evntsrc/pkg/utils/db"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -44,13 +45,13 @@ func (s *server) Create(ctx context.Context, request *pb.StreamKey) (*pb.StreamK
 		return nil, err
 	}
 
-	db, err := NewDBSession()
+	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
 		return nil, err
 	}
-	defer db.Close()
+	defer dbConn.Close()
 
-	collection := db.DB(dBName).C(collectionName)
+	collection := dbConn.DB(dBName).C(collectionName)
 
 	request.Id = uuid.New().String()
 
@@ -107,13 +108,13 @@ func (s *server) List(ctx context.Context, request *pb.ListRequest) (*pb.KeyList
 		return nil, err
 	}
 
-	db, err := NewDBSession()
+	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
 		return nil, err
 	}
-	defer db.Close()
+	defer dbConn.Close()
 
-	collection := db.DB(dBName).C(collectionName)
+	collection := dbConn.DB(dBName).C(collectionName)
 
 	bsonq := bson.M{"stream": request.GetStream()}
 	query := collection.Find(bsonq)
@@ -134,20 +135,15 @@ func (s *server) List(ctx context.Context, request *pb.ListRequest) (*pb.KeyList
 //ListAll @TODO ~> change to paged request
 func (s *server) ListAll(ctx context.Context, request *pb.Empty) (*pb.KeyList, error) {
 
-	/*
-		Verify user admin token claim
-		DB Connect
-		Get all streams
-		Return stream keys
-	*/
+	//@TODO Verify user admin token claim
 
-	db, err := NewDBSession()
+	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
 		return nil, err
 	}
-	defer db.Close()
+	defer dbConn.Close()
 
-	collection := db.DB(dBName).C(collectionName)
+	collection := dbConn.DB(dBName).C(collectionName)
 
 	query := collection.Find(bson.M{})
 
@@ -171,13 +167,13 @@ func (s *server) Get(ctx context.Context, request *pb.GetRequest) (*pb.StreamKey
 		return nil, err
 	}
 
-	db, err := NewDBSession()
+	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
 		return nil, err
 	}
-	defer db.Close()
+	defer dbConn.Close()
 
-	collection := db.DB(dBName).C(collectionName)
+	collection := dbConn.DB(dBName).C(collectionName)
 
 	bsonq := bson.M{"stream": request.GetStream(), "_id": request.GetId()}
 	query := collection.Find(bsonq)
@@ -211,26 +207,18 @@ func (s *server) Update(ctx context.Context, request *pb.StreamKey) (*pb.StreamK
 
 //Delete @TODO
 func (s *server) Delete(ctx context.Context, request *pb.StreamKey) (*pb.Empty, error) {
-
-	/*
-		Validate ownership of stream
-		DB Connect
-		Delete stream key
-		Return
-	*/
-
 	err := s.validateOwnership(ctx, request.GetStream())
 	if err != nil {
 		return nil, err
 	}
 
-	db, err := NewDBSession()
+	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
 		return nil, err
 	}
-	defer db.Close()
+	defer dbConn.Close()
 
-	collection := db.DB(dBName).C(collectionName)
+	collection := dbConn.DB(dBName).C(collectionName)
 
 	bsonq := bson.M{"stream": request.GetStream(), "_id": request.GetId()}
 	err = collection.Remove(bsonq)
@@ -240,7 +228,6 @@ func (s *server) Delete(ctx context.Context, request *pb.StreamKey) (*pb.Empty, 
 
 //validateOwnership contacts streams to verify stream ownership via jwt token
 func (s *server) validateOwnership(ctx context.Context, stream int32) error {
-	//Allow for mocking
 	if s.streamConn == nil {
 		conn, err := grpc.DialContext(ctx, "streams:443", grpc.WithInsecure())
 		if err != nil {

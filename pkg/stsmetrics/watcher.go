@@ -8,16 +8,17 @@ import (
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	nats "github.com/nats-io/go-nats"
+	"github.com/tcfw/evntsrc/pkg/utils/db"
 )
 
 //StartWatch monitors timeseries requests
 func StartWatch(natsEndpoint string) {
 	connectNats(natsEndpoint)
-	db, err := NewDBSession()
+	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
 		panic(err)
 	}
-	defer db.Close()
+	defer dbConn.Close()
 
 	log.Println("Starting watch...")
 
@@ -25,7 +26,7 @@ func StartWatch(natsEndpoint string) {
 		request := &STSRequest{}
 		json.Unmarshal(m.Data, request)
 
-		streamCollection := db.DB("events").C("store")
+		streamCollection := dbConn.DB("events").C("store")
 
 		fq := &bson.M{"stream": request.Stream}
 		query := streamCollection.Find(fq)
@@ -45,7 +46,7 @@ func StartWatch(natsEndpoint string) {
 			Time:   time.Now(),
 		}
 
-		metricsCollection := db.DB("metrics").C("storage_count")
+		metricsCollection := dbConn.DB("metrics").C("storage_count")
 
 		err = metricsCollection.Insert(metric)
 		if err != nil && m.Reply != "" {

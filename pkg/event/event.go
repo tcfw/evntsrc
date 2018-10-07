@@ -6,6 +6,7 @@ import (
 
 	"github.com/globalsign/mgo"
 	"github.com/google/uuid"
+	"github.com/tcfw/evntsrc/pkg/utils/db"
 )
 
 //Event is the main event structure for all events throughout the system
@@ -48,13 +49,13 @@ func (e *Event) SetDataFromString(data string) {
 
 //Store saves the event to DB
 func (e *Event) Store() error {
-	db, err := NewDBSession()
+	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
 		return err
 	}
-	defer db.Close()
+	defer dbConn.Close()
 
-	collection := db.DB("events").C("store")
+	collection := dbConn.DB("events").C("store")
 
 	err = collection.Insert(e)
 	if err != nil {

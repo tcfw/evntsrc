@@ -10,6 +10,7 @@ import (
 	"github.com/globalsign/mgo/bson"
 	pb "github.com/tcfw/evntsrc/pkg/streams/protos"
 	utils "github.com/tcfw/evntsrc/pkg/utils/authorization"
+	"github.com/tcfw/evntsrc/pkg/utils/db"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -56,13 +57,13 @@ func (s *Server) Create(ctx context.Context, request *pb.Stream) (*pb.Stream, er
 		return nil, status.Errorf(codes.FailedPrecondition, err.Error())
 	}
 
-	db, err := NewDBSession()
+	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
 		return nil, err
 	}
-	defer db.Close()
+	defer dbConn.Close()
 
-	collection := db.DB(dBName).C(collectionName)
+	collection := dbConn.DB(dBName).C(collectionName)
 
 	userClaims, err := utils.TokenClaimsFromContext(ctx)
 	if err != nil {
@@ -83,13 +84,13 @@ func (s *Server) Create(ctx context.Context, request *pb.Stream) (*pb.Stream, er
 
 //List @TODO
 func (s *Server) List(ctx context.Context, request *pb.Empty) (*pb.StreamList, error) {
-	db, err := NewDBSession()
+	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
 		return nil, err
 	}
-	defer db.Close()
+	defer dbConn.Close()
 
-	collection := db.DB(dBName).C(collectionName)
+	collection := dbConn.DB(dBName).C(collectionName)
 
 	userClaims, err := utils.TokenClaimsFromContext(ctx)
 	if err != nil {
@@ -115,13 +116,13 @@ func (s *Server) List(ctx context.Context, request *pb.Empty) (*pb.StreamList, e
 //Get @TODO
 func (s *Server) Get(ctx context.Context, request *pb.GetRequest) (*pb.Stream, error) {
 
-	db, err := NewDBSession()
+	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
 		return nil, err
 	}
-	defer db.Close()
+	defer dbConn.Close()
 
-	collection := db.DB(dBName).C(collectionName)
+	collection := dbConn.DB(dBName).C(collectionName)
 
 	userClaims, err := utils.TokenClaimsFromContext(ctx)
 	if err != nil {
@@ -147,13 +148,13 @@ func (s *Server) Get(ctx context.Context, request *pb.GetRequest) (*pb.Stream, e
 //Delete @TODO
 func (s *Server) Delete(ctx context.Context, request *pb.Stream) (*pb.Empty, error) {
 
-	db, err := NewDBSession()
+	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
 		return nil, err
 	}
-	defer db.Close()
+	defer dbConn.Close()
 
-	collection := db.DB(dBName).C(collectionName)
+	collection := dbConn.DB(dBName).C(collectionName)
 
 	userClaims, err := utils.TokenClaimsFromContext(ctx)
 	if err != nil {

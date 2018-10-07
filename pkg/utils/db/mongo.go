@@ -1,4 +1,4 @@
-package streams
+package db
 
 import (
 	"os"
@@ -6,8 +6,8 @@ import (
 	"github.com/globalsign/mgo"
 )
 
-//NewDBSession returns a mongoDB session
-func NewDBSession() (*mgo.Session, error) {
+//NewMongoDBSession returns a mongoDB session
+func NewMongoDBSession() (*mgo.Session, error) {
 	dbConnHost, exists := os.LookupEnv("DB_HOST")
 	if exists == false {
 		dbConnHost = "localhost:30180"

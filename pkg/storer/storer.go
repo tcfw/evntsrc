@@ -9,6 +9,7 @@ import (
 	nats "github.com/nats-io/go-nats"
 	"github.com/simplereach/timeutils"
 	event "github.com/tcfw/evntsrc/pkg/event"
+	"github.com/tcfw/evntsrc/pkg/utils/db"
 )
 
 //ReplayCommand instructs events to rebroadcast all events stored since time
@@ -58,14 +59,14 @@ func monitorReplayRequests() {
 		command := &ReplayCommand{}
 		json.Unmarshal(m.Data, command)
 
-		db, err := event.NewDBSession()
+		dbConn, err := db.NewMongoDBSession()
 		if err != nil {
 			natsConn.Publish(m.Reply, []byte(fmt.Sprintf("failed: %s", err.Error())))
 			return
 		}
-		defer db.Close()
+		defer dbConn.Close()
 
-		collection := db.DB("events").C("store")
+		collection := dbConn.DB("events").C("store")
 
 		fq := bson.M{"stream": command.Stream, "time": bson.M{"$gt": command.Time.Time}}
 		query := collection.Find(fq).Sort("time")

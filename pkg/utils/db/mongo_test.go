@@ -1,4 +1,4 @@
-package users
+package db
 
 import (
 	"testing"
@@ -7,8 +7,8 @@ import (
 	assert "github.com/stretchr/testify/assert"
 )
 
-func TestNewDBSession(t *testing.T) {
-	session, err := NewDBSession()
+func TestNewMongoDBSession(t *testing.T) {
+	session, err := NewMongoDBSession()
 
 	assert.NoError(t, err)
 	assert.IsType(t, &mgo.Session{}, session)

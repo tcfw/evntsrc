@@ -13,6 +13,7 @@ import (
 
 	protos "github.com/tcfw/evntsrc/pkg/users/protos"
 	utils "github.com/tcfw/evntsrc/pkg/utils/authorization"
+	"github.com/tcfw/evntsrc/pkg/utils/db"
 	events "github.com/tcfw/evntsrc/pkg/utils/sysevents"
 	"golang.org/x/crypto/bcrypt"
 	context "golang.org/x/net/context"
@@ -34,13 +35,13 @@ func newServer() *server {
 //Create @TODO Validation
 func (s *server) Create(ctx context.Context, request *protos.User) (*protos.User, error) {
 
-	session, err := NewDBSession()
+	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
 		return nil, err
 	}
-	defer session.Close()
+	defer dbConn.Close()
 
-	collection := session.DB(dbName).C(dbCollection)
+	collection := dbConn.DB(dbName).C(dbCollection)
 
 	id := bson.NewObjectId().Hex()
 
@@ -71,13 +72,13 @@ func (s *server) Create(ctx context.Context, request *protos.User) (*protos.User
 
 //Delete TODO
 func (s *server) Delete(ctx context.Context, request *protos.UserRequest) (*protos.Empty, error) {
-	session, err := NewDBSession()
+	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
 		return &protos.Empty{}, err
 	}
-	defer session.Close()
+	defer dbConn.Close()
 
-	collection := session.DB(dbName).C(dbCollection)
+	collection := dbConn.DB(dbName).C(dbCollection)
 	user, err := s.Find(ctx, request)
 	if err != nil {
 		return &protos.Empty{}, err
@@ -115,13 +116,13 @@ func (s *server) Get(ctx context.Context, request *protos.UserRequest) (*protos.
 
 //Find TODO
 func (s *server) Find(ctx context.Context, request *protos.UserRequest) (*protos.User, error) {
-	session, err := NewDBSession()
+	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
 		return nil, err
 	}
-	defer session.Close()
+	defer dbConn.Close()
 
-	collection := session.DB(dbName).C(dbCollection)
+	collection := dbConn.DB(dbName).C(dbCollection)
 
 	var query *mgo.Query
 
@@ -152,13 +153,13 @@ func (s *server) FindUsers(request *protos.UserRequest, stream protos.UserServic
 
 //List TODO
 func (s *server) List(ctx context.Context, request *protos.Empty) (*protos.UserList, error) {
-	session, err := NewDBSession()
+	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
 		return nil, err
 	}
-	defer session.Close()
+	defer dbConn.Close()
 
-	collection := session.DB(dbName).C(dbCollection)
+	collection := dbConn.DB(dbName).C(dbCollection)
 
 	//Find All
 	query := collection.Find(nil)
@@ -173,13 +174,13 @@ func (s *server) List(ctx context.Context, request *protos.Empty) (*protos.UserL
 
 //SetPassword TODO
 func (s *server) SetPassword(ctx context.Context, request *protos.PasswordUpdateRequest) (*protos.Empty, error) {
-	session, err := NewDBSession()
+	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
 		return nil, err
 	}
-	defer session.Close()
+	defer dbConn.Close()
 
-	collection := session.DB(dbName).C(dbCollection)
+	collection := dbConn.DB(dbName).C(dbCollection)
 
 	query := collection.FindId(request.Id)
 
@@ -226,13 +227,13 @@ func validatePassword(password string) (*string, error) {
 
 //Update TODO
 func (s *server) Update(ctx context.Context, request *protos.UserUpdateRequest) (*protos.User, error) {
-	session, err := NewDBSession()
+	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
 		return nil, err
 	}
-	defer session.Close()
+	defer dbConn.Close()
 
-	collection := session.DB(dbName).C(dbCollection)
+	collection := dbConn.DB(dbName).C(dbCollection)
 
 	query := collection.FindId(request.Id)
 

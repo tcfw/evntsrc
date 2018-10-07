@@ -2,7 +2,10 @@ package streams
 
 import (
 	"context"
+	"errors"
+	"log"
 	"sync"
+	"time"
 
 	"github.com/globalsign/mgo/bson"
 	pb "github.com/tcfw/evntsrc/pkg/streams/protos"
@@ -16,22 +19,70 @@ const (
 	collectionName = "streams"
 )
 
-type server struct {
+//Server core struct
+type Server struct {
 	mu sync.Mutex
 }
 
-//newServer creates a new struct to interface the streams server
-func newServer() *server {
-	return &server{}
+//NewServer creates a new struct to interface the streams server
+func NewServer() *Server {
+	return &Server{}
+}
+
+func (s *Server) validateCreate(request *pb.Stream) error {
+	if request.GetID() != 0 {
+		return errors.New("ID must not be set")
+	}
+
+	if request.GetOwner() != "" {
+		return errors.New("Owner must not be set")
+	}
+
+	if request.GetName() == "" {
+		return errors.New("Name must be set")
+	}
+
+	if request.GetCluster() == "" {
+		return errors.New("Cluster must be set")
+	}
+
+	return nil
 }
 
 //Create @TODO
-func (s *server) Create(ctx context.Context, request *pb.Stream) (*pb.Stream, error) {
-	return nil, status.Errorf(codes.Unavailable, "Not implemented")
+func (s *Server) Create(ctx context.Context, request *pb.Stream) (*pb.Stream, error) {
+	err := s.validateCreate(request)
+	if err != nil {
+		return nil, status.Errorf(codes.FailedPrecondition, err.Error())
+	}
+
+	db, err := NewDBSession()
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	collection := db.DB(dBName).C(collectionName)
+
+	userClaims, err := utils.TokenClaimsFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	request.Owner = userClaims["sub"].(string)
+	request.ID = int32(time.Now().Unix())
+
+	err = collection.Insert(request)
+	if err != nil {
+		log.Println(err.Error())
+		return nil, err
+	}
+
+	return s.Get(ctx, &pb.GetRequest{ID: request.ID})
 }
 
 //List @TODO
-func (s *server) List(ctx context.Context, request *pb.Empty) (*pb.StreamList, error) {
+func (s *Server) List(ctx context.Context, request *pb.Empty) (*pb.StreamList, error) {
 	db, err := NewDBSession()
 	if err != nil {
 		return nil, err
@@ -62,6 +113,55 @@ func (s *server) List(ctx context.Context, request *pb.Empty) (*pb.StreamList, e
 }
 
 //Get @TODO
-func (s *server) Get(ctx context.Context, request *pb.GetRequest) (*pb.Stream, error) {
-	return nil, status.Errorf(codes.Unavailable, "Not implemented")
+func (s *Server) Get(ctx context.Context, request *pb.GetRequest) (*pb.Stream, error) {
+
+	db, err := NewDBSession()
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	collection := db.DB(dBName).C(collectionName)
+
+	userClaims, err := utils.TokenClaimsFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	bsonq := bson.M{"owner": userClaims["sub"], "_id": request.GetID()}
+	query := collection.Find(bsonq)
+
+	if c, _ := query.Count(); c == 0 {
+		return nil, status.Errorf(codes.NotFound, "Unknown stream")
+	}
+
+	stream := pb.Stream{}
+	err = query.One(&stream)
+	if err != nil {
+		return nil, err
+	}
+
+	return &stream, nil
+}
+
+//Delete @TODO
+func (s *Server) Delete(ctx context.Context, request *pb.Stream) (*pb.Empty, error) {
+
+	db, err := NewDBSession()
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	collection := db.DB(dBName).C(collectionName)
+
+	userClaims, err := utils.TokenClaimsFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	bsonq := bson.M{"owner": userClaims["sub"], "_id": request.GetID()}
+	err = collection.Remove(bsonq)
+
+	return &pb.Empty{}, err
 }

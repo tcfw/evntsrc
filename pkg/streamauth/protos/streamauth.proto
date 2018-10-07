@@ -50,7 +50,7 @@ message KeyList {
 service StreamAuthService {
 	rpc Create(StreamKey) returns (StreamKey) {
 		option (google.api.http) = {
-            post: "/v1/stream/{stream}/keys",
+            post: "/v1/stream/{stream}/key",
             body: "*"
         };
 	};

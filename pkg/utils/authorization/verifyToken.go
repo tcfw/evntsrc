@@ -54,9 +54,13 @@ func getAuthToken(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("failed to parse metadata")
 	}
 
-	auth := md.Get("authorization")
+	auth := md.Get("grpcgateway-authorization")
+
 	if auth == nil || len(auth) == 0 {
-		return "", fmt.Errorf("no authorization sent")
+		auth = md.Get("authorization")
+		if auth == nil || len(auth) == 0 {
+			return "", fmt.Errorf("no authorization sent")
+		}
 	}
 
 	return auth[0], nil

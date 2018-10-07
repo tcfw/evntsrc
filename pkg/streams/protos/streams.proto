@@ -23,6 +23,7 @@ message Stream {
 	string Owner = 4;
 	string Icon = 5;
 	string Color = 6;
+	string saveId = 7;
 }
 
 message SearchRequest {
@@ -55,7 +56,13 @@ service StreamsService {
 
 	rpc Get(GetRequest) returns (Stream) {
 		option (google.api.http) = {
-			get: "/v1/streams/{ID}",
+			get: "/v1/stream/{ID}",
+		};
+	}
+
+	rpc Delete(Stream) returns (Empty) {
+		option (google.api.http) = {
+			delete: "/v1/stream/{ID}"
 		};
 	}
 }

@@ -17,7 +17,7 @@ func RunGRPC(port int) {
 	}
 
 	grpcServer := grpc.NewServer()
-	pb.RegisterStreamsServiceServer(grpcServer, newServer())
+	pb.RegisterStreamsServiceServer(grpcServer, NewServer())
 
 	log.Printf("Starting gRPC server (port %d)\n", port)
 	grpcServer.Serve(lis)

@@ -9,6 +9,7 @@ import (
 	assert "github.com/stretchr/testify/assert"
 	"github.com/tcfw/evntsrc/pkg/passport"
 	protos "github.com/tcfw/evntsrc/pkg/users/protos"
+	"github.com/tcfw/evntsrc/pkg/utils/db"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -40,7 +41,7 @@ func TestCreate(t *testing.T) {
 	assert.NotEmpty(t, user.Id)
 
 	//Clean up - manually delete created user
-	session, err := NewDBSession()
+	session, err := db.NewMongoDBSession()
 	if err != nil {
 		t.Error(err)
 	}
@@ -79,7 +80,7 @@ func TestFind(t *testing.T) {
 	})
 
 	//Clean up - manually delete created user
-	session, err := NewDBSession()
+	session, err := db.NewMongoDBSession()
 	if err != nil {
 		t.Error(err)
 	}
@@ -101,7 +102,7 @@ func TestList(t *testing.T) {
 		Email: fake.EmailAddress(),
 	}
 
-	session, err := NewDBSession()
+	session, err := db.NewMongoDBSession()
 	if err != nil {
 		t.Error(err)
 	}
@@ -136,7 +137,7 @@ func TestDelete(t *testing.T) {
 		Email: fake.EmailAddress(),
 	}
 
-	session, err := NewDBSession()
+	session, err := db.NewMongoDBSession()
 	if err != nil {
 		t.Error(err)
 	}
@@ -192,7 +193,7 @@ func TestCanSetPassword(t *testing.T) {
 		Email: fake.EmailAddress(),
 	}
 
-	session, err := NewDBSession()
+	session, err := db.NewMongoDBSession()
 	if err != nil {
 		t.Error(err)
 	}
@@ -251,7 +252,7 @@ func TestUpdate(t *testing.T) {
 		Email: fake.EmailAddress(),
 	}
 
-	session, err := NewDBSession()
+	session, err := db.NewMongoDBSession()
 	if err != nil {
 		t.Error(err)
 	}
@@ -284,7 +285,7 @@ func TestMe(t *testing.T) {
 		Email: "johnsmith@example.com",
 	}
 
-	session, err := NewDBSession()
+	session, err := db.NewMongoDBSession()
 	if err != nil {
 		t.Error(err)
 	}

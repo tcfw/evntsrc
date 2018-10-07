@@ -4,21 +4,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"runtime"
+
+	"github.com/tcfw/evntsrc/pkg/event"
+	"github.com/tcfw/evntsrc/pkg/utils/db"
+	"github.com/tcfw/evntsrc/pkg/utils/hvwq"
+	"github.com/tcfw/evntsrc/pkg/websocks"
 
 	"github.com/globalsign/mgo/bson"
 	nats "github.com/nats-io/go-nats"
-	"github.com/simplereach/timeutils"
-	event "github.com/tcfw/evntsrc/pkg/event"
-	"github.com/tcfw/evntsrc/pkg/utils/db"
 )
-
-//ReplayCommand instructs events to rebroadcast all events stored since time
-type ReplayCommand struct {
-	Command string         `json:"cmd"`
-	Stream  int32          `json:"stream"`
-	Subject string         `json:"subject"`
-	Time    timeutils.Time `json:"startTime"`
-}
 
 //StartMonitor subscripts to all user channels
 func StartMonitor(nats string) {
@@ -32,8 +27,30 @@ func StartMonitor(nats string) {
 	select {}
 }
 
+type eventProcessor struct{}
+
+func (ep *eventProcessor) Handle(job interface{}) {
+	usrEvent := job.(event.Event)
+
+	if isReplay, ok := usrEvent.Metadata["replay"]; ok && isReplay == "true" {
+		return
+	}
+
+	err := usrEvent.Store()
+	if err != nil {
+		log.Printf("%s\n", err.Error())
+	}
+}
+
 func monitorUserStreams() {
 	log.Println("Watching for user streams...")
+
+	dispatcher := hvwq.NewDispatcher(&eventProcessor{})
+	if c := runtime.NumCPU(); c < 4 {
+		dispatcher.MaxWorkers = 4
+	}
+	dispatcher.Run()
+
 	natsConn.QueueSubscribe("_USER.>", "storers", func(m *nats.Msg) {
 		event := &event.Event{}
 		err := json.Unmarshal(m.Data, event)
@@ -42,21 +59,15 @@ func monitorUserStreams() {
 			return
 		}
 
-		if isReplay, ok := event.Metadata["replay"]; ok && isReplay == "true" {
-			return
-		}
+		dispatcher.Queue(event)
 
-		err = event.Store()
-		if err != nil {
-			log.Printf("%s\n", err.Error())
-		}
 	})
 }
 
 func monitorReplayRequests() {
 	log.Println("Watching for replay requests...")
 	natsConn.QueueSubscribe("replay.broadcast", "replayers", func(m *nats.Msg) {
-		command := &ReplayCommand{}
+		command := &websocks.ReplayCommand{}
 		json.Unmarshal(m.Data, command)
 
 		dbConn, err := db.NewMongoDBSession()
@@ -74,13 +85,17 @@ func monitorReplayRequests() {
 		if c, _ := query.Count(); c == 0 {
 			natsConn.Publish(m.Reply, []byte("failed: no events"))
 		} else {
-			natsConn.Publish(m.Reply, []byte("starting replay"))
+			natsConn.Publish(m.Reply, []byte("starting"))
 			iter := query.Iter()
 			event := event.Event{}
 			for iter.Next(&event) {
 				event.Metadata["replay"] = "true"
 				jsonBytes, _ := json.Marshal(event)
-				natsConn.Publish("_USER."+string(command.Stream)+"."+command.Subject, jsonBytes)
+				if command.JustMe {
+					natsConn.Publish(m.Reply, jsonBytes)
+				} else {
+					natsConn.Publish("_USER."+string(command.Stream)+"."+command.Subject, jsonBytes)
+				}
 			}
 		}
 	})

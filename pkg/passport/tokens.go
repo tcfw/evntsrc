@@ -83,6 +83,9 @@ func MakeNewToken(extraClaims map[string]interface{}) (*string, *jwt.Token, erro
 	signer.Header["kid"] = "4b65488bcf182b9baead9e7c625763c104829912"
 
 	tokenString, err := signer.SignedString(key)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	return &tokenString, signer, nil
 }

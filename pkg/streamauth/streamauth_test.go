@@ -43,9 +43,9 @@ func TestInvalidCreate(t *testing.T) {
 	s.streamConn = NewMockStreamClient()
 
 	invalidRequests := []*pb.StreamKey{
-		&pb.StreamKey{},
-		&pb.StreamKey{Stream: 0},
-		&pb.StreamKey{Label: "hi"},
+		{},
+		{Stream: 0},
+		{Label: "hi"},
 	}
 
 	for tk, key := range invalidRequests {
@@ -187,7 +187,7 @@ func (s *MockStreamClient) Create(ctx context.Context, in *evntsrc_streams.Strea
 func (s *MockStreamClient) List(ctx context.Context, in *evntsrc_streams.Empty, opts ...grpc.CallOption) (*evntsrc_streams.StreamList, error) {
 	return &evntsrc_streams.StreamList{
 		Streams: []*evntsrc_streams.Stream{
-			&evntsrc_streams.Stream{
+			{
 				ID:      999999999,
 				Cluster: "test",
 				Name:    "test",

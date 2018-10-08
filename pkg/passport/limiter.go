@@ -39,8 +39,8 @@ type keyTTL struct {
 
 func incRateLimit(email string, ip net.IP) {
 	keysToIncrement := []keyTTL{
-		keyTTL{key: userCountKey(email, ip), ttl: userLimitTTL},
-		keyTTL{key: ipCountKey(ip), ttl: ipLimitTTL},
+		{key: userCountKey(email, ip), ttl: userLimitTTL},
+		{key: ipCountKey(ip), ttl: ipLimitTTL},
 	}
 
 	client, err := redisClient()

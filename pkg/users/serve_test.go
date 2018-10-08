@@ -271,6 +271,10 @@ func TestUpdate(t *testing.T) {
 	}
 
 	updatedUser, err := s.Update(context.Background(), req)
+	if err != nil {
+		t.Error(err)
+	}
+
 	assert.Equal(t, updatedUser.Name, user.Name)
 
 	//Cleanup

@@ -105,6 +105,10 @@ func (s *Server) Authenticate(ctx context.Context, request *pb.AuthRequest) (*pb
 
 		//Validate user creds against the user service
 		users, err := newUserClient(ctx)
+		if err != nil {
+			return nil, err
+		}
+
 		user, err := users.Find(ctx, &userSvc.UserRequest{Query: &userSvc.UserRequest_Email{Email: username}}, grpc.Header(&md))
 		if err != nil {
 			grpc.SendHeader(ctx, metadata.Pairs("Grpc-Metadata-X-RateLimit-Remaining", fmt.Sprintf("%d", remaining+1)))
@@ -205,6 +209,10 @@ func (s *Server) SocialLogin(ctx context.Context, request *pb.SocialRequest) (*p
 	}
 
 	users, err := newUserClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	user, err := users.Find(ctx, &userSvc.UserRequest{Query: &userSvc.UserRequest_Email{Email: info.Email}}, grpc.Header(&md))
 	if err != nil {
 		incRateLimit(info.Email, remoteIP)

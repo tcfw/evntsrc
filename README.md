@@ -1,3 +1,5 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/tcfw/evntsrc)](https://goreportcard.com/report/github.com/tcfw/evntsrc)
+
 # EvntSrc
 
 EvntSrc (Event Source) is a distributed event sourcing platform aiming at low latency event broadcasting & storage.

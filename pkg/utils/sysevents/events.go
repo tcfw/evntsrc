@@ -37,34 +37,42 @@ type EventInterface interface {
 	SetChannel(string)
 }
 
+//GetType returns event type
 func (e *Event) GetType() string {
 	return e.Type
 }
 
+//SetSource applies source
 func (e *Event) SetSource(source string) {
 	e.Source = source
 }
 
+//SetTime sets event time from timestamp
 func (e *Event) SetTime(eventTime time.Time) {
 	e.Time = eventTime
 }
 
+//SetID generates a new UUID for the event id
 func (e *Event) SetID() {
 	e.ID = uuid.New().String()
 }
 
+//SetMetadata overrides the existing metadata string map
 func (e *Event) SetMetadata(md map[string]interface{}) {
 	e.Metadata = md
 }
 
+//GetMetadata returns the current metadata
 func (e *Event) GetMetadata() map[string]interface{} {
 	return e.Metadata
 }
 
+//GetChannel returns the event channel
 func (e *Event) GetChannel() string {
 	return e.Channel
 }
 
+//SetChannel overwrites the event channel
 func (e *Event) SetChannel(channel string) {
 	e.Channel = channel
 }
@@ -77,24 +85,6 @@ type AuthenticateEvent struct {
 	User     string `json:"user"`
 	IP       string `json:"ip"`
 	Err      string `json:"error,omitempty"`
-}
-
-//UserEvent
-type UserEvent struct {
-	*Event
-	UserID string `json:"id"`
-}
-
-//RecipeEvent
-type RecipeEvent struct {
-	*Event
-	RecipeID string `json:"id"`
-}
-
-//RecipeEvent
-type IngredientEvent struct {
-	*Event
-	IngredientID string `json:"id"`
 }
 
 //BroadcastEvent attempts to connect to nats server to pub any event and saves to stream

@@ -249,3 +249,22 @@ func (s *server) validateOwnership(ctx context.Context, stream int32) error {
 	}
 	return nil
 }
+
+func (s *server) ValidateKeySecret(ctx context.Context, request *pb.KSRequest) (*pb.Empty, error) {
+	dbConn, err := db.NewMongoDBSession()
+	if err != nil {
+		return nil, err
+	}
+	defer dbConn.Close()
+
+	collection := dbConn.DB(dBName).C(collectionName)
+
+	bsonq := bson.M{"stream": request.GetStream(), "key": request.GetKey(), "secret": request.GetSecret()}
+	query := collection.Find(bsonq)
+
+	if c, _ := query.Count(); c == 0 {
+		return nil, status.Errorf(codes.NotFound, "Unknown key/secret")
+	}
+
+	return nil, nil
+}

@@ -43,6 +43,12 @@ message StreamKey {
 	APIPermissions permissions = 7;
 }
 
+message KSRequest {
+	int32 stream = 1;
+	string key = 2;
+	string secret = 3;
+}
+
 message KeyList {
 	repeated StreamKey keys = 1;
 }
@@ -68,6 +74,8 @@ service StreamAuthService {
 			get: "/v1/stream/{stream}/key/{id}"
 		};
 	};
+
+	rpc ValidateKeySecret(KSRequest) returns (Empty) {};
 
 	rpc Update(StreamKey) returns (StreamKey) {
 		option (google.api.http) = {

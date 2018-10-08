@@ -2,6 +2,7 @@ package websocks
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -10,6 +11,8 @@ import (
 	"github.com/gorilla/websocket"
 	nats "github.com/nats-io/go-nats"
 	"github.com/tcfw/evntsrc/pkg/event"
+	streamauth "github.com/tcfw/evntsrc/pkg/streamauth/protos"
+	"google.golang.org/grpc"
 )
 
 const (
@@ -194,6 +197,16 @@ func (c *Client) processCommand(command *InboundCommand, message []byte) {
 		subcommand := &AuthCommand{}
 		json.Unmarshal(message, subcommand)
 
+		if err := c.validateAuth(subcommand); err != nil {
+			ack := &AckSubUnSucCommand{
+				Acktype: "Failed",
+				Error:   err.Error(),
+			}
+			ackBytes, _ := json.Marshal(ack)
+			c.send <- ackBytes
+			return
+		}
+
 		//TODO verify auth info
 		c.auth = subcommand
 		ack := &AckSubUnSucCommand{
@@ -266,4 +279,17 @@ func (c *Client) writePump() {
 			}
 		}
 	}
+}
+
+func (c *Client) validateAuth(auth *AuthCommand) error {
+	//@TODO pass through passport instead
+	conn, err := grpc.Dial("streamauth:443", grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	cli := streamauth.NewStreamAuthServiceClient(conn)
+
+	_, err = cli.ValidateKeySecret(context.Background(), &streamauth.KSRequest{Stream: auth.Stream, Key: auth.Key, Secret: auth.Secret})
+	return err
 }

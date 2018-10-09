@@ -41,9 +41,12 @@ type Client struct {
 	// Buffered channel of outbound messages.
 	send chan []byte
 
+	//Subscription state
 	subscriptions map[string]chan bool
 
-	auth *AuthCommand
+	//Auth mappings
+	auth    *AuthCommand
+	authKey *streamauth.StreamKey
 }
 
 func (c *Client) subscribe(channel string) {
@@ -290,6 +293,7 @@ func (c *Client) validateAuth(auth *AuthCommand) error {
 	defer conn.Close()
 	cli := streamauth.NewStreamAuthServiceClient(conn)
 
-	_, err = cli.ValidateKeySecret(context.Background(), &streamauth.KSRequest{Stream: auth.Stream, Key: auth.Key, Secret: auth.Secret})
+	sk, err := cli.ValidateKeySecret(context.Background(), &streamauth.KSRequest{Stream: auth.Stream, Key: auth.Key, Secret: auth.Secret})
+	c.authKey = sk
 	return err
 }

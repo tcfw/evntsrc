@@ -250,7 +250,7 @@ func (s *server) validateOwnership(ctx context.Context, stream int32) error {
 	return nil
 }
 
-func (s *server) ValidateKeySecret(ctx context.Context, request *pb.KSRequest) (*pb.Empty, error) {
+func (s *server) ValidateKeySecret(ctx context.Context, request *pb.KSRequest) (*pb.StreamKey, error) {
 	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
 		return nil, err
@@ -266,5 +266,11 @@ func (s *server) ValidateKeySecret(ctx context.Context, request *pb.KSRequest) (
 		return nil, status.Errorf(codes.NotFound, "Unknown key/secret")
 	}
 
-	return nil, nil
+	sk := &pb.StreamKey{}
+	err = query.One(sk)
+	if err != nil {
+		return nil, err
+	}
+
+	return sk, nil
 }

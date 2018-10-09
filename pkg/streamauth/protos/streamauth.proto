@@ -75,7 +75,7 @@ service StreamAuthService {
 		};
 	};
 
-	rpc ValidateKeySecret(KSRequest) returns (Empty) {};
+	rpc ValidateKeySecret(KSRequest) returns (StreamKey) {};
 
 	rpc Update(StreamKey) returns (StreamKey) {
 		option (google.api.http) = {

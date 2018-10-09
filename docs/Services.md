@@ -30,6 +30,10 @@
 
 # Future Services
 
+## Ingress
+- HTTP to forward inbound web requests to pub
+- Data transformations?
+
 ## WUI
 - Web user interface service 
 

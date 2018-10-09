@@ -30,7 +30,7 @@ func StartMonitor(nats string) {
 type eventProcessor struct{}
 
 func (ep *eventProcessor) Handle(job interface{}) {
-	usrEvent := job.(event.Event)
+	usrEvent := job.(*event.Event)
 
 	if isReplay, ok := usrEvent.Metadata["replay"]; ok && isReplay == "true" {
 		return

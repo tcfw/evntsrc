@@ -115,6 +115,12 @@ func BroadcastEvent(ctx context.Context, event EventInterface) error {
 	return nc.Publish("io.evntsrc."+event.GetChannel(), buf)
 }
 
+//UserEvent used for broadcasting general user svc events
+type UserEvent struct {
+	*Event
+	UserID string `json:"id"`
+}
+
 //BroadcastNonStreamingEvent broadcasts an event like BroadcastEvent but uses the non-streaming engine
 func BroadcastNonStreamingEvent(ctx context.Context, event EventInterface) error {
 	nc, err := nats.Connect(os.Getenv("NATS_HOST"))

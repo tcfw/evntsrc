@@ -18,7 +18,7 @@ endif
 
 .DEFAULT_GOAL := all
 .PHONY: all
-all: storer websocks stsmetrics streams passport users apigw build streamauth push
+all: storer websocks stsmetrics streams passport users apigw bridge streamauth push
 
 storer:
 	docker build -f ./build/storer/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/storer:latest .

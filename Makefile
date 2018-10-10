@@ -18,7 +18,7 @@ endif
 
 .DEFAULT_GOAL := all
 .PHONY: all
-all: storer websocks stsmetrics streams passport users apigw bridge streamauth push
+all: storer websocks stsmetrics streams passport users apigw bridge streamauth ingress push
 
 storer:
 	docker build -f ./build/storer/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/storer:latest .
@@ -47,6 +47,9 @@ bridge:
 streamauth:
 	docker build -f ./build/streamauth/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/streamauth:latest .
 
+ingress:
+	docker build -f ./build/ingress/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/ingress:latest .
+
 .PHONY: push
 push: 
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/storer:latest
@@ -58,6 +61,7 @@ push:
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/apigw:latest
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/bridge:latest
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/streamauth:latest
+	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/ingress:latest
 
 
 protos:

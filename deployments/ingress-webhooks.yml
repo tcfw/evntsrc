@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-webhooks
+spec:
+  ports:
+  - port: 80
+    name: http
+  selector:
+    run: ingress-webhooks
+  type: NodePort
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ingress-webhooks
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        version: v1
+        run: ingress-webhooks
+        app: ingress-webhooks
+        service: ingress-webhooks
+        tier: backend
+      annotations:
+        prometheus.io/scrape: "false"
+    spec:
+      containers:
+      - name: ingress-webhooks
+        imagePullPolicy: Never
+        image: asia.gcr.io/evntsrc-io/ingress:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: NATS_HOST
+          value: "nats:4222"

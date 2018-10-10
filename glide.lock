@@ -1,5 +1,5 @@
 hash: 7358b0f70f33e79313b3e8e1f6fd57c93aa1fb5064186ec6b0c4f4fb11db8b9c
-updated: 2018-09-20T10:08:09.515693+10:00
+updated: 2018-10-10T17:21:33.434126+11:00
 imports:
 - name: github.com/beorn7/perks
   version: 3a771d992973f24aa725d07868b467d1ddfceafb
@@ -28,8 +28,6 @@ imports:
   - internal/proto
   - internal/singleflight
   - internal/util
-- name: github.com/gogo/gateway
-  version: 6d3dfbe4e3b52add3800488f526462e69bce526a
 - name: github.com/gogo/googleapis
   version: 8558fb44d2f1fc223118afc694129d2c2d2924d1
   subpackages:
@@ -38,7 +36,6 @@ imports:
   version: 636bf0302bc95575d69441b25a2603156ffdddf1
   subpackages:
   - gogoproto
-  - jsonpb
   - proto
   - protoc-gen-gogo/descriptor
   - sortkeys
@@ -55,10 +52,12 @@ imports:
   - ptypes/timestamp
 - name: github.com/google/uuid
   version: d460ce9f8df2e77fb1ba55ca87fafed96c607494
+- name: github.com/gorilla/mux
+  version: 9e1f5955c0d22b55d9e20d6faa28589f83b2faca
 - name: github.com/gorilla/websocket
   version: 66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d
 - name: github.com/grpc-ecosystem/grpc-gateway
-  version: 7916b03771e9edb045fcfc7db5f516f8b6a29c39
+  version: 8aa3d3f00fbaea619d864e688cd045497aa30fe8
   subpackages:
   - runtime
   - runtime/internal
@@ -90,10 +89,6 @@ imports:
   subpackages:
   - encoders/builtin
   - util
-- name: github.com/nats-io/go-nats-streaming
-  version: e54893da22a81e79edb70d3b1e3ebda61ce731a0
-  subpackages:
-  - pb
 - name: github.com/nats-io/nuid
   version: 3024a71c3cbe30667286099921591e6fcc328230
 - name: github.com/opentracing/opentracing-go
@@ -104,7 +99,7 @@ imports:
 - name: github.com/pelletier/go-toml
   version: c2dbbc24a97911339e01bda0b8cabdbd8f13b602
 - name: github.com/prometheus/client_golang
-  version: 73edb9af667d9467d99b2001722770062a0086c3
+  version: 0a8115f42e037a6e327f9a269a26ff6603fb8472
   subpackages:
   - prometheus
   - prometheus/internal
@@ -119,7 +114,7 @@ imports:
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: 05ee40e3a273f7245e8777337fc7b46e533a9a92
+  version: 185b4288413d2a0dd0806f78c90dde719829e5ae
   subpackages:
   - internal/util
   - nfs
@@ -127,7 +122,7 @@ imports:
 - name: github.com/robfig/cron
   version: b41be1df696709bb6395fe435af20370037c0b4c
 - name: github.com/rs/cors
-  version: 3fb1b69b103a84de38a19c3c6ec073dd6caa4d3f
+  version: 9a47f48565a795472d43519dd49aac781f3034fb
 - name: github.com/simplereach/timeutils
   version: 1a719258b86a08630289b86902ab16817ba641e9
 - name: github.com/spf13/afero
@@ -143,7 +138,7 @@ imports:
 - name: github.com/spf13/pflag
   version: 3ebe029320b2676d667ae88da602a5f854788a8a
 - name: github.com/spf13/viper
-  version: 8fb642006536c8d3760c99d4fa2389f5e2205631
+  version: 2c12c60302a5a0e62ee102ca9bc996277c2f64f5
 - name: golang.org/x/crypto
   version: a49355c7e3f8fe157a85be2f77e6e269a0f89602
   subpackages:
@@ -223,6 +218,6 @@ testImports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: f35b8ab0b5a2cef36673838d662e249dd9c94686
+  version: 2db35c88b92a1631e987089b5485a95e68bc5d3a
   subpackages:
   - assert

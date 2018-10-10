@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/globalsign/mgo"
+	"github.com/globalsign/mgo/bson"
 	"github.com/google/uuid"
 	pb "github.com/tcfw/evntsrc/pkg/streamauth/protos"
 	streams "github.com/tcfw/evntsrc/pkg/streams/protos"
@@ -15,7 +16,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
-	"gopkg.in/mgo.v2/bson"
 )
 
 const (

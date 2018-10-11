@@ -190,7 +190,7 @@ func (c *Client) processCommand(command *InboundCommand, message []byte) {
 		rEvent.Data = []byte(subcommand.Data)
 		rEvent.Time = event.ZeroableTime{Time: time.Now()}
 		rEvent.Metadata = map[string]string{}
-		rEvent.Metadata["ws.source_ip"] = c.conn.RemoteAddr().String()
+		rEvent.Metadata["source_ip"] = c.conn.RemoteAddr().String()
 
 		eventJSONBytes, _ := json.Marshal(rEvent)
 

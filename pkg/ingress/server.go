@@ -19,7 +19,8 @@ func RunHTTP(port int, natsEndpoint string) {
 	connectNats(natsEndpoint)
 
 	r := mux.NewRouter()
-	r.HandleFunc("/{stream}/{subject}", HandlePub).Methods("GET")
+	r.HandleFunc("/{stream}/{subject}", HandlePub).Methods("GET", "POST")
+	r.HandleFunc("/{stream}/{subject}/{type}", HandlePub).Methods("GET", "POST")
 
 	r.Use(cors.AllowAll().Handler, ValidateAuth)
 

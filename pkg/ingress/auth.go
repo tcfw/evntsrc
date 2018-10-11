@@ -2,6 +2,7 @@ package ingress
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net/http"
 	"strconv"
@@ -53,7 +54,11 @@ func ValidateAuth(next http.Handler) http.Handler {
 func getStream(r *http.Request) (*int32, error) {
 	parts := mux.Vars(r)
 
-	expectedStream := parts["stream"]
+	expectedStream, ok := parts["stream"]
+	if !ok {
+		return nil, errors.New("Stream not found in request")
+	}
+
 	testedStream, err := strconv.Atoi(expectedStream)
 	if err != nil {
 		return nil, err

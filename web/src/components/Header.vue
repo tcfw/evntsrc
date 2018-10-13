@@ -7,6 +7,7 @@
 				</span>
 				<el-dropdown-menu slot="dropdown">
 					<el-dropdown-item disabled>{{$root.me.name}}</el-dropdown-item>
+					<router-link :to="{name:'settings'}"><el-dropdown-item>Settings</el-dropdown-item></router-link>
 					<el-dropdown-item @click.native="$root.logout()" divided>Logout</el-dropdown-item>
 				</el-dropdown-menu>
 			</el-dropdown>

@@ -6,15 +6,13 @@
         <el-header v-if="$root.loggedIn()" :style="{zIndex: 2}">
           <page-header></page-header>
         </el-header>
-        <el-main :style="$root.loggedIn() ? {zIndex: 1, position: 'absolute', top: '62px', width: 'calc(100% - 220px)', height: 'calc(100% - 62px)'} : {zIndex: 1}"><router-view></router-view></el-main>
+        <el-main :style="$root.loggedIn() ? {zIndex: 1, position: 'absolute', top: '60px', width: 'calc(100% - 220px)', height: 'calc(100% - 59px)'} : {zIndex: 1}"><router-view></router-view></el-main>
       </el-container>
     </el-container>
 
   </div>
 </template>
 <script>
-import "@/styles/app.scss";
-
 import pageHeader from "@/components/Header.vue"
 import sideMenu from "@/components/SideMenu.vue"
 

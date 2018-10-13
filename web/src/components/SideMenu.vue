@@ -5,6 +5,15 @@
 			<router-link to="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</router-link>
 			<router-link to="/streams"><i class="fas fa-stream"></i> Streams</router-link>
 		</div>
+		<div class="info">
+			&copy; 2018 EvntSrc.io
+			<p>
+				<router-link to="/about">About</router-link> | 
+				<router-link to="/terms">Terms</router-link> |
+				<router-link to="/privacy">Privacy</router-link> | 
+				<router-link to="/help">Help</router-link>
+			</p>
+		</div>
 	</div>
 </template>
 <script>
@@ -41,6 +50,22 @@ export default {
 				background: rgba(255,255,255,0.12);
 				border-left: 4px solid #636D97;
 				padding-left: 11px;
+			}
+		}
+	}
+
+	.info {
+		color: white;
+		position: absolute;
+		bottom: 5px;
+		left: 15px;
+		font-size: 10px;
+
+		a {
+			color: #eee;
+
+			&:hover {
+				text-decoration: underline;
 			}
 		}
 	}

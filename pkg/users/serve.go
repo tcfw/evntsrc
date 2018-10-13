@@ -1,6 +1,7 @@
 package users
 
 import (
+	"errors"
 	fmt "fmt"
 	"log"
 	"net"
@@ -18,6 +19,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	context "golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 const dbName = "users"
@@ -110,7 +113,6 @@ func (s *server) Get(ctx context.Context, request *protos.UserRequest) (*protos.
 	}
 
 	user.Password = ""
-	user.Id = bson.ObjectId(user.Id).Hex()
 	return user, nil
 }
 
@@ -182,6 +184,17 @@ func (s *server) SetPassword(ctx context.Context, request *protos.PasswordUpdate
 
 	collection := dbConn.DB(dbName).C(dbCollection)
 
+	claims, err := utils.TokenClaimsFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if request.Id == "" {
+		request.Id = claims["sub"].(string)
+	} else if _, ok := claims["admin"]; request.Id != claims["sub"].(string) && !ok {
+		return nil, status.Errorf(codes.PermissionDenied, "Unauthorized")
+	}
+
 	query := collection.FindId(request.Id)
 
 	if c, err := query.Count(); c == 0 || err != nil {
@@ -195,10 +208,15 @@ func (s *server) SetPassword(ctx context.Context, request *protos.PasswordUpdate
 		return nil, err
 	}
 
-	password, _ := validatePassword(request.Password)
-	user.Password = *password
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.GetCurrentPassword()))
+	if err != nil {
+		return nil, errors.New("Current password doesn't match")
+	}
 
-	_, err = s.Update(ctx, &protos.UserUpdateRequest{Id: request.Id, User: user})
+	password, _ := validatePassword(request.Password)
+
+	collection.UpdateId(user.Id, bson.M{"$set": bson.M{"password": password}})
+
 	return nil, err
 }
 
@@ -235,31 +253,49 @@ func (s *server) Update(ctx context.Context, request *protos.UserUpdateRequest) 
 
 	collection := dbConn.DB(dbName).C(dbCollection)
 
+	claims, err := utils.TokenClaimsFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if request.Id == "" {
+		request.Id = claims["sub"].(string)
+	} else if _, ok := claims["admin"]; request.Id != claims["sub"].(string) && !ok {
+		return nil, status.Errorf(codes.PermissionDenied, "Unauthorized")
+	}
+
 	query := collection.FindId(request.Id)
 
 	if c, err := query.Count(); c == 0 || err != nil {
 		return nil, fmt.Errorf("Failed to find user %s: %v", request.Id, err)
 	}
 
-	err = collection.UpdateId(request.Id, request.User)
-	if err != nil {
-		return nil, err
-	}
+	if _, ok := claims["admin"]; request.Replace == true && ok {
+		request.User.Id = request.Id
+		err = collection.UpdateId(request.Id, request.User)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		user := &protos.User{}
+		err = query.One(user)
+		if err != nil {
+			return nil, err
+		}
 
-	query = collection.FindId(request.User.Id)
-	if c, err := query.Count(); c == 0 || err != nil {
-		return nil, fmt.Errorf("Failed to find user %s: %v", request.User.Id, err)
-	}
+		user.Name = request.User.Name
+		user.Email = request.User.Email
+		user.Company = request.User.Company
 
-	updatedUser := &protos.User{}
-	err = query.One(updatedUser)
-	if err != nil {
-		return nil, err
+		err = collection.UpdateId(request.Id, user)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	events.BroadcastEvent(ctx, &events.UserEvent{Event: &events.Event{Type: "io.evntsrc.users.updated"}, UserID: request.User.Id})
 
-	return updatedUser, nil
+	return s.Get(ctx, &protos.UserRequest{Query: &protos.UserRequest_Id{Id: request.GetId()}})
 }
 
 //Me returns the user information based on the uid from a gwt token provided in the authorization metadata

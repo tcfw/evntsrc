@@ -14,6 +14,10 @@
 		PasswordUpdateRequest
 		UserUpdateRequest
 		AuthRequest
+		MFAFIDO
+		MFASMS
+		MFATOTP
+		MFA
 		Empty
 */
 package evntsrc_users
@@ -54,6 +58,8 @@ type User struct {
 	Password  string            `protobuf:"bytes,5,opt,name=password,proto3" json:"password,omitempty"`
 	Metadata  map[string][]byte `protobuf:"bytes,6,rep,name=metadata" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	Picture   string            `protobuf:"bytes,7,opt,name=picture,proto3" json:"picture,omitempty"`
+	Company   string            `protobuf:"bytes,8,opt,name=company,proto3" json:"company,omitempty"`
+	Mfa       *MFA              `protobuf:"bytes,9,opt,name=mfa" json:"mfa,omitempty"`
 }
 
 func (m *User) Reset()                    { *m = User{} }
@@ -108,6 +114,20 @@ func (m *User) GetPicture() string {
 		return m.Picture
 	}
 	return ""
+}
+
+func (m *User) GetCompany() string {
+	if m != nil {
+		return m.Company
+	}
+	return ""
+}
+
+func (m *User) GetMfa() *MFA {
+	if m != nil {
+		return m.Mfa
+	}
+	return nil
 }
 
 func (*User) XXX_MessageName() string {
@@ -254,8 +274,9 @@ func (*UserList) XXX_MessageName() string {
 }
 
 type PasswordUpdateRequest struct {
-	Id       string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty" bson:"_id"`
-	Password string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	Id              string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty" bson:"_id"`
+	Password        string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	CurrentPassword string `protobuf:"bytes,3,opt,name=current_password,json=currentPassword,proto3" json:"current_password,omitempty"`
 }
 
 func (m *PasswordUpdateRequest) Reset()                    { *m = PasswordUpdateRequest{} }
@@ -277,13 +298,22 @@ func (m *PasswordUpdateRequest) GetPassword() string {
 	return ""
 }
 
+func (m *PasswordUpdateRequest) GetCurrentPassword() string {
+	if m != nil {
+		return m.CurrentPassword
+	}
+	return ""
+}
+
 func (*PasswordUpdateRequest) XXX_MessageName() string {
 	return "evntsrc.users.PasswordUpdateRequest"
 }
 
 type UserUpdateRequest struct {
-	Id   string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty" bson:"_id"`
-	User *User  `protobuf:"bytes,2,opt,name=user" json:"user,omitempty"`
+	Id              string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty" bson:"_id"`
+	User            *User  `protobuf:"bytes,2,opt,name=user" json:"user,omitempty"`
+	Replace         bool   `protobuf:"varint,3,opt,name=replace,proto3" json:"replace,omitempty"`
+	CurrentPassword string `protobuf:"bytes,4,opt,name=currentPassword,proto3" json:"currentPassword,omitempty"`
 }
 
 func (m *UserUpdateRequest) Reset()                    { *m = UserUpdateRequest{} }
@@ -303,6 +333,20 @@ func (m *UserUpdateRequest) GetUser() *User {
 		return m.User
 	}
 	return nil
+}
+
+func (m *UserUpdateRequest) GetReplace() bool {
+	if m != nil {
+		return m.Replace
+	}
+	return false
+}
+
+func (m *UserUpdateRequest) GetCurrentPassword() string {
+	if m != nil {
+		return m.CurrentPassword
+	}
+	return ""
 }
 
 func (*UserUpdateRequest) XXX_MessageName() string {
@@ -337,13 +381,247 @@ func (*AuthRequest) XXX_MessageName() string {
 	return "evntsrc.users.AuthRequest"
 }
 
+type MFAFIDO struct {
+	Registration          []byte `protobuf:"bytes,1,opt,name=registration,proto3" json:"registration,omitempty"`
+	RegistrationChallenge []byte `protobuf:"bytes,2,opt,name=registrationChallenge,proto3" json:"registrationChallenge,omitempty"`
+}
+
+func (m *MFAFIDO) Reset()                    { *m = MFAFIDO{} }
+func (m *MFAFIDO) String() string            { return proto.CompactTextString(m) }
+func (*MFAFIDO) ProtoMessage()               {}
+func (*MFAFIDO) Descriptor() ([]byte, []int) { return fileDescriptorUsers, []int{6} }
+
+func (m *MFAFIDO) GetRegistration() []byte {
+	if m != nil {
+		return m.Registration
+	}
+	return nil
+}
+
+func (m *MFAFIDO) GetRegistrationChallenge() []byte {
+	if m != nil {
+		return m.RegistrationChallenge
+	}
+	return nil
+}
+
+func (*MFAFIDO) XXX_MessageName() string {
+	return "evntsrc.users.MFAFIDO"
+}
+
+type MFASMS struct {
+	Mobile string `protobuf:"bytes,1,opt,name=mobile,proto3" json:"mobile,omitempty"`
+}
+
+func (m *MFASMS) Reset()                    { *m = MFASMS{} }
+func (m *MFASMS) String() string            { return proto.CompactTextString(m) }
+func (*MFASMS) ProtoMessage()               {}
+func (*MFASMS) Descriptor() ([]byte, []int) { return fileDescriptorUsers, []int{7} }
+
+func (m *MFASMS) GetMobile() string {
+	if m != nil {
+		return m.Mobile
+	}
+	return ""
+}
+
+func (*MFASMS) XXX_MessageName() string {
+	return "evntsrc.users.MFASMS"
+}
+
+type MFATOTP struct {
+	Key         string   `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	BackupCodes []string `protobuf:"bytes,2,rep,name=backupCodes" json:"backupCodes,omitempty"`
+}
+
+func (m *MFATOTP) Reset()                    { *m = MFATOTP{} }
+func (m *MFATOTP) String() string            { return proto.CompactTextString(m) }
+func (*MFATOTP) ProtoMessage()               {}
+func (*MFATOTP) Descriptor() ([]byte, []int) { return fileDescriptorUsers, []int{8} }
+
+func (m *MFATOTP) GetKey() string {
+	if m != nil {
+		return m.Key
+	}
+	return ""
+}
+
+func (m *MFATOTP) GetBackupCodes() []string {
+	if m != nil {
+		return m.BackupCodes
+	}
+	return nil
+}
+
+func (*MFATOTP) XXX_MessageName() string {
+	return "evntsrc.users.MFATOTP"
+}
+
+type MFA struct {
+	// Types that are valid to be assigned to MFA:
+	//	*MFA_FIDO
+	//	*MFA_SMS
+	//	*MFA_TOTP
+	MFA isMFA_MFA `protobuf_oneof:"MFA"`
+}
+
+func (m *MFA) Reset()                    { *m = MFA{} }
+func (m *MFA) String() string            { return proto.CompactTextString(m) }
+func (*MFA) ProtoMessage()               {}
+func (*MFA) Descriptor() ([]byte, []int) { return fileDescriptorUsers, []int{9} }
+
+type isMFA_MFA interface {
+	isMFA_MFA()
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type MFA_FIDO struct {
+	FIDO *MFAFIDO `protobuf:"bytes,1,opt,name=FIDO,oneof"`
+}
+type MFA_SMS struct {
+	SMS *MFASMS `protobuf:"bytes,2,opt,name=SMS,oneof"`
+}
+type MFA_TOTP struct {
+	TOTP *MFATOTP `protobuf:"bytes,3,opt,name=TOTP,oneof"`
+}
+
+func (*MFA_FIDO) isMFA_MFA() {}
+func (*MFA_SMS) isMFA_MFA()  {}
+func (*MFA_TOTP) isMFA_MFA() {}
+
+func (m *MFA) GetMFA() isMFA_MFA {
+	if m != nil {
+		return m.MFA
+	}
+	return nil
+}
+
+func (m *MFA) GetFIDO() *MFAFIDO {
+	if x, ok := m.GetMFA().(*MFA_FIDO); ok {
+		return x.FIDO
+	}
+	return nil
+}
+
+func (m *MFA) GetSMS() *MFASMS {
+	if x, ok := m.GetMFA().(*MFA_SMS); ok {
+		return x.SMS
+	}
+	return nil
+}
+
+func (m *MFA) GetTOTP() *MFATOTP {
+	if x, ok := m.GetMFA().(*MFA_TOTP); ok {
+		return x.TOTP
+	}
+	return nil
+}
+
+// XXX_OneofFuncs is for the internal use of the proto package.
+func (*MFA) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
+	return _MFA_OneofMarshaler, _MFA_OneofUnmarshaler, _MFA_OneofSizer, []interface{}{
+		(*MFA_FIDO)(nil),
+		(*MFA_SMS)(nil),
+		(*MFA_TOTP)(nil),
+	}
+}
+
+func _MFA_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
+	m := msg.(*MFA)
+	// MFA
+	switch x := m.MFA.(type) {
+	case *MFA_FIDO:
+		_ = b.EncodeVarint(1<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.FIDO); err != nil {
+			return err
+		}
+	case *MFA_SMS:
+		_ = b.EncodeVarint(2<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.SMS); err != nil {
+			return err
+		}
+	case *MFA_TOTP:
+		_ = b.EncodeVarint(3<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.TOTP); err != nil {
+			return err
+		}
+	case nil:
+	default:
+		return fmt.Errorf("MFA.MFA has unexpected type %T", x)
+	}
+	return nil
+}
+
+func _MFA_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
+	m := msg.(*MFA)
+	switch tag {
+	case 1: // MFA.FIDO
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		msg := new(MFAFIDO)
+		err := b.DecodeMessage(msg)
+		m.MFA = &MFA_FIDO{msg}
+		return true, err
+	case 2: // MFA.SMS
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		msg := new(MFASMS)
+		err := b.DecodeMessage(msg)
+		m.MFA = &MFA_SMS{msg}
+		return true, err
+	case 3: // MFA.TOTP
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		msg := new(MFATOTP)
+		err := b.DecodeMessage(msg)
+		m.MFA = &MFA_TOTP{msg}
+		return true, err
+	default:
+		return false, nil
+	}
+}
+
+func _MFA_OneofSizer(msg proto.Message) (n int) {
+	m := msg.(*MFA)
+	// MFA
+	switch x := m.MFA.(type) {
+	case *MFA_FIDO:
+		s := proto.Size(x.FIDO)
+		n += proto.SizeVarint(1<<3 | proto.WireBytes)
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case *MFA_SMS:
+		s := proto.Size(x.SMS)
+		n += proto.SizeVarint(2<<3 | proto.WireBytes)
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case *MFA_TOTP:
+		s := proto.Size(x.TOTP)
+		n += proto.SizeVarint(3<<3 | proto.WireBytes)
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case nil:
+	default:
+		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
+	}
+	return n
+}
+
+func (*MFA) XXX_MessageName() string {
+	return "evntsrc.users.MFA"
+}
+
 type Empty struct {
 }
 
 func (m *Empty) Reset()                    { *m = Empty{} }
 func (m *Empty) String() string            { return proto.CompactTextString(m) }
 func (*Empty) ProtoMessage()               {}
-func (*Empty) Descriptor() ([]byte, []int) { return fileDescriptorUsers, []int{6} }
+func (*Empty) Descriptor() ([]byte, []int) { return fileDescriptorUsers, []int{10} }
 
 func (*Empty) XXX_MessageName() string {
 	return "evntsrc.users.Empty"
@@ -355,6 +633,10 @@ func init() {
 	proto.RegisterType((*PasswordUpdateRequest)(nil), "evntsrc.users.PasswordUpdateRequest")
 	proto.RegisterType((*UserUpdateRequest)(nil), "evntsrc.users.UserUpdateRequest")
 	proto.RegisterType((*AuthRequest)(nil), "evntsrc.users.AuthRequest")
+	proto.RegisterType((*MFAFIDO)(nil), "evntsrc.users.MFAFIDO")
+	proto.RegisterType((*MFASMS)(nil), "evntsrc.users.MFASMS")
+	proto.RegisterType((*MFATOTP)(nil), "evntsrc.users.MFATOTP")
+	proto.RegisterType((*MFA)(nil), "evntsrc.users.MFA")
 	proto.RegisterType((*Empty)(nil), "evntsrc.users.Empty")
 }
 
@@ -800,6 +1082,22 @@ func (m *User) MarshalTo(dAtA []byte) (int, error) {
 		i = encodeVarintUsers(dAtA, i, uint64(len(m.Picture)))
 		i += copy(dAtA[i:], m.Picture)
 	}
+	if len(m.Company) > 0 {
+		dAtA[i] = 0x42
+		i++
+		i = encodeVarintUsers(dAtA, i, uint64(len(m.Company)))
+		i += copy(dAtA[i:], m.Company)
+	}
+	if m.Mfa != nil {
+		dAtA[i] = 0x4a
+		i++
+		i = encodeVarintUsers(dAtA, i, uint64(m.Mfa.Size()))
+		n2, err := m.Mfa.MarshalTo(dAtA[i:])
+		if err != nil {
+			return 0, err
+		}
+		i += n2
+	}
 	return i, nil
 }
 
@@ -819,11 +1117,11 @@ func (m *UserRequest) MarshalTo(dAtA []byte) (int, error) {
 	var l int
 	_ = l
 	if m.Query != nil {
-		nn2, err := m.Query.MarshalTo(dAtA[i:])
+		nn3, err := m.Query.MarshalTo(dAtA[i:])
 		if err != nil {
 			return 0, err
 		}
-		i += nn2
+		i += nn3
 	}
 	return i, nil
 }
@@ -901,6 +1199,12 @@ func (m *PasswordUpdateRequest) MarshalTo(dAtA []byte) (int, error) {
 		i = encodeVarintUsers(dAtA, i, uint64(len(m.Password)))
 		i += copy(dAtA[i:], m.Password)
 	}
+	if len(m.CurrentPassword) > 0 {
+		dAtA[i] = 0x1a
+		i++
+		i = encodeVarintUsers(dAtA, i, uint64(len(m.CurrentPassword)))
+		i += copy(dAtA[i:], m.CurrentPassword)
+	}
 	return i, nil
 }
 
@@ -929,11 +1233,27 @@ func (m *UserUpdateRequest) MarshalTo(dAtA []byte) (int, error) {
 		dAtA[i] = 0x12
 		i++
 		i = encodeVarintUsers(dAtA, i, uint64(m.User.Size()))
-		n3, err := m.User.MarshalTo(dAtA[i:])
+		n4, err := m.User.MarshalTo(dAtA[i:])
 		if err != nil {
 			return 0, err
 		}
-		i += n3
+		i += n4
+	}
+	if m.Replace {
+		dAtA[i] = 0x18
+		i++
+		if m.Replace {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i++
+	}
+	if len(m.CurrentPassword) > 0 {
+		dAtA[i] = 0x22
+		i++
+		i = encodeVarintUsers(dAtA, i, uint64(len(m.CurrentPassword)))
+		i += copy(dAtA[i:], m.CurrentPassword)
 	}
 	return i, nil
 }
@@ -968,6 +1288,166 @@ func (m *AuthRequest) MarshalTo(dAtA []byte) (int, error) {
 	return i, nil
 }
 
+func (m *MFAFIDO) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalTo(dAtA)
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MFAFIDO) MarshalTo(dAtA []byte) (int, error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
+	if len(m.Registration) > 0 {
+		dAtA[i] = 0xa
+		i++
+		i = encodeVarintUsers(dAtA, i, uint64(len(m.Registration)))
+		i += copy(dAtA[i:], m.Registration)
+	}
+	if len(m.RegistrationChallenge) > 0 {
+		dAtA[i] = 0x12
+		i++
+		i = encodeVarintUsers(dAtA, i, uint64(len(m.RegistrationChallenge)))
+		i += copy(dAtA[i:], m.RegistrationChallenge)
+	}
+	return i, nil
+}
+
+func (m *MFASMS) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalTo(dAtA)
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MFASMS) MarshalTo(dAtA []byte) (int, error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
+	if len(m.Mobile) > 0 {
+		dAtA[i] = 0xa
+		i++
+		i = encodeVarintUsers(dAtA, i, uint64(len(m.Mobile)))
+		i += copy(dAtA[i:], m.Mobile)
+	}
+	return i, nil
+}
+
+func (m *MFATOTP) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalTo(dAtA)
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MFATOTP) MarshalTo(dAtA []byte) (int, error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
+	if len(m.Key) > 0 {
+		dAtA[i] = 0xa
+		i++
+		i = encodeVarintUsers(dAtA, i, uint64(len(m.Key)))
+		i += copy(dAtA[i:], m.Key)
+	}
+	if len(m.BackupCodes) > 0 {
+		for _, s := range m.BackupCodes {
+			dAtA[i] = 0x12
+			i++
+			l = len(s)
+			for l >= 1<<7 {
+				dAtA[i] = uint8(uint64(l)&0x7f | 0x80)
+				l >>= 7
+				i++
+			}
+			dAtA[i] = uint8(l)
+			i++
+			i += copy(dAtA[i:], s)
+		}
+	}
+	return i, nil
+}
+
+func (m *MFA) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalTo(dAtA)
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MFA) MarshalTo(dAtA []byte) (int, error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
+	if m.MFA != nil {
+		nn5, err := m.MFA.MarshalTo(dAtA[i:])
+		if err != nil {
+			return 0, err
+		}
+		i += nn5
+	}
+	return i, nil
+}
+
+func (m *MFA_FIDO) MarshalTo(dAtA []byte) (int, error) {
+	i := 0
+	if m.FIDO != nil {
+		dAtA[i] = 0xa
+		i++
+		i = encodeVarintUsers(dAtA, i, uint64(m.FIDO.Size()))
+		n6, err := m.FIDO.MarshalTo(dAtA[i:])
+		if err != nil {
+			return 0, err
+		}
+		i += n6
+	}
+	return i, nil
+}
+func (m *MFA_SMS) MarshalTo(dAtA []byte) (int, error) {
+	i := 0
+	if m.SMS != nil {
+		dAtA[i] = 0x12
+		i++
+		i = encodeVarintUsers(dAtA, i, uint64(m.SMS.Size()))
+		n7, err := m.SMS.MarshalTo(dAtA[i:])
+		if err != nil {
+			return 0, err
+		}
+		i += n7
+	}
+	return i, nil
+}
+func (m *MFA_TOTP) MarshalTo(dAtA []byte) (int, error) {
+	i := 0
+	if m.TOTP != nil {
+		dAtA[i] = 0x1a
+		i++
+		i = encodeVarintUsers(dAtA, i, uint64(m.TOTP.Size()))
+		n8, err := m.TOTP.MarshalTo(dAtA[i:])
+		if err != nil {
+			return 0, err
+		}
+		i += n8
+	}
+	return i, nil
+}
 func (m *Empty) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -1034,6 +1514,14 @@ func (m *User) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovUsers(uint64(l))
 	}
+	l = len(m.Company)
+	if l > 0 {
+		n += 1 + l + sovUsers(uint64(l))
+	}
+	if m.Mfa != nil {
+		l = m.Mfa.Size()
+		n += 1 + l + sovUsers(uint64(l))
+	}
 	return n
 }
 
@@ -1083,6 +1571,10 @@ func (m *PasswordUpdateRequest) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovUsers(uint64(l))
 	}
+	l = len(m.CurrentPassword)
+	if l > 0 {
+		n += 1 + l + sovUsers(uint64(l))
+	}
 	return n
 }
 
@@ -1095,6 +1587,13 @@ func (m *UserUpdateRequest) Size() (n int) {
 	}
 	if m.User != nil {
 		l = m.User.Size()
+		n += 1 + l + sovUsers(uint64(l))
+	}
+	if m.Replace {
+		n += 2
+	}
+	l = len(m.CurrentPassword)
+	if l > 0 {
 		n += 1 + l + sovUsers(uint64(l))
 	}
 	return n
@@ -1114,6 +1613,82 @@ func (m *AuthRequest) Size() (n int) {
 	return n
 }
 
+func (m *MFAFIDO) Size() (n int) {
+	var l int
+	_ = l
+	l = len(m.Registration)
+	if l > 0 {
+		n += 1 + l + sovUsers(uint64(l))
+	}
+	l = len(m.RegistrationChallenge)
+	if l > 0 {
+		n += 1 + l + sovUsers(uint64(l))
+	}
+	return n
+}
+
+func (m *MFASMS) Size() (n int) {
+	var l int
+	_ = l
+	l = len(m.Mobile)
+	if l > 0 {
+		n += 1 + l + sovUsers(uint64(l))
+	}
+	return n
+}
+
+func (m *MFATOTP) Size() (n int) {
+	var l int
+	_ = l
+	l = len(m.Key)
+	if l > 0 {
+		n += 1 + l + sovUsers(uint64(l))
+	}
+	if len(m.BackupCodes) > 0 {
+		for _, s := range m.BackupCodes {
+			l = len(s)
+			n += 1 + l + sovUsers(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *MFA) Size() (n int) {
+	var l int
+	_ = l
+	if m.MFA != nil {
+		n += m.MFA.Size()
+	}
+	return n
+}
+
+func (m *MFA_FIDO) Size() (n int) {
+	var l int
+	_ = l
+	if m.FIDO != nil {
+		l = m.FIDO.Size()
+		n += 1 + l + sovUsers(uint64(l))
+	}
+	return n
+}
+func (m *MFA_SMS) Size() (n int) {
+	var l int
+	_ = l
+	if m.SMS != nil {
+		l = m.SMS.Size()
+		n += 1 + l + sovUsers(uint64(l))
+	}
+	return n
+}
+func (m *MFA_TOTP) Size() (n int) {
+	var l int
+	_ = l
+	if m.TOTP != nil {
+		l = m.TOTP.Size()
+		n += 1 + l + sovUsers(uint64(l))
+	}
+	return n
+}
 func (m *Empty) Size() (n int) {
 	var l int
 	_ = l
@@ -1459,6 +2034,68 @@ func (m *User) Unmarshal(dAtA []byte) error {
 			}
 			m.Picture = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Company", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowUsers
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthUsers
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Company = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Mfa", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowUsers
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= (int(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthUsers
+			}
+			postIndex := iNdEx + msglen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Mfa == nil {
+				m.Mfa = &MFA{}
+			}
+			if err := m.Mfa.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipUsers(dAtA[iNdEx:])
@@ -1756,6 +2393,35 @@ func (m *PasswordUpdateRequest) Unmarshal(dAtA []byte) error {
 			}
 			m.Password = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CurrentPassword", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowUsers
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthUsers
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.CurrentPassword = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipUsers(dAtA[iNdEx:])
@@ -1868,6 +2534,55 @@ func (m *UserUpdateRequest) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Replace", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowUsers
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= (int(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Replace = bool(v != 0)
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CurrentPassword", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowUsers
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthUsers
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.CurrentPassword = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipUsers(dAtA[iNdEx:])
@@ -1975,6 +2690,451 @@ func (m *AuthRequest) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			m.Password = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipUsers(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthUsers
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MFAFIDO) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowUsers
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= (uint64(b) & 0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MFAFIDO: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MFAFIDO: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Registration", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowUsers
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= (int(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthUsers
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Registration = append(m.Registration[:0], dAtA[iNdEx:postIndex]...)
+			if m.Registration == nil {
+				m.Registration = []byte{}
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RegistrationChallenge", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowUsers
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= (int(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthUsers
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.RegistrationChallenge = append(m.RegistrationChallenge[:0], dAtA[iNdEx:postIndex]...)
+			if m.RegistrationChallenge == nil {
+				m.RegistrationChallenge = []byte{}
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipUsers(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthUsers
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MFASMS) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowUsers
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= (uint64(b) & 0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MFASMS: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MFASMS: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Mobile", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowUsers
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthUsers
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Mobile = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipUsers(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthUsers
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MFATOTP) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowUsers
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= (uint64(b) & 0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MFATOTP: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MFATOTP: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Key", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowUsers
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthUsers
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Key = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field BackupCodes", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowUsers
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= (uint64(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthUsers
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.BackupCodes = append(m.BackupCodes, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipUsers(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthUsers
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MFA) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowUsers
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= (uint64(b) & 0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MFA: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MFA: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field FIDO", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowUsers
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= (int(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthUsers
+			}
+			postIndex := iNdEx + msglen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &MFAFIDO{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.MFA = &MFA_FIDO{v}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SMS", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowUsers
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= (int(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthUsers
+			}
+			postIndex := iNdEx + msglen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &MFASMS{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.MFA = &MFA_SMS{v}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TOTP", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowUsers
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= (int(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthUsers
+			}
+			postIndex := iNdEx + msglen
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &MFATOTP{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.MFA = &MFA_TOTP{v}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -2155,46 +3315,63 @@ var (
 func init() { proto.RegisterFile("users.proto", fileDescriptorUsers) }
 
 var fileDescriptorUsers = []byte{
-	// 654 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x54, 0xcd, 0x6e, 0xd3, 0x4c,
-	0x14, 0xb5, 0x1d, 0xe7, 0xa7, 0x37, 0x5f, 0xab, 0x7e, 0x43, 0x29, 0x96, 0x85, 0xdc, 0x60, 0x21,
-	0x51, 0x16, 0xd8, 0x50, 0x40, 0x40, 0xf9, 0x29, 0x0d, 0x14, 0x2a, 0x41, 0x51, 0xe5, 0xd2, 0x1d,
-	0x12, 0x9a, 0xc4, 0x97, 0x74, 0x44, 0xfc, 0x53, 0x7b, 0x1c, 0x14, 0x21, 0x36, 0x3c, 0x01, 0x12,
-	0x1b, 0x1e, 0x07, 0xb1, 0xea, 0x12, 0x89, 0x0d, 0x2b, 0x40, 0x0d, 0x4f, 0xc0, 0x13, 0x20, 0x8f,
-	0xe3, 0xd0, 0x54, 0x4e, 0x51, 0xd9, 0xcd, 0x1d, 0x9f, 0x73, 0xee, 0xb9, 0x67, 0xae, 0x0c, 0xf5,
-	0x24, 0xc6, 0x28, 0xb6, 0xc2, 0x28, 0xe0, 0x01, 0x99, 0xc6, 0x9e, 0xcf, 0xe3, 0xa8, 0x6d, 0x89,
-	0x4b, 0xfd, 0x42, 0x87, 0xf1, 0x9d, 0xa4, 0x65, 0xb5, 0x03, 0xcf, 0xee, 0x04, 0x9d, 0xc0, 0x16,
-	0xa8, 0x56, 0xf2, 0x42, 0x54, 0xa2, 0x10, 0xa7, 0x8c, 0xad, 0x9f, 0xee, 0x04, 0x41, 0xa7, 0x8b,
-	0x36, 0x0d, 0x99, 0x4d, 0x7d, 0x3f, 0xe0, 0x94, 0xb3, 0xc0, 0x1f, 0x6a, 0xeb, 0x0b, 0xc3, 0xaf,
-	0x23, 0x0d, 0xce, 0x3c, 0x8c, 0x39, 0xf5, 0xc2, 0x0c, 0x60, 0x7e, 0x52, 0x40, 0xdd, 0x8e, 0x31,
-	0x22, 0x06, 0x28, 0xcc, 0xd5, 0xe4, 0x86, 0xbc, 0x38, 0xd5, 0x9c, 0xf9, 0xf5, 0x6d, 0x01, 0x5a,
-	0x71, 0xe0, 0x2f, 0x9b, 0xcf, 0x99, 0x6b, 0x3a, 0x0a, 0x73, 0x09, 0x01, 0xd5, 0xa7, 0x1e, 0x6a,
-	0x4a, 0x8a, 0x70, 0xc4, 0x99, 0xcc, 0x41, 0x19, 0x3d, 0xca, 0xba, 0x5a, 0x49, 0x5c, 0x66, 0x05,
-	0xb9, 0x03, 0x53, 0xed, 0x08, 0x29, 0x47, 0x77, 0x95, 0x6b, 0x6a, 0x43, 0x5e, 0xac, 0x2f, 0xe9,
-	0x56, 0xe6, 0xc3, 0xca, 0x7d, 0x58, 0x4f, 0x73, 0x1f, 0x4d, 0xf5, 0xdd, 0xf7, 0x05, 0xd9, 0xf9,
-	0x43, 0x21, 0x3a, 0xd4, 0x42, 0x1a, 0xc7, 0xaf, 0x82, 0xc8, 0xd5, 0xca, 0x42, 0x78, 0x54, 0x93,
-	0xdb, 0x50, 0xf3, 0x90, 0x53, 0x97, 0x72, 0xaa, 0x55, 0x1a, 0xa5, 0xc5, 0xfa, 0xd2, 0x19, 0x6b,
-	0x2c, 0x3e, 0x2b, 0x1d, 0xc6, 0xda, 0x18, 0x62, 0xd6, 0x7c, 0x1e, 0xf5, 0x9d, 0x11, 0x85, 0x68,
-	0x50, 0x0d, 0x59, 0x9b, 0x27, 0x11, 0x6a, 0x55, 0xa1, 0x9c, 0x97, 0xfa, 0x4d, 0x98, 0x1e, 0x23,
-	0x91, 0x59, 0x28, 0xbd, 0xc4, 0x7e, 0x16, 0x88, 0x93, 0x1e, 0xd3, 0x69, 0x7b, 0xb4, 0x9b, 0x64,
-	0x11, 0xfc, 0xe7, 0x64, 0xc5, 0xb2, 0x72, 0x5d, 0x36, 0x37, 0xa1, 0x9e, 0xb6, 0x75, 0x70, 0x37,
-	0xc1, 0x98, 0x93, 0xc6, 0xe4, 0x28, 0xd7, 0x25, 0x11, 0xe6, 0x7c, 0x1e, 0x9c, 0x48, 0x73, 0x5d,
-	0x1a, 0x46, 0xd7, 0xac, 0x42, 0x79, 0x37, 0xc1, 0xa8, 0x6f, 0x5e, 0x85, 0x5a, 0xaa, 0xf8, 0x98,
-	0xc5, 0x9c, 0x9c, 0x87, 0xb2, 0x18, 0x4d, 0x93, 0xc5, 0xc0, 0x27, 0x0a, 0x06, 0x76, 0x32, 0x84,
-	0xb9, 0x05, 0x27, 0x37, 0x87, 0x51, 0x6d, 0x87, 0x2e, 0xe5, 0x98, 0x5b, 0xfa, 0xdb, 0xeb, 0x1e,
-	0xcc, 0x5c, 0x19, 0xcf, 0xdc, 0x7c, 0x06, 0xff, 0xa7, 0x3d, 0x8e, 0x27, 0x78, 0x0e, 0xd4, 0xd4,
-	0x92, 0x10, 0x9b, 0xe0, 0x59, 0x00, 0xcc, 0x15, 0xa8, 0xaf, 0x26, 0x7c, 0x27, 0xd7, 0x1d, 0xad,
-	0x94, 0x7c, 0x70, 0xa5, 0x8e, 0xb2, 0x57, 0x85, 0xf2, 0x9a, 0x17, 0xf2, 0xfe, 0xd2, 0x57, 0x35,
-	0x7b, 0x86, 0x2d, 0x8c, 0x7a, 0xac, 0x8d, 0xe4, 0x0a, 0x54, 0xee, 0x89, 0xa5, 0x22, 0x45, 0xed,
-	0xf5, 0xa2, 0x4b, 0x53, 0x22, 0xb7, 0xa0, 0x72, 0x1f, 0xbb, 0xc8, 0x91, 0xe8, 0x45, 0xa6, 0x33,
-	0x9b, 0xfa, 0xdc, 0xa1, 0x6f, 0xc2, 0x81, 0x29, 0x91, 0x27, 0x50, 0x7a, 0x88, 0xfc, 0x48, 0x6a,
-	0x61, 0xdf, 0xf9, 0xb7, 0x5f, 0x7e, 0xbe, 0x57, 0x66, 0xc9, 0x8c, 0xdd, 0xbb, 0x64, 0x8b, 0x7b,
-	0xfb, 0x35, 0x73, 0xdf, 0x90, 0x1b, 0xa0, 0x3e, 0x60, 0xbe, 0x7b, 0x7c, 0x41, 0x89, 0xdc, 0x85,
-	0xa9, 0x94, 0x9a, 0x56, 0xf1, 0x3f, 0xf0, 0x2f, 0xca, 0xe4, 0x1a, 0xa8, 0x62, 0x01, 0x0b, 0x87,
-	0xd5, 0x4f, 0x15, 0xd0, 0x52, 0xb8, 0x29, 0x91, 0x47, 0x50, 0xdf, 0x42, 0x9e, 0x6f, 0x22, 0x39,
-	0x7b, 0x08, 0x59, 0xb8, 0xa2, 0x13, 0x23, 0x5d, 0x85, 0x4a, 0x06, 0x24, 0x8d, 0x82, 0x8e, 0xe3,
-	0x1a, 0x13, 0xa2, 0x58, 0x01, 0x65, 0x03, 0x27, 0x8c, 0x51, 0x48, 0x99, 0x11, 0xcf, 0x51, 0x23,
-	0x95, 0xf4, 0x39, 0x3c, 0x6c, 0x6a, 0x7b, 0xfb, 0x86, 0xfc, 0x79, 0xdf, 0x90, 0x7f, 0xec, 0x1b,
-	0xf2, 0x87, 0x81, 0x21, 0x7d, 0x1c, 0x18, 0xf2, 0xde, 0xc0, 0x90, 0x5b, 0x15, 0xf1, 0x47, 0xbb,
-	0xfc, 0x3b, 0x00, 0x00, 0xff, 0xff, 0x34, 0x8f, 0x8c, 0xd3, 0xd2, 0x05, 0x00, 0x00,
+	// 918 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x55, 0x4d, 0x8f, 0xdb, 0x44,
+	0x18, 0xb6, 0xe3, 0x7c, 0xbe, 0xde, 0x6e, 0x97, 0x61, 0x77, 0x6b, 0x59, 0x28, 0x6b, 0x46, 0x15,
+	0x64, 0x11, 0x38, 0x10, 0x8a, 0x28, 0x0b, 0xa5, 0x24, 0xdb, 0x86, 0x45, 0xc2, 0x74, 0xe5, 0x6c,
+	0x2f, 0x5c, 0xaa, 0x89, 0x3d, 0xcd, 0x5a, 0x8d, 0x3f, 0x6a, 0x8f, 0x17, 0x45, 0x08, 0x0e, 0xe5,
+	0x0f, 0x20, 0xf5, 0xc2, 0x91, 0x7f, 0xc1, 0x95, 0x63, 0x8f, 0x48, 0xdc, 0x01, 0xed, 0xf2, 0x0b,
+	0xf8, 0x05, 0x68, 0xc6, 0x76, 0x48, 0x52, 0xa7, 0x68, 0x7b, 0x8a, 0xdf, 0xaf, 0xe7, 0x7d, 0xe6,
+	0x79, 0xdf, 0x99, 0x80, 0x9a, 0x26, 0x34, 0x4e, 0xcc, 0x28, 0x0e, 0x59, 0x88, 0xae, 0xd0, 0xb3,
+	0x80, 0x25, 0xb1, 0x63, 0x0a, 0xa7, 0xfe, 0xce, 0xc4, 0x63, 0xa7, 0xe9, 0xd8, 0x74, 0x42, 0xbf,
+	0x3b, 0x09, 0x27, 0x61, 0x57, 0x64, 0x8d, 0xd3, 0x87, 0xc2, 0x12, 0x86, 0xf8, 0xca, 0xaa, 0xf5,
+	0xd7, 0x26, 0x61, 0x38, 0x99, 0xd2, 0x2e, 0x89, 0xbc, 0x2e, 0x09, 0x82, 0x90, 0x11, 0xe6, 0x85,
+	0x41, 0x8e, 0xad, 0xef, 0xe5, 0xd1, 0x39, 0x06, 0xf3, 0x7c, 0x9a, 0x30, 0xe2, 0x47, 0x59, 0x02,
+	0x7e, 0xa2, 0x40, 0xf5, 0x7e, 0x42, 0x63, 0xd4, 0x86, 0x8a, 0xe7, 0x6a, 0xb2, 0x21, 0x77, 0x5a,
+	0x83, 0xcd, 0x7f, 0xfe, 0xd8, 0x83, 0x71, 0x12, 0x06, 0x07, 0xf8, 0x81, 0xe7, 0x62, 0xbb, 0xe2,
+	0xb9, 0x08, 0x41, 0x35, 0x20, 0x3e, 0xd5, 0x2a, 0x3c, 0xc3, 0x16, 0xdf, 0x68, 0x1b, 0x6a, 0xd4,
+	0x27, 0xde, 0x54, 0x53, 0x84, 0x33, 0x33, 0xd0, 0xa7, 0xd0, 0x72, 0x62, 0x4a, 0x18, 0x75, 0xfb,
+	0x4c, 0xab, 0x1a, 0x72, 0x47, 0xed, 0xe9, 0x66, 0xc6, 0xc3, 0x2c, 0x78, 0x98, 0x27, 0x05, 0x8f,
+	0x41, 0xf5, 0xc7, 0x3f, 0xf7, 0x64, 0xfb, 0xbf, 0x12, 0xa4, 0x43, 0x33, 0x22, 0x49, 0xf2, 0x4d,
+	0x18, 0xbb, 0x5a, 0x4d, 0x00, 0xcf, 0x6d, 0x74, 0x0b, 0x9a, 0x3e, 0x65, 0xc4, 0x25, 0x8c, 0x68,
+	0x75, 0x43, 0xe9, 0xa8, 0xbd, 0xd7, 0xcd, 0x25, 0xf9, 0x4c, 0x7e, 0x18, 0xd3, 0xca, 0x73, 0xee,
+	0x06, 0x2c, 0x9e, 0xd9, 0xf3, 0x12, 0xa4, 0x41, 0x23, 0xf2, 0x1c, 0x96, 0xc6, 0x54, 0x6b, 0x08,
+	0xe4, 0xc2, 0xe4, 0x11, 0x27, 0xf4, 0x23, 0x12, 0xcc, 0xb4, 0x66, 0x16, 0xc9, 0x4d, 0x74, 0x1d,
+	0x14, 0xff, 0x21, 0xd1, 0x5a, 0xe2, 0x20, 0x68, 0xa5, 0x9b, 0x35, 0xec, 0xdb, 0x3c, 0xac, 0x7f,
+	0x0c, 0x57, 0x96, 0x9a, 0xa2, 0x2d, 0x50, 0x1e, 0xd1, 0x59, 0x26, 0xa8, 0xcd, 0x3f, 0xb9, 0x5a,
+	0x67, 0x64, 0x9a, 0x66, 0x12, 0x6e, 0xd8, 0x99, 0x71, 0x50, 0xb9, 0x29, 0xe3, 0x63, 0x50, 0x39,
+	0x6d, 0x9b, 0x3e, 0x4e, 0x69, 0xc2, 0x90, 0xb1, 0x7e, 0x14, 0x47, 0x92, 0x18, 0xc6, 0x6e, 0x21,
+	0xbc, 0x98, 0xc6, 0x91, 0x94, 0x4b, 0x3f, 0x68, 0x40, 0xed, 0x71, 0x4a, 0xe3, 0x19, 0xfe, 0x00,
+	0x9a, 0x1c, 0xf1, 0x4b, 0x2f, 0x61, 0x68, 0x1f, 0x6a, 0x82, 0xac, 0x26, 0x0b, 0xc1, 0x5e, 0x2d,
+	0x11, 0xcc, 0xce, 0x32, 0xf0, 0xf7, 0xb0, 0x73, 0x9c, 0x4b, 0x7d, 0x3f, 0x72, 0x09, 0xa3, 0x05,
+	0xa5, 0xff, 0xdb, 0x8e, 0xc5, 0x99, 0x55, 0x56, 0x66, 0xb6, 0x0f, 0x5b, 0x4e, 0x1a, 0xc7, 0x34,
+	0x60, 0x0f, 0xe6, 0x39, 0xd9, 0xc2, 0x5c, 0xcd, 0xfd, 0x45, 0x4f, 0xfc, 0xb3, 0x0c, 0xaf, 0x70,
+	0x3e, 0x97, 0x6b, 0xfe, 0x26, 0x54, 0x39, 0x7d, 0xd1, 0x78, 0xcd, 0xf9, 0x44, 0x02, 0x1f, 0x72,
+	0x4c, 0xa3, 0x29, 0x71, 0xa8, 0x20, 0xd0, 0xb4, 0x0b, 0x13, 0x75, 0x60, 0x95, 0x8b, 0xd8, 0xdc,
+	0x12, 0x8a, 0xb7, 0x41, 0xed, 0xa7, 0xec, 0xb4, 0xe0, 0x36, 0xbf, 0x02, 0xf2, 0xe2, 0x15, 0x78,
+	0x81, 0x1c, 0xd8, 0x81, 0x86, 0x35, 0xec, 0x0f, 0xbf, 0xb8, 0x73, 0x0f, 0x61, 0xd8, 0x88, 0xe9,
+	0xc4, 0x4b, 0x58, 0x2c, 0x2e, 0xad, 0xc0, 0xd8, 0xb0, 0x97, 0x7c, 0xe8, 0x06, 0xec, 0x2c, 0xda,
+	0x87, 0xa7, 0x64, 0x3a, 0xa5, 0xc1, 0xa4, 0xd8, 0xa2, 0xf2, 0x20, 0x36, 0xa0, 0x6e, 0x0d, 0xfb,
+	0x23, 0x6b, 0x84, 0x76, 0xa1, 0xee, 0x87, 0x63, 0x6f, 0x4a, 0x73, 0x86, 0xb9, 0x85, 0x6f, 0x09,
+	0x1a, 0x27, 0xf7, 0x4e, 0x8e, 0x4b, 0x56, 0xd5, 0x00, 0x75, 0x4c, 0x9c, 0x47, 0x69, 0x74, 0x18,
+	0xba, 0x34, 0xd1, 0x2a, 0x86, 0xd2, 0x69, 0xd9, 0x8b, 0x2e, 0xfc, 0x54, 0x06, 0xc5, 0x1a, 0xf6,
+	0xd1, 0xdb, 0x50, 0xe5, 0x47, 0x11, 0xc5, 0x6a, 0x6f, 0xf7, 0xf9, 0xeb, 0xc1, 0xa3, 0x47, 0x92,
+	0x2d, 0xb2, 0xd0, 0x3e, 0x28, 0x23, 0x6b, 0x94, 0x0f, 0x6a, 0xe7, 0xf9, 0xe4, 0x91, 0x35, 0x3a,
+	0x92, 0x6c, 0x9e, 0xc3, 0x81, 0x39, 0x39, 0x31, 0xa8, 0x52, 0x60, 0x1e, 0xe5, 0xc0, 0xfc, 0x77,
+	0x50, 0x13, 0x6c, 0x70, 0x03, 0x6a, 0x77, 0xfd, 0x88, 0xcd, 0x7a, 0xbf, 0xd4, 0xb2, 0x2b, 0x35,
+	0xa2, 0xf1, 0x99, 0xe7, 0x50, 0x74, 0x03, 0xea, 0x87, 0xe2, 0x81, 0x41, 0x65, 0xeb, 0xa1, 0x97,
+	0x39, 0xb1, 0x84, 0x3e, 0x81, 0xfa, 0x1d, 0x3a, 0xa5, 0x8c, 0x22, 0xbd, 0x6c, 0xa9, 0xb2, 0x15,
+	0xd0, 0xb7, 0x57, 0x62, 0x82, 0x01, 0x96, 0xd0, 0x57, 0xa0, 0x7c, 0x4e, 0xd9, 0x0b, 0x4b, 0x4b,
+	0xfb, 0xee, 0x3e, 0xf9, 0xfd, 0xef, 0xa7, 0x95, 0x2d, 0xb4, 0xd9, 0x3d, 0x7b, 0xaf, 0x2b, 0xfc,
+	0xdd, 0x6f, 0x3d, 0xf7, 0x3b, 0xf4, 0x11, 0x54, 0x87, 0x5e, 0xe0, 0x5e, 0x1e, 0x50, 0x42, 0x9f,
+	0x41, 0x8b, 0x97, 0x72, 0x2b, 0x79, 0x89, 0xfa, 0x77, 0x65, 0xf4, 0x21, 0x54, 0xc5, 0x63, 0x52,
+	0x7a, 0x58, 0xfd, 0x5a, 0x49, 0x19, 0x4f, 0xc7, 0x12, 0xfa, 0x41, 0x06, 0x75, 0x44, 0xe7, 0xf7,
+	0x07, 0x5d, 0x5f, 0x49, 0x2d, 0x7d, 0x6f, 0xd6, 0x68, 0x7a, 0x53, 0x28, 0xd3, 0xc3, 0xd7, 0x96,
+	0x95, 0xe9, 0x16, 0x77, 0xeb, 0x40, 0x7e, 0xeb, 0xeb, 0x6d, 0x7c, 0x95, 0x47, 0x7d, 0xba, 0xe8,
+	0x45, 0x13, 0xa8, 0x67, 0x0d, 0x90, 0x51, 0x42, 0x75, 0xb9, 0x77, 0xa9, 0x06, 0x6f, 0x88, 0xd6,
+	0x06, 0x5e, 0x19, 0x0a, 0xef, 0xa8, 0xe2, 0x7a, 0xd6, 0x91, 0x37, 0xba, 0x0d, 0x15, 0x8b, 0xae,
+	0x51, 0xa9, 0x14, 0x78, 0x53, 0x00, 0x37, 0x51, 0x8e, 0x31, 0xd0, 0x9e, 0x9d, 0xb7, 0xe5, 0xdf,
+	0xce, 0xdb, 0xf2, 0x5f, 0xe7, 0x6d, 0xf9, 0xa7, 0x8b, 0xb6, 0xf4, 0xeb, 0x45, 0x5b, 0x7e, 0x76,
+	0xd1, 0x96, 0xc7, 0x75, 0xf1, 0xe7, 0xf9, 0xfe, 0xbf, 0x01, 0x00, 0x00, 0xff, 0xff, 0x51, 0x76,
+	0x13, 0xf1, 0x3d, 0x08, 0x00, 0x00,
 }

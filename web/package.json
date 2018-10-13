@@ -10,7 +10,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "axios-retry": "^3.1.1",
-    "element-ui": "^2.4.5",
+    "": "^2.4.5",
     "google-protobuf": "^3.6.1",
     "lodash": "^4.17.11",
     "md5": "^2.2.1",

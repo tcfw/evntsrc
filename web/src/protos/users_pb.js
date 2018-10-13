@@ -16,6 +16,10 @@ var google_api_annotations_pb = require('./google/api/annotations_pb.js');
 var google_protobuf_timestamp_pb = require('google-protobuf/google/protobuf/timestamp_pb.js');
 goog.exportSymbol('proto.evntsrc.users.AuthRequest', null, global);
 goog.exportSymbol('proto.evntsrc.users.Empty', null, global);
+goog.exportSymbol('proto.evntsrc.users.MFA', null, global);
+goog.exportSymbol('proto.evntsrc.users.MFAFIDO', null, global);
+goog.exportSymbol('proto.evntsrc.users.MFASMS', null, global);
+goog.exportSymbol('proto.evntsrc.users.MFATOTP', null, global);
 goog.exportSymbol('proto.evntsrc.users.PasswordUpdateRequest', null, global);
 goog.exportSymbol('proto.evntsrc.users.User', null, global);
 goog.exportSymbol('proto.evntsrc.users.UserList', null, global);
@@ -74,7 +78,9 @@ proto.evntsrc.users.User.toObject = function(includeInstance, msg) {
     createdat: (f = msg.getCreatedat()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
     password: jspb.Message.getFieldWithDefault(msg, 5, ""),
     metadataMap: (f = msg.getMetadataMap()) ? f.toObject(includeInstance, undefined) : [],
-    picture: jspb.Message.getFieldWithDefault(msg, 7, "")
+    picture: jspb.Message.getFieldWithDefault(msg, 7, ""),
+    company: jspb.Message.getFieldWithDefault(msg, 8, ""),
+    mfa: (f = msg.getMfa()) && proto.evntsrc.users.MFA.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -141,6 +147,15 @@ proto.evntsrc.users.User.deserializeBinaryFromReader = function(msg, reader) {
     case 7:
       var value = /** @type {string} */ (reader.readString());
       msg.setPicture(value);
+      break;
+    case 8:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setCompany(value);
+      break;
+    case 9:
+      var value = new proto.evntsrc.users.MFA;
+      reader.readMessage(value,proto.evntsrc.users.MFA.deserializeBinaryFromReader);
+      msg.setMfa(value);
       break;
     default:
       reader.skipField();
@@ -216,6 +231,21 @@ proto.evntsrc.users.User.serializeBinaryToWriter = function(message, writer) {
     writer.writeString(
       7,
       f
+    );
+  }
+  f = message.getCompany();
+  if (f.length > 0) {
+    writer.writeString(
+      8,
+      f
+    );
+  }
+  f = message.getMfa();
+  if (f != null) {
+    writer.writeMessage(
+      9,
+      f,
+      proto.evntsrc.users.MFA.serializeBinaryToWriter
     );
   }
 };
@@ -341,6 +371,51 @@ proto.evntsrc.users.User.prototype.getPicture = function() {
 /** @param {string} value */
 proto.evntsrc.users.User.prototype.setPicture = function(value) {
   jspb.Message.setProto3StringField(this, 7, value);
+};
+
+
+/**
+ * optional string company = 8;
+ * @return {string}
+ */
+proto.evntsrc.users.User.prototype.getCompany = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 8, ""));
+};
+
+
+/** @param {string} value */
+proto.evntsrc.users.User.prototype.setCompany = function(value) {
+  jspb.Message.setProto3StringField(this, 8, value);
+};
+
+
+/**
+ * optional MFA mfa = 9;
+ * @return {?proto.evntsrc.users.MFA}
+ */
+proto.evntsrc.users.User.prototype.getMfa = function() {
+  return /** @type{?proto.evntsrc.users.MFA} */ (
+    jspb.Message.getWrapperField(this, proto.evntsrc.users.MFA, 9));
+};
+
+
+/** @param {?proto.evntsrc.users.MFA|undefined} value */
+proto.evntsrc.users.User.prototype.setMfa = function(value) {
+  jspb.Message.setWrapperField(this, 9, value);
+};
+
+
+proto.evntsrc.users.User.prototype.clearMfa = function() {
+  this.setMfa(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {!boolean}
+ */
+proto.evntsrc.users.User.prototype.hasMfa = function() {
+  return jspb.Message.getField(this, 9) != null;
 };
 
 
@@ -783,7 +858,8 @@ proto.evntsrc.users.PasswordUpdateRequest.prototype.toObject = function(opt_incl
 proto.evntsrc.users.PasswordUpdateRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
     id: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    password: jspb.Message.getFieldWithDefault(msg, 2, "")
+    password: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    currentPassword: jspb.Message.getFieldWithDefault(msg, 3, "")
   };
 
   if (includeInstance) {
@@ -828,6 +904,10 @@ proto.evntsrc.users.PasswordUpdateRequest.deserializeBinaryFromReader = function
       var value = /** @type {string} */ (reader.readString());
       msg.setPassword(value);
       break;
+    case 3:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setCurrentPassword(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -871,6 +951,13 @@ proto.evntsrc.users.PasswordUpdateRequest.serializeBinaryToWriter = function(mes
       f
     );
   }
+  f = message.getCurrentPassword();
+  if (f.length > 0) {
+    writer.writeString(
+      3,
+      f
+    );
+  }
 };
 
 
@@ -901,6 +988,21 @@ proto.evntsrc.users.PasswordUpdateRequest.prototype.getPassword = function() {
 /** @param {string} value */
 proto.evntsrc.users.PasswordUpdateRequest.prototype.setPassword = function(value) {
   jspb.Message.setProto3StringField(this, 2, value);
+};
+
+
+/**
+ * optional string current_password = 3;
+ * @return {string}
+ */
+proto.evntsrc.users.PasswordUpdateRequest.prototype.getCurrentPassword = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
+};
+
+
+/** @param {string} value */
+proto.evntsrc.users.PasswordUpdateRequest.prototype.setCurrentPassword = function(value) {
+  jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
@@ -952,7 +1054,9 @@ proto.evntsrc.users.UserUpdateRequest.prototype.toObject = function(opt_includeI
 proto.evntsrc.users.UserUpdateRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
     id: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    user: (f = msg.getUser()) && proto.evntsrc.users.User.toObject(includeInstance, f)
+    user: (f = msg.getUser()) && proto.evntsrc.users.User.toObject(includeInstance, f),
+    replace: jspb.Message.getFieldWithDefault(msg, 3, false),
+    currentpassword: jspb.Message.getFieldWithDefault(msg, 4, "")
   };
 
   if (includeInstance) {
@@ -998,6 +1102,14 @@ proto.evntsrc.users.UserUpdateRequest.deserializeBinaryFromReader = function(msg
       reader.readMessage(value,proto.evntsrc.users.User.deserializeBinaryFromReader);
       msg.setUser(value);
       break;
+    case 3:
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setReplace(value);
+      break;
+    case 4:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setCurrentpassword(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -1040,6 +1152,20 @@ proto.evntsrc.users.UserUpdateRequest.serializeBinaryToWriter = function(message
       2,
       f,
       proto.evntsrc.users.User.serializeBinaryToWriter
+    );
+  }
+  f = message.getReplace();
+  if (f) {
+    writer.writeBool(
+      3,
+      f
+    );
+  }
+  f = message.getCurrentpassword();
+  if (f.length > 0) {
+    writer.writeString(
+      4,
+      f
     );
   }
 };
@@ -1087,6 +1213,38 @@ proto.evntsrc.users.UserUpdateRequest.prototype.clearUser = function() {
  */
 proto.evntsrc.users.UserUpdateRequest.prototype.hasUser = function() {
   return jspb.Message.getField(this, 2) != null;
+};
+
+
+/**
+ * optional bool replace = 3;
+ * Note that Boolean fields may be set to 0/1 when serialized from a Java server.
+ * You should avoid comparisons like {@code val === true/false} in those cases.
+ * @return {boolean}
+ */
+proto.evntsrc.users.UserUpdateRequest.prototype.getReplace = function() {
+  return /** @type {boolean} */ (jspb.Message.getFieldWithDefault(this, 3, false));
+};
+
+
+/** @param {boolean} value */
+proto.evntsrc.users.UserUpdateRequest.prototype.setReplace = function(value) {
+  jspb.Message.setProto3BooleanField(this, 3, value);
+};
+
+
+/**
+ * optional string currentPassword = 4;
+ * @return {string}
+ */
+proto.evntsrc.users.UserUpdateRequest.prototype.getCurrentpassword = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+};
+
+
+/** @param {string} value */
+proto.evntsrc.users.UserUpdateRequest.prototype.setCurrentpassword = function(value) {
+  jspb.Message.setProto3StringField(this, 4, value);
 };
 
 
@@ -1256,6 +1414,829 @@ proto.evntsrc.users.AuthRequest.prototype.getPassword = function() {
 /** @param {string} value */
 proto.evntsrc.users.AuthRequest.prototype.setPassword = function(value) {
   jspb.Message.setProto3StringField(this, 2, value);
+};
+
+
+
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.evntsrc.users.MFAFIDO = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+};
+goog.inherits(proto.evntsrc.users.MFAFIDO, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  proto.evntsrc.users.MFAFIDO.displayName = 'proto.evntsrc.users.MFAFIDO';
+}
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto suitable for use in Soy templates.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
+ * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
+ *     for transitional soy proto support: http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.evntsrc.users.MFAFIDO.prototype.toObject = function(opt_includeInstance) {
+  return proto.evntsrc.users.MFAFIDO.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Whether to include the JSPB
+ *     instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.evntsrc.users.MFAFIDO} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.evntsrc.users.MFAFIDO.toObject = function(includeInstance, msg) {
+  var f, obj = {
+    registration: msg.getRegistration_asB64(),
+    registrationchallenge: msg.getRegistrationchallenge_asB64()
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.evntsrc.users.MFAFIDO}
+ */
+proto.evntsrc.users.MFAFIDO.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.evntsrc.users.MFAFIDO;
+  return proto.evntsrc.users.MFAFIDO.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.evntsrc.users.MFAFIDO} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.evntsrc.users.MFAFIDO}
+ */
+proto.evntsrc.users.MFAFIDO.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {!Uint8Array} */ (reader.readBytes());
+      msg.setRegistration(value);
+      break;
+    case 2:
+      var value = /** @type {!Uint8Array} */ (reader.readBytes());
+      msg.setRegistrationchallenge(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.evntsrc.users.MFAFIDO.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.evntsrc.users.MFAFIDO.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.evntsrc.users.MFAFIDO} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.evntsrc.users.MFAFIDO.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getRegistration_asU8();
+  if (f.length > 0) {
+    writer.writeBytes(
+      1,
+      f
+    );
+  }
+  f = message.getRegistrationchallenge_asU8();
+  if (f.length > 0) {
+    writer.writeBytes(
+      2,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional bytes registration = 1;
+ * @return {!(string|Uint8Array)}
+ */
+proto.evntsrc.users.MFAFIDO.prototype.getRegistration = function() {
+  return /** @type {!(string|Uint8Array)} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * optional bytes registration = 1;
+ * This is a type-conversion wrapper around `getRegistration()`
+ * @return {string}
+ */
+proto.evntsrc.users.MFAFIDO.prototype.getRegistration_asB64 = function() {
+  return /** @type {string} */ (jspb.Message.bytesAsB64(
+      this.getRegistration()));
+};
+
+
+/**
+ * optional bytes registration = 1;
+ * Note that Uint8Array is not supported on all browsers.
+ * @see http://caniuse.com/Uint8Array
+ * This is a type-conversion wrapper around `getRegistration()`
+ * @return {!Uint8Array}
+ */
+proto.evntsrc.users.MFAFIDO.prototype.getRegistration_asU8 = function() {
+  return /** @type {!Uint8Array} */ (jspb.Message.bytesAsU8(
+      this.getRegistration()));
+};
+
+
+/** @param {!(string|Uint8Array)} value */
+proto.evntsrc.users.MFAFIDO.prototype.setRegistration = function(value) {
+  jspb.Message.setProto3BytesField(this, 1, value);
+};
+
+
+/**
+ * optional bytes registrationChallenge = 2;
+ * @return {!(string|Uint8Array)}
+ */
+proto.evntsrc.users.MFAFIDO.prototype.getRegistrationchallenge = function() {
+  return /** @type {!(string|Uint8Array)} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+};
+
+
+/**
+ * optional bytes registrationChallenge = 2;
+ * This is a type-conversion wrapper around `getRegistrationchallenge()`
+ * @return {string}
+ */
+proto.evntsrc.users.MFAFIDO.prototype.getRegistrationchallenge_asB64 = function() {
+  return /** @type {string} */ (jspb.Message.bytesAsB64(
+      this.getRegistrationchallenge()));
+};
+
+
+/**
+ * optional bytes registrationChallenge = 2;
+ * Note that Uint8Array is not supported on all browsers.
+ * @see http://caniuse.com/Uint8Array
+ * This is a type-conversion wrapper around `getRegistrationchallenge()`
+ * @return {!Uint8Array}
+ */
+proto.evntsrc.users.MFAFIDO.prototype.getRegistrationchallenge_asU8 = function() {
+  return /** @type {!Uint8Array} */ (jspb.Message.bytesAsU8(
+      this.getRegistrationchallenge()));
+};
+
+
+/** @param {!(string|Uint8Array)} value */
+proto.evntsrc.users.MFAFIDO.prototype.setRegistrationchallenge = function(value) {
+  jspb.Message.setProto3BytesField(this, 2, value);
+};
+
+
+
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.evntsrc.users.MFASMS = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+};
+goog.inherits(proto.evntsrc.users.MFASMS, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  proto.evntsrc.users.MFASMS.displayName = 'proto.evntsrc.users.MFASMS';
+}
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto suitable for use in Soy templates.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
+ * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
+ *     for transitional soy proto support: http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.evntsrc.users.MFASMS.prototype.toObject = function(opt_includeInstance) {
+  return proto.evntsrc.users.MFASMS.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Whether to include the JSPB
+ *     instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.evntsrc.users.MFASMS} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.evntsrc.users.MFASMS.toObject = function(includeInstance, msg) {
+  var f, obj = {
+    mobile: jspb.Message.getFieldWithDefault(msg, 1, "")
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.evntsrc.users.MFASMS}
+ */
+proto.evntsrc.users.MFASMS.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.evntsrc.users.MFASMS;
+  return proto.evntsrc.users.MFASMS.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.evntsrc.users.MFASMS} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.evntsrc.users.MFASMS}
+ */
+proto.evntsrc.users.MFASMS.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setMobile(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.evntsrc.users.MFASMS.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.evntsrc.users.MFASMS.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.evntsrc.users.MFASMS} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.evntsrc.users.MFASMS.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getMobile();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional string mobile = 1;
+ * @return {string}
+ */
+proto.evntsrc.users.MFASMS.prototype.getMobile = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/** @param {string} value */
+proto.evntsrc.users.MFASMS.prototype.setMobile = function(value) {
+  jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.evntsrc.users.MFATOTP = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.evntsrc.users.MFATOTP.repeatedFields_, null);
+};
+goog.inherits(proto.evntsrc.users.MFATOTP, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  proto.evntsrc.users.MFATOTP.displayName = 'proto.evntsrc.users.MFATOTP';
+}
+/**
+ * List of repeated fields within this message type.
+ * @private {!Array<number>}
+ * @const
+ */
+proto.evntsrc.users.MFATOTP.repeatedFields_ = [2];
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto suitable for use in Soy templates.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
+ * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
+ *     for transitional soy proto support: http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.evntsrc.users.MFATOTP.prototype.toObject = function(opt_includeInstance) {
+  return proto.evntsrc.users.MFATOTP.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Whether to include the JSPB
+ *     instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.evntsrc.users.MFATOTP} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.evntsrc.users.MFATOTP.toObject = function(includeInstance, msg) {
+  var f, obj = {
+    key: jspb.Message.getFieldWithDefault(msg, 1, ""),
+    backupcodesList: jspb.Message.getRepeatedField(msg, 2)
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.evntsrc.users.MFATOTP}
+ */
+proto.evntsrc.users.MFATOTP.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.evntsrc.users.MFATOTP;
+  return proto.evntsrc.users.MFATOTP.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.evntsrc.users.MFATOTP} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.evntsrc.users.MFATOTP}
+ */
+proto.evntsrc.users.MFATOTP.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setKey(value);
+      break;
+    case 2:
+      var value = /** @type {string} */ (reader.readString());
+      msg.addBackupcodes(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.evntsrc.users.MFATOTP.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.evntsrc.users.MFATOTP.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.evntsrc.users.MFATOTP} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.evntsrc.users.MFATOTP.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getKey();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+  f = message.getBackupcodesList();
+  if (f.length > 0) {
+    writer.writeRepeatedString(
+      2,
+      f
+    );
+  }
+};
+
+
+/**
+ * optional string key = 1;
+ * @return {string}
+ */
+proto.evntsrc.users.MFATOTP.prototype.getKey = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/** @param {string} value */
+proto.evntsrc.users.MFATOTP.prototype.setKey = function(value) {
+  jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * repeated string backupCodes = 2;
+ * @return {!Array<string>}
+ */
+proto.evntsrc.users.MFATOTP.prototype.getBackupcodesList = function() {
+  return /** @type {!Array<string>} */ (jspb.Message.getRepeatedField(this, 2));
+};
+
+
+/** @param {!Array<string>} value */
+proto.evntsrc.users.MFATOTP.prototype.setBackupcodesList = function(value) {
+  jspb.Message.setField(this, 2, value || []);
+};
+
+
+/**
+ * @param {!string} value
+ * @param {number=} opt_index
+ */
+proto.evntsrc.users.MFATOTP.prototype.addBackupcodes = function(value, opt_index) {
+  jspb.Message.addToRepeatedField(this, 2, value, opt_index);
+};
+
+
+proto.evntsrc.users.MFATOTP.prototype.clearBackupcodesList = function() {
+  this.setBackupcodesList([]);
+};
+
+
+
+/**
+ * Generated by JsPbCodeGenerator.
+ * @param {Array=} opt_data Optional initial data array, typically from a
+ * server response, or constructed directly in Javascript. The array is used
+ * in place and becomes part of the constructed object. It is not cloned.
+ * If no data is provided, the constructed object will be empty, but still
+ * valid.
+ * @extends {jspb.Message}
+ * @constructor
+ */
+proto.evntsrc.users.MFA = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, proto.evntsrc.users.MFA.oneofGroups_);
+};
+goog.inherits(proto.evntsrc.users.MFA, jspb.Message);
+if (goog.DEBUG && !COMPILED) {
+  proto.evntsrc.users.MFA.displayName = 'proto.evntsrc.users.MFA';
+}
+/**
+ * Oneof group definitions for this message. Each group defines the field
+ * numbers belonging to that group. When of these fields' value is set, all
+ * other fields in the group are cleared. During deserialization, if multiple
+ * fields are encountered for a group, only the last value seen will be kept.
+ * @private {!Array<!Array<number>>}
+ * @const
+ */
+proto.evntsrc.users.MFA.oneofGroups_ = [[1,2,3]];
+
+/**
+ * @enum {number}
+ */
+proto.evntsrc.users.MFA.MfaCase = {
+  MFA_NOT_SET: 0,
+  FIDO: 1,
+  SMS: 2,
+  TOTP: 3
+};
+
+/**
+ * @return {proto.evntsrc.users.MFA.MfaCase}
+ */
+proto.evntsrc.users.MFA.prototype.getMfaCase = function() {
+  return /** @type {proto.evntsrc.users.MFA.MfaCase} */(jspb.Message.computeOneofCase(this, proto.evntsrc.users.MFA.oneofGroups_[0]));
+};
+
+
+
+if (jspb.Message.GENERATE_TO_OBJECT) {
+/**
+ * Creates an object representation of this proto suitable for use in Soy templates.
+ * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
+ * For the list of reserved names please see:
+ *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
+ * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
+ *     for transitional soy proto support: http://goto/soy-param-migration
+ * @return {!Object}
+ */
+proto.evntsrc.users.MFA.prototype.toObject = function(opt_includeInstance) {
+  return proto.evntsrc.users.MFA.toObject(opt_includeInstance, this);
+};
+
+
+/**
+ * Static version of the {@see toObject} method.
+ * @param {boolean|undefined} includeInstance Whether to include the JSPB
+ *     instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
+ * @param {!proto.evntsrc.users.MFA} msg The msg instance to transform.
+ * @return {!Object}
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.evntsrc.users.MFA.toObject = function(includeInstance, msg) {
+  var f, obj = {
+    fido: (f = msg.getFido()) && proto.evntsrc.users.MFAFIDO.toObject(includeInstance, f),
+    sms: (f = msg.getSms()) && proto.evntsrc.users.MFASMS.toObject(includeInstance, f),
+    totp: (f = msg.getTotp()) && proto.evntsrc.users.MFATOTP.toObject(includeInstance, f)
+  };
+
+  if (includeInstance) {
+    obj.$jspbMessageInstance = msg;
+  }
+  return obj;
+};
+}
+
+
+/**
+ * Deserializes binary data (in protobuf wire format).
+ * @param {jspb.ByteSource} bytes The bytes to deserialize.
+ * @return {!proto.evntsrc.users.MFA}
+ */
+proto.evntsrc.users.MFA.deserializeBinary = function(bytes) {
+  var reader = new jspb.BinaryReader(bytes);
+  var msg = new proto.evntsrc.users.MFA;
+  return proto.evntsrc.users.MFA.deserializeBinaryFromReader(msg, reader);
+};
+
+
+/**
+ * Deserializes binary data (in protobuf wire format) from the
+ * given reader into the given message object.
+ * @param {!proto.evntsrc.users.MFA} msg The message object to deserialize into.
+ * @param {!jspb.BinaryReader} reader The BinaryReader to use.
+ * @return {!proto.evntsrc.users.MFA}
+ */
+proto.evntsrc.users.MFA.deserializeBinaryFromReader = function(msg, reader) {
+  while (reader.nextField()) {
+    if (reader.isEndGroup()) {
+      break;
+    }
+    var field = reader.getFieldNumber();
+    switch (field) {
+    case 1:
+      var value = new proto.evntsrc.users.MFAFIDO;
+      reader.readMessage(value,proto.evntsrc.users.MFAFIDO.deserializeBinaryFromReader);
+      msg.setFido(value);
+      break;
+    case 2:
+      var value = new proto.evntsrc.users.MFASMS;
+      reader.readMessage(value,proto.evntsrc.users.MFASMS.deserializeBinaryFromReader);
+      msg.setSms(value);
+      break;
+    case 3:
+      var value = new proto.evntsrc.users.MFATOTP;
+      reader.readMessage(value,proto.evntsrc.users.MFATOTP.deserializeBinaryFromReader);
+      msg.setTotp(value);
+      break;
+    default:
+      reader.skipField();
+      break;
+    }
+  }
+  return msg;
+};
+
+
+/**
+ * Serializes the message to binary data (in protobuf wire format).
+ * @return {!Uint8Array}
+ */
+proto.evntsrc.users.MFA.prototype.serializeBinary = function() {
+  var writer = new jspb.BinaryWriter();
+  proto.evntsrc.users.MFA.serializeBinaryToWriter(this, writer);
+  return writer.getResultBuffer();
+};
+
+
+/**
+ * Serializes the given message to binary data (in protobuf wire
+ * format), writing to the given BinaryWriter.
+ * @param {!proto.evntsrc.users.MFA} message
+ * @param {!jspb.BinaryWriter} writer
+ * @suppress {unusedLocalVariables} f is only used for nested messages
+ */
+proto.evntsrc.users.MFA.serializeBinaryToWriter = function(message, writer) {
+  var f = undefined;
+  f = message.getFido();
+  if (f != null) {
+    writer.writeMessage(
+      1,
+      f,
+      proto.evntsrc.users.MFAFIDO.serializeBinaryToWriter
+    );
+  }
+  f = message.getSms();
+  if (f != null) {
+    writer.writeMessage(
+      2,
+      f,
+      proto.evntsrc.users.MFASMS.serializeBinaryToWriter
+    );
+  }
+  f = message.getTotp();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      proto.evntsrc.users.MFATOTP.serializeBinaryToWriter
+    );
+  }
+};
+
+
+/**
+ * optional MFAFIDO FIDO = 1;
+ * @return {?proto.evntsrc.users.MFAFIDO}
+ */
+proto.evntsrc.users.MFA.prototype.getFido = function() {
+  return /** @type{?proto.evntsrc.users.MFAFIDO} */ (
+    jspb.Message.getWrapperField(this, proto.evntsrc.users.MFAFIDO, 1));
+};
+
+
+/** @param {?proto.evntsrc.users.MFAFIDO|undefined} value */
+proto.evntsrc.users.MFA.prototype.setFido = function(value) {
+  jspb.Message.setOneofWrapperField(this, 1, proto.evntsrc.users.MFA.oneofGroups_[0], value);
+};
+
+
+proto.evntsrc.users.MFA.prototype.clearFido = function() {
+  this.setFido(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {!boolean}
+ */
+proto.evntsrc.users.MFA.prototype.hasFido = function() {
+  return jspb.Message.getField(this, 1) != null;
+};
+
+
+/**
+ * optional MFASMS SMS = 2;
+ * @return {?proto.evntsrc.users.MFASMS}
+ */
+proto.evntsrc.users.MFA.prototype.getSms = function() {
+  return /** @type{?proto.evntsrc.users.MFASMS} */ (
+    jspb.Message.getWrapperField(this, proto.evntsrc.users.MFASMS, 2));
+};
+
+
+/** @param {?proto.evntsrc.users.MFASMS|undefined} value */
+proto.evntsrc.users.MFA.prototype.setSms = function(value) {
+  jspb.Message.setOneofWrapperField(this, 2, proto.evntsrc.users.MFA.oneofGroups_[0], value);
+};
+
+
+proto.evntsrc.users.MFA.prototype.clearSms = function() {
+  this.setSms(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {!boolean}
+ */
+proto.evntsrc.users.MFA.prototype.hasSms = function() {
+  return jspb.Message.getField(this, 2) != null;
+};
+
+
+/**
+ * optional MFATOTP TOTP = 3;
+ * @return {?proto.evntsrc.users.MFATOTP}
+ */
+proto.evntsrc.users.MFA.prototype.getTotp = function() {
+  return /** @type{?proto.evntsrc.users.MFATOTP} */ (
+    jspb.Message.getWrapperField(this, proto.evntsrc.users.MFATOTP, 3));
+};
+
+
+/** @param {?proto.evntsrc.users.MFATOTP|undefined} value */
+proto.evntsrc.users.MFA.prototype.setTotp = function(value) {
+  jspb.Message.setOneofWrapperField(this, 3, proto.evntsrc.users.MFA.oneofGroups_[0], value);
+};
+
+
+proto.evntsrc.users.MFA.prototype.clearTotp = function() {
+  this.setTotp(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {!boolean}
+ */
+proto.evntsrc.users.MFA.prototype.hasTotp = function() {
+  return jspb.Message.getField(this, 3) != null;
 };
 
 

@@ -5,6 +5,10 @@ import Dashboard from "./views/Dashboard.vue";
 import Streams from "./views/Streams.vue";
 import Stream from "./views/Stream.vue";
 import StreamHistory from "./views/Stream/History.vue";
+import Settings from "./views/Settings.vue";
+import SettingsAccount from "./views/Settings/Account.vue";
+import SettingsSecurity from "./views/Settings/Security.vue";
+import SettingsBilling from "./views/Settings/Billing.vue";
 
 Vue.use(Router);
 
@@ -57,6 +61,29 @@ export default new Router({
       // which is lazy-loaded when the route is visited.
       component: () =>
         import(/* webpackChunkName: "about" */ "./views/About.vue")
+    },
+    {
+      path: "/settings",
+      name: "settings",
+      redirect: "/settings/account",
+      component: Settings,
+      children: [
+        {
+          path: "account",
+          name: "account",
+          component: SettingsAccount
+        },
+        {
+          path: "security",
+          name: "security",
+          component: SettingsSecurity
+        },
+        {
+          path: "billing",
+          name: "billing",
+          component: SettingsBilling
+        }
+      ]
     }
   ]
 });

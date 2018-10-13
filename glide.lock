@@ -1,5 +1,5 @@
-hash: 7358b0f70f33e79313b3e8e1f6fd57c93aa1fb5064186ec6b0c4f4fb11db8b9c
-updated: 2018-10-10T17:21:33.434126+11:00
+hash: 551e58b88b0aca5f13fc197d6838d102502c288f5936796b64b010e6fbe99a70
+updated: 2018-10-12T09:46:37.060575+11:00
 imports:
 - name: github.com/beorn7/perks
   version: 3a771d992973f24aa725d07868b467d1ddfceafb
@@ -57,7 +57,7 @@ imports:
 - name: github.com/gorilla/websocket
   version: 66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d
 - name: github.com/grpc-ecosystem/grpc-gateway
-  version: 8aa3d3f00fbaea619d864e688cd045497aa30fe8
+  version: 0a52bbd2f9d05ebcc1f064d0245830c67e349a50
   subpackages:
   - runtime
   - runtime/internal
@@ -99,7 +99,7 @@ imports:
 - name: github.com/pelletier/go-toml
   version: c2dbbc24a97911339e01bda0b8cabdbd8f13b602
 - name: github.com/prometheus/client_golang
-  version: 0a8115f42e037a6e327f9a269a26ff6603fb8472
+  version: 7866eead363ec334628dbc56e32df590a05f4696
   subpackages:
   - prometheus
   - prometheus/internal
@@ -139,6 +139,8 @@ imports:
   version: 3ebe029320b2676d667ae88da602a5f854788a8a
 - name: github.com/spf13/viper
   version: 2c12c60302a5a0e62ee102ca9bc996277c2f64f5
+- name: github.com/tstranex/u2f
+  version: d21a03e0b1d9fc1df59ff54e7a513655c1748b0c
 - name: golang.org/x/crypto
   version: a49355c7e3f8fe157a85be2f77e6e269a0f89602
   subpackages:

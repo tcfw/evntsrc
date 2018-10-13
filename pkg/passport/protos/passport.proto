@@ -41,6 +41,7 @@ message VerifyTokenResponse {
 message UserCreds {
     string username = 1;
     string password = 2;
+    string MFA = 3;
 }
 
 message OAuthClientSecretCreds {
@@ -65,6 +66,12 @@ message AuthRequest {
 message AuthResponse {
     bool success = 1;
     Tokens tokens = 2;
+    MFAResponse MFAResponse = 3;
+}
+
+message MFAResponse {
+    string type = 1;
+    string challenge = 2;
 }
 
 message RefreshRequest {

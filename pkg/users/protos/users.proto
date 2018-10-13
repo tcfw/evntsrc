@@ -24,6 +24,8 @@ message User {
     string password = 5;
     map<string, bytes> metadata = 6;
     string picture = 7;
+    string company = 8;
+    MFA mfa = 9;
 }
 
 message UserRequest {
@@ -40,16 +42,41 @@ message UserList {
 message PasswordUpdateRequest {
     string id = 1 [(gogoproto.moretags) = "bson:\"_id\""];
     string password = 2;
+    string current_password = 3;
 }
 
 message UserUpdateRequest {
     string id = 1 [(gogoproto.moretags) = "bson:\"_id\""];
     User user = 2;
+    bool replace = 3;
+    string currentPassword = 4;
 }
 
 message AuthRequest {
     string email = 1;
     string password = 2;
+}
+
+message MFAFIDO {
+    bytes registration = 1;
+    bytes registrationChallenge = 2;
+}
+
+message MFASMS {
+    string mobile = 1;
+}
+
+message MFATOTP {
+    string key = 1;
+    repeated string backupCodes = 2;
+}
+
+message MFA {
+    oneof MFA {
+        MFAFIDO FIDO = 1;
+        MFASMS SMS = 2;
+        MFATOTP TOTP = 3;
+    }
 }
 
 message Empty {}
@@ -65,8 +92,26 @@ service UserService {
     rpc Find(UserRequest) returns (User) {};
     rpc FindUsers(UserRequest) returns (stream User) {};
     rpc List(Empty) returns (UserList) {};
-    rpc SetPassword(PasswordUpdateRequest) returns (Empty) {};
-    rpc Update(UserUpdateRequest) returns (User) {};
+    rpc SetPassword(PasswordUpdateRequest) returns (Empty) {
+        option (google.api.http) = {
+            post: "/v1/users/{id}/password"
+            body: "*"
+            additional_bindings {
+                post: "/v1/me/password"
+                body: "*"
+            }
+        };
+    };
+    rpc Update(UserUpdateRequest) returns (User) {
+        option (google.api.http) = {
+            post: "/v1/users/{id}"
+            body: "*"
+            additional_bindings {
+                post: "/v1/me"
+                body: "*"
+            }
+        };
+    };
     rpc Me(Empty) returns (User) {
         option (google.api.http) = {
             get: "/v1/me"

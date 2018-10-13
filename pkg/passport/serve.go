@@ -1,6 +1,7 @@
 package passport
 
 import (
+	"encoding/json"
 	fmt "fmt"
 	"log"
 	"net"
@@ -14,6 +15,7 @@ import (
 	userSvc "github.com/tcfw/evntsrc/pkg/users/protos"
 	rpcUtils "github.com/tcfw/evntsrc/pkg/utils/rpc"
 	events "github.com/tcfw/evntsrc/pkg/utils/sysevents"
+	"github.com/tstranex/u2f"
 	"golang.org/x/crypto/bcrypt"
 	context "golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -115,6 +117,33 @@ func (s *Server) Authenticate(ctx context.Context, request *pb.AuthRequest) (*pb
 			events.BroadcastNonStreamingEvent(ctx, events.AuthenticateEvent{Event: &events.Event{Type: "io.evntsrc.passport.limite_increased"}, Err: fmt.Sprintf("limit increased"), IP: remoteIP.String(), User: username})
 			incRateLimit(username, remoteIP)
 			return &pb.AuthResponse{Success: false}, status.Errorf(codes.Unauthenticated, "unknown username or password")
+		}
+
+		if user.Mfa != nil && request.GetUserCreds().GetMFA() == "" {
+			mfa := &pb.MFAResponse{}
+			mfa.Type = reflect.TypeOf(user.GetMfa()).String()
+
+			switch mfaType := user.Mfa.MFA.(type) {
+			case *userSvc.MFA_FIDO:
+				U2FChallenge, err := u2f.NewChallenge("evntsrc.io", []string{"evntsrc.io"})
+				if err != nil {
+					return nil, err
+				}
+				userReg := &u2f.Registration{}
+				err = json.Unmarshal(user.Mfa.GetFIDO().Registration, userReg)
+				if err != nil {
+					return nil, err
+				}
+				r := U2FChallenge.SignRequest([]u2f.Registration{*userReg})
+				mfa.Challenge = r.Challenge
+			case *userSvc.MFA_TOTP:
+			case *userSvc.MFA_SMS:
+				//...
+			default:
+				return nil, fmt.Errorf("Unknown MFA type %v", mfaType)
+			}
+
+			return &pb.AuthResponse{Success: false, MFAResponse: mfa}, nil
 		}
 
 		//Validate password hash

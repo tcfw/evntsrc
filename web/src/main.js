@@ -8,6 +8,7 @@ import "./plugins/config.js";
 import "./plugins/google.js";
 import "./plugins/facebook.js";
 import "./plugins/cookie.js";
+import "@/styles/app.scss";
 
 router.afterEach(route => {
   if ("App" in router.app.$refs) {

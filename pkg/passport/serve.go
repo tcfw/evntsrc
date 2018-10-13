@@ -80,6 +80,33 @@ func newUserClient(ctx context.Context) (userSvc.UserServiceClient, error) {
 	return userSvc.NewUserServiceClient(conn), nil
 }
 
+func validateMFA(user *userSvc.User) (*pb.AuthResponse, error) {
+	mfa := &pb.MFAResponse{}
+	mfa.Type = reflect.TypeOf(user.GetMfa()).String()
+
+	switch mfaType := user.Mfa.MFA.(type) {
+	case *userSvc.MFA_FIDO:
+		U2FChallenge, err := u2f.NewChallenge("evntsrc.io", []string{"evntsrc.io"})
+		if err != nil {
+			return nil, err
+		}
+		userReg := &u2f.Registration{}
+		err = json.Unmarshal(user.Mfa.GetFIDO().Registration, userReg)
+		if err != nil {
+			return nil, err
+		}
+		r := U2FChallenge.SignRequest([]u2f.Registration{*userReg})
+		mfa.Challenge = r.Challenge
+	case *userSvc.MFA_TOTP:
+	case *userSvc.MFA_SMS:
+		//...
+	default:
+		return nil, fmt.Errorf("Unknown MFA type %v", mfaType)
+	}
+
+	return &pb.AuthResponse{Success: false, MFAResponse: mfa}, nil
+}
+
 //Authenticate takes in oneof a authentication types and tries to generate tokens
 func (s *Server) Authenticate(ctx context.Context, request *pb.AuthRequest) (*pb.AuthResponse, error) {
 	md, _ := metadata.FromIncomingContext(ctx)
@@ -120,30 +147,7 @@ func (s *Server) Authenticate(ctx context.Context, request *pb.AuthRequest) (*pb
 		}
 
 		if user.Mfa != nil && request.GetUserCreds().GetMFA() == "" {
-			mfa := &pb.MFAResponse{}
-			mfa.Type = reflect.TypeOf(user.GetMfa()).String()
-
-			switch mfaType := user.Mfa.MFA.(type) {
-			case *userSvc.MFA_FIDO:
-				U2FChallenge, err := u2f.NewChallenge("evntsrc.io", []string{"evntsrc.io"})
-				if err != nil {
-					return nil, err
-				}
-				userReg := &u2f.Registration{}
-				err = json.Unmarshal(user.Mfa.GetFIDO().Registration, userReg)
-				if err != nil {
-					return nil, err
-				}
-				r := U2FChallenge.SignRequest([]u2f.Registration{*userReg})
-				mfa.Challenge = r.Challenge
-			case *userSvc.MFA_TOTP:
-			case *userSvc.MFA_SMS:
-				//...
-			default:
-				return nil, fmt.Errorf("Unknown MFA type %v", mfaType)
-			}
-
-			return &pb.AuthResponse{Success: false, MFAResponse: mfa}, nil
+			return validateMFA(user)
 		}
 
 		//Validate password hash

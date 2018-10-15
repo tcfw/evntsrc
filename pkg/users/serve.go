@@ -286,6 +286,9 @@ func (s *server) Update(ctx context.Context, request *protos.UserUpdateRequest) 
 		user.Name = request.User.Name
 		user.Email = request.User.Email
 		user.Company = request.User.Company
+		for k, v := range request.User.GetMetadata() {
+			user.Metadata[k] = v
+		}
 
 		err = collection.UpdateId(request.Id, user)
 		if err != nil {

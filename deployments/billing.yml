@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: billing
+spec:
+  ports:
+  - port: 443
+    name: https
+  selector:
+    run: billing
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: billing
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        version: v1
+        run: billing
+        app: billing
+        service: billing
+        tier: backend
+      annotations:
+        prometheus.io/scrape: "false"
+    spec:
+      containers:
+      - name: billing
+        imagePullPolicy: Never
+        image: asia.gcr.io/evntsrc-io/billing:latest
+        ports:
+        - containerPort: 443
+        env:
+        - name: STRIPE_KEY
+          valueFrom:
+            secretKeyRef: 
+              name: billing
+              key: StripeKey

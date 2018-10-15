@@ -1,0 +1,187 @@
+syntax="proto3";
+
+package evntsrc.billing;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+
+// Enable custom Marshal method.
+option (gogoproto.marshaler_all) = true;
+// Enable custom Unmarshal method.
+option (gogoproto.unmarshaler_all) = true;
+// Enable custom Size method (Required by Marshal and Unmarshal).
+option (gogoproto.sizer_all) = true;
+// Enable registration with golang/protobuf for the grpc-gateway.
+option (gogoproto.goproto_registration) = true;
+// Enable generation of XXX_MessageName methods for grpc-go/status.
+option (gogoproto.messagename_all) = true;
+
+message Empty {}
+
+//https://github.com/stripe/stripe-go/blob/master/product.go
+message Product {
+	bool active = 1;
+	repeated string attributes = 2;
+	string caption = 3;
+	reserved 4;
+	reserved 5;
+	string description = 6;
+	string id = 7;
+	reserved 8;
+	map<string, string> metadata = 9;
+	string name = 10;
+	reserved 11 to 15;
+	
+}
+
+//https://github.com/stripe/stripe-go/blob/master/plan.go
+message Plan {
+	bool active = 1;
+	string aggregateUsage = 2;
+	int64 amount = 3;
+	string billingScheme = 4;
+	reserved 5;
+	string currency = 6;
+	bool deleted = 7;
+	string id = 8;
+	string interval = 9;
+	int64 intervalCount = 10;
+	bool liveMode = 11;
+	map<string, string> metadata = 12;
+	string nickname = 13;
+	Product product = 14;
+	string tiresMode = 15;
+	reserved 16;
+	int64 trialPeriodDays = 17;
+	string usageType = 18;
+}
+
+//https://github.com/stripe/stripe-go/blob/master/sub.go
+message Subscription {
+	reserved 1;
+	string billing = 2;
+	int64 billingCycleAnchor = 3;
+	int64 canceledAt = 4;
+	int64 createdAt = 5;
+	int64 currentPeriodEnds = 6;
+	int64 currentPeriodStarts = 7;
+	reserved 8;
+	int64 daysUntilDue = 9;
+	reserved 10;
+	bool cancelAtPeriodEnd = 11;
+	int64 endedAt = 12;
+	string id = 13;
+	reserved 14;
+	map<string,string> metadata = 15;
+	reserved 16;
+	string plan = 17;
+	reserved 18;
+	int64 start = 19;
+	string status = 20;
+	double taxPercent = 21;
+	int64 trialEnds = 22;
+	int64 trialStarts = 23;
+}
+
+message PlanList {
+	repeated Plan plans = 1;
+}
+
+message CreateRequest {
+	string userId = 1;
+	string cardToken = 2;
+}
+
+message CreateResponse {
+	string customerId = 1;
+}
+
+message UserSubscriptionsRequest {
+	string userId = 1;
+}
+
+message UserSubscriptionsResponse {
+	repeated Subscription subscriptions = 1;
+}
+
+message SubscribeRequest {
+	string userId = 1;
+	string planId = 2;
+}
+
+message SubscribeResponse {
+	string subscriptionId = 1;
+}
+
+message TerminateRequest {
+	string planId = 1;
+}
+
+message InfoRequest {
+	string userId = 1;
+}
+
+//https://github.com/stripe/stripe-go/blob/master/card.go
+message Card {
+	string id = 1;
+	string brand = 2;
+	string country = 3;
+	uint32 expMonth = 4;
+	uint32 expYear = 5;
+	string name = 6;
+	string number = 7;
+	string cvcCheck = 8;
+}
+
+//https://github.com/stripe/stripe-go/blob/master/source.go
+message Source {
+	string id = 1;
+	string type = 2;
+	oneof source {
+		Card card = 3;
+	}
+}
+
+//https://github.com/stripe/stripe-go/blob/master/customer.go
+message Customer {
+	int64 accountBalance = 1;
+	int64 created = 2;
+	string currency = 3;
+	reserved 4;
+	bool deleted = 5;
+	bool delinquent = 6;
+	string description = 7;
+	reserved 8;
+	string email = 9;
+	string id = 10;
+	string invoicePrefix = 11;
+	bool liveMode = 12;
+	map<string, string> metadata = 13;
+	reserved 14;
+	repeated Source sources = 15;
+	repeated Subscription subscriptions = 16;
+	string taxInfo = 17;
+	string taxInfoVerification = 18;
+}
+
+service BillingService {
+	rpc GetPlans (Empty) returns (PlanList) {
+		option (google.api.http) = {
+            get: "/v1/billing/plans"
+        };
+	};
+	rpc CreateCustomerFromUser (CreateRequest) returns (CreateResponse) {
+		option (google.api.http) = {
+			post: "/v1/billing/{userId}"
+			body: "cardToken"
+        };
+	};
+	rpc GetUserInfo(InfoRequest) returns (Customer) {
+		option (google.api.http) = {
+			get: "/v1/billing/user/{userId}"
+		};
+	}
+	rpc GetUserSubscriptions (UserSubscriptionsRequest) returns (UserSubscriptionsResponse);
+	rpc SubscribeUser (SubscribeRequest) returns (SubscribeResponse);
+	rpc TerminateSubscription (TerminateRequest) returns (Empty);
+}

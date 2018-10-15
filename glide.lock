@@ -1,5 +1,5 @@
-hash: 551e58b88b0aca5f13fc197d6838d102502c288f5936796b64b010e6fbe99a70
-updated: 2018-10-12T09:46:37.060575+11:00
+hash: 6c6a757f49ad3ad0e633eb30a1451a06bffd658c27eaff7be05c76c065cd9e6b
+updated: 2018-10-15T10:51:07.60039+11:00
 imports:
 - name: github.com/beorn7/perks
   version: 3a771d992973f24aa725d07868b467d1ddfceafb
@@ -53,7 +53,7 @@ imports:
 - name: github.com/google/uuid
   version: d460ce9f8df2e77fb1ba55ca87fafed96c607494
 - name: github.com/gorilla/mux
-  version: 9e1f5955c0d22b55d9e20d6faa28589f83b2faca
+  version: deb579d6e030503f430978ee229008b9bc912d40
 - name: github.com/gorilla/websocket
   version: 66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d
 - name: github.com/grpc-ecosystem/grpc-gateway
@@ -139,6 +139,10 @@ imports:
   version: 3ebe029320b2676d667ae88da602a5f854788a8a
 - name: github.com/spf13/viper
   version: 2c12c60302a5a0e62ee102ca9bc996277c2f64f5
+- name: github.com/stripe/stripe-go
+  version: 5d00b1a66777515527a2a5eb7828ede4cf7d4ed2
+  subpackages:
+  - form
 - name: github.com/tstranex/u2f
   version: d21a03e0b1d9fc1df59ff54e7a513655c1748b0c
 - name: golang.org/x/crypto
@@ -220,6 +224,6 @@ testImports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: 2db35c88b92a1631e987089b5485a95e68bc5d3a
+  version: 04af85275a5c7ac09d16bb3b9b2e751ed45154e5
   subpackages:
   - assert

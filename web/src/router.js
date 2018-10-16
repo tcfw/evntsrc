@@ -5,10 +5,11 @@ import Dashboard from "./views/Dashboard.vue";
 import Streams from "./views/Streams.vue";
 import Stream from "./views/Stream.vue";
 import StreamHistory from "./views/Stream/History.vue";
+import StreamKeys from "./views/Stream/Keys.vue";
 import Settings from "./views/Settings.vue";
 import SettingsAccount from "./views/Settings/Account.vue";
 import SettingsSecurity from "./views/Settings/Security.vue";
-import SettingsBilling from "./views/Settings/Billing.vue";
+import SettingsSessions from "./views/Settings/Sessions.vue";
 
 Vue.use(Router);
 
@@ -48,6 +49,11 @@ export default new Router({
               path: "history",
               name: "stream-history",
               component: StreamHistory
+            }, 
+            {
+              path: "keys",
+              name: "stream-auth",
+              component: StreamKeys
             }
           ]
         }
@@ -81,7 +87,13 @@ export default new Router({
         {
           path: "billing",
           name: "billing",
-          component: SettingsBilling
+          component: () => 
+            import(/* webpackChunkName: "billing" */ "./views/Settings/Billing.vue")
+        },
+        {
+          path: "sessions",
+          name: "sessions",
+          component: SettingsSessions
         }
       ]
     }

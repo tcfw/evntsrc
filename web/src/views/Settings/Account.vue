@@ -1,32 +1,37 @@
 <template>
-    <div style="padding: 5px 20px;">
+    <div style="padding: 15px;">
         <el-row>
             <el-col :span="16">
+                <el-breadcrumb separator-class="el-icon-arrow-right">
+                    <el-breadcrumb-item :to="{ path: '/' }">Home</el-breadcrumb-item>
+                    <el-breadcrumb-item :to="{ path: '/settings' }">Settings</el-breadcrumb-item>
+                    <el-breadcrumb-item>Account</el-breadcrumb-item>
+                </el-breadcrumb>
                 <h3>Profile</h3>
-
-                <el-form label-position="left" :rules="editProfileRules" ref="editProfileForm" label-width="200px" :model="editProfileForm">
-                    <el-form-item label="Name" prop="name">
-                        <el-input v-model="editProfileForm.name"></el-input>
-                    </el-form-item>
-                    <el-form-item label="Email" prop="email">
-                        <el-input v-model="editProfileForm.email"></el-input>
-                    </el-form-item>
-                    <el-form-item label="Company" prop="company">
-                        <el-input v-model="editProfileForm.company"></el-input>
-                    </el-form-item>
-                    <br/>
-                    <el-form-item label="Current password" prop="current_password">
-                        <el-input autocomplete="off" type="password" v-model="editProfileForm.current_password" placeholder="Leave blank to keep the current password"></el-input>
-                    </el-form-item>
-                    <el-form-item label="New password" prop="new_password">
-                        <el-input autocomplete="off" type="password" v-model="editProfileForm.new_password"></el-input>
-                    </el-form-item>
-                    <el-form-item label="Confirm new password" prop="c_new_password">
-                        <el-input autocomplete="off" type="password" v-model="editProfileForm.c_new_password"></el-input>
-                    </el-form-item>
-                     <el-button type="success" size="small" :loading="submittingEditProfileForm" @click="saveProfile">Update profile</el-button>
-                </el-form>
-                
+                <el-card class="box-card">
+                    <el-form label-position="left" :rules="editProfileRules" ref="editProfileForm" label-width="200px" :model="editProfileForm">
+                        <el-form-item label="Name" prop="name">
+                            <el-input v-model="editProfileForm.name"></el-input>
+                        </el-form-item>
+                        <el-form-item label="Email" prop="email">
+                            <el-input v-model="editProfileForm.email"></el-input>
+                        </el-form-item>
+                        <el-form-item label="Company" prop="company">
+                            <el-input v-model="editProfileForm.company"></el-input>
+                        </el-form-item>
+                        <br/>
+                        <el-form-item label="Current password" prop="current_password">
+                            <el-input autocomplete="off" type="password" v-model="editProfileForm.current_password" placeholder="Leave blank to keep the current password"></el-input>
+                        </el-form-item>
+                        <el-form-item label="New password" prop="new_password">
+                            <el-input autocomplete="off" type="password" v-model="editProfileForm.new_password"></el-input>
+                        </el-form-item>
+                        <el-form-item label="Confirm new password" prop="c_new_password">
+                            <el-input autocomplete="off" type="password" v-model="editProfileForm.c_new_password"></el-input>
+                        </el-form-item>
+                        <el-button type="success" size="small" :loading="submittingEditProfileForm" @click="saveProfile">Update profile</el-button>
+                    </el-form>
+                </el-card>
                 <hr />
                 <h5>Delete account</h5>
                 <small>If you delete your account, there is no going back. This will be perminant.<br/>This will also include all stored events.</small>
@@ -130,6 +135,8 @@ export default {
                                     type: 'error'
                                 });
                             })
+                        } else {
+                            this.submittingEditProfileForm = false;
                         }
                     
                     }).catch(err => {

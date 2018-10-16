@@ -67,7 +67,7 @@ message Subscription {
 	int64 currentPeriodStarts = 7;
 	reserved 8;
 	int64 daysUntilDue = 9;
-	reserved 10;
+	string discount = 10;
 	bool cancelAtPeriodEnd = 11;
 	int64 endedAt = 12;
 	string id = 13;
@@ -81,6 +81,7 @@ message Subscription {
 	double taxPercent = 21;
 	int64 trialEnds = 22;
 	int64 trialStarts = 23;
+	int64 discountEnds = 24;
 }
 
 message PlanList {
@@ -173,12 +174,18 @@ service BillingService {
 	rpc CreateCustomerFromUser (CreateRequest) returns (CreateResponse) {
 		option (google.api.http) = {
 			post: "/v1/billing/{userId}"
-			body: "cardToken"
+			body: "*"
         };
 	};
 	rpc GetUserInfo(InfoRequest) returns (Customer) {
 		option (google.api.http) = {
 			get: "/v1/billing/user/{userId}"
+		};
+	}
+	rpc AttachPaymentMethod(CreateRequest) returns (Empty) {
+		option (google.api.http) = {
+			post: "/v1/billing/user/{userId}/method"
+			body: "*"
 		};
 	}
 	rpc GetUserSubscriptions (UserSubscriptionsRequest) returns (UserSubscriptionsResponse);

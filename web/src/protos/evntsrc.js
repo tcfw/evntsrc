@@ -1101,6 +1101,7 @@ proto.evntsrc.billing.Subscription.toObject = function(includeInstance, msg) {
     currentperiodends: jspb.Message.getFieldWithDefault(msg, 6, 0),
     currentperiodstarts: jspb.Message.getFieldWithDefault(msg, 7, 0),
     daysuntildue: jspb.Message.getFieldWithDefault(msg, 9, 0),
+    discount: jspb.Message.getFieldWithDefault(msg, 10, ""),
     cancelatperiodend: jspb.Message.getFieldWithDefault(msg, 11, false),
     endedat: jspb.Message.getFieldWithDefault(msg, 12, 0),
     id: jspb.Message.getFieldWithDefault(msg, 13, ""),
@@ -1110,7 +1111,8 @@ proto.evntsrc.billing.Subscription.toObject = function(includeInstance, msg) {
     status: jspb.Message.getFieldWithDefault(msg, 20, ""),
     taxpercent: +jspb.Message.getFieldWithDefault(msg, 21, 0.0),
     trialends: jspb.Message.getFieldWithDefault(msg, 22, 0),
-    trialstarts: jspb.Message.getFieldWithDefault(msg, 23, 0)
+    trialstarts: jspb.Message.getFieldWithDefault(msg, 23, 0),
+    discountends: jspb.Message.getFieldWithDefault(msg, 24, 0)
   };
 
   if (includeInstance) {
@@ -1175,6 +1177,10 @@ proto.evntsrc.billing.Subscription.deserializeBinaryFromReader = function(msg, r
       var value = /** @type {number} */ (reader.readInt64());
       msg.setDaysuntildue(value);
       break;
+    case 10:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setDiscount(value);
+      break;
     case 11:
       var value = /** @type {boolean} */ (reader.readBool());
       msg.setCancelatperiodend(value);
@@ -1216,6 +1222,10 @@ proto.evntsrc.billing.Subscription.deserializeBinaryFromReader = function(msg, r
     case 23:
       var value = /** @type {number} */ (reader.readInt64());
       msg.setTrialstarts(value);
+      break;
+    case 24:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setDiscountends(value);
       break;
     default:
       reader.skipField();
@@ -1295,6 +1305,13 @@ proto.evntsrc.billing.Subscription.serializeBinaryToWriter = function(message, w
       f
     );
   }
+  f = message.getDiscount();
+  if (f.length > 0) {
+    writer.writeString(
+      10,
+      f
+    );
+  }
   f = message.getCancelatperiodend();
   if (f) {
     writer.writeBool(
@@ -1359,6 +1376,13 @@ proto.evntsrc.billing.Subscription.serializeBinaryToWriter = function(message, w
   if (f !== 0) {
     writer.writeInt64(
       23,
+      f
+    );
+  }
+  f = message.getDiscountends();
+  if (f !== 0) {
+    writer.writeInt64(
+      24,
       f
     );
   }
@@ -1467,6 +1491,21 @@ proto.evntsrc.billing.Subscription.prototype.getDaysuntildue = function() {
 /** @param {number} value */
 proto.evntsrc.billing.Subscription.prototype.setDaysuntildue = function(value) {
   jspb.Message.setProto3IntField(this, 9, value);
+};
+
+
+/**
+ * optional string discount = 10;
+ * @return {string}
+ */
+proto.evntsrc.billing.Subscription.prototype.getDiscount = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 10, ""));
+};
+
+
+/** @param {string} value */
+proto.evntsrc.billing.Subscription.prototype.setDiscount = function(value) {
+  jspb.Message.setProto3StringField(this, 10, value);
 };
 
 
@@ -1622,6 +1661,21 @@ proto.evntsrc.billing.Subscription.prototype.getTrialstarts = function() {
 /** @param {number} value */
 proto.evntsrc.billing.Subscription.prototype.setTrialstarts = function(value) {
   jspb.Message.setProto3IntField(this, 23, value);
+};
+
+
+/**
+ * optional int64 discountEnds = 24;
+ * @return {number}
+ */
+proto.evntsrc.billing.Subscription.prototype.getDiscountends = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 24, 0));
+};
+
+
+/** @param {number} value */
+proto.evntsrc.billing.Subscription.prototype.setDiscountends = function(value) {
+  jspb.Message.setProto3IntField(this, 24, value);
 };
 
 

@@ -116,6 +116,34 @@ func (s *Server) CreateCustomerFromUser(ctx context.Context, request *pb.CreateR
 	return &pb.CreateResponse{CustomerId: customer.ID}, nil
 }
 
+//AttachPaymentMethod @TODO
+func (s *Server) AttachPaymentMethod(ctx context.Context, request *pb.CreateRequest) (*pb.Empty, error) {
+	if request.CardToken == "" || request.UserId == "" {
+		return nil, errors.New("All params required")
+	}
+
+	users, err := newUserClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := users.Find(ctx, &evntsrc_users.UserRequest{Query: &evntsrc_users.UserRequest_Id{Id: request.UserId}})
+	if err != nil {
+		return nil, err
+	}
+
+	customerID, ok := user.Metadata[UserMetadataCustomerId]
+	if !ok {
+		_, err := s.CreateCustomerFromUser(ctx, request)
+		return nil, err
+	}
+	params := &stripe.CustomerParams{}
+	params.SetSource(request.CardToken)
+
+	_, err = customer.Update(string(customerID), params)
+	return nil, err
+}
+
 //GetUserInfo @TODO
 func (s *Server) GetUserInfo(ctx context.Context, request *pb.InfoRequest) (*pb.Customer, error) {
 
@@ -170,7 +198,7 @@ func (s *Server) GetUserInfo(ctx context.Context, request *pb.InfoRequest) (*pb.
 		for subs.Next() {
 			subscription := subs.Subscription()
 
-			rCustomer.Subscriptions = append(rCustomer.Subscriptions, &pb.Subscription{
+			sub := &pb.Subscription{
 				Billing:             string(subscription.Billing),
 				BillingCycleAnchor:  subscription.BillingCycleAnchor,
 				CanceledAt:          subscription.CanceledAt,
@@ -187,7 +215,20 @@ func (s *Server) GetUserInfo(ctx context.Context, request *pb.InfoRequest) (*pb.
 				TaxPercent:          subscription.TaxPercent,
 				TrialEnds:           subscription.TrialEnd,
 				TrialStarts:         subscription.TrialStart,
-			})
+			}
+
+			if subscription.Discount != nil && subscription.Discount.Coupon != nil {
+				if subscription.Discount.Coupon.AmountOff > 0 {
+					sub.Discount = fmt.Sprintf("$%.2f", float64(subscription.Discount.Coupon.AmountOff)/100)
+				} else if subscription.Discount.Coupon.PercentOff > 0 {
+					sub.Discount = "%" + fmt.Sprintf("%.0f", subscription.Discount.Coupon.PercentOff) + " off"
+				} else {
+					sub.Discount = subscription.Discount.Coupon.Name
+				}
+				sub.DiscountEnds = subscription.Discount.End
+			}
+
+			rCustomer.Subscriptions = append(rCustomer.Subscriptions, sub)
 		}
 		wg.Done()
 	}()

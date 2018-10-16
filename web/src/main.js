@@ -8,7 +8,7 @@ import "./plugins/config.js";
 import "./plugins/google.js";
 import "./plugins/facebook.js";
 import "./plugins/cookie.js";
-import "./plugins/stripe.js";
+import "./plugins/moment.js";
 import "@/styles/app.scss";
 
 router.afterEach(route => {
@@ -23,7 +23,8 @@ window.app = new Vue({
   render: h => h(App),
   data() {
     return {
-      me: {}
+      me: {},
+      stripe: {}
     };
   },
   mounted() {
@@ -32,12 +33,14 @@ window.app = new Vue({
     } else {
       this.fetchMe();
     }
+    this.loadStripe();
   },
   methods: {
     fetchMe() {
       if (this.loggedIn()) {
         axios.get(this.$config.API + "/me").then(d => {
           this.me = d.data;
+          this.$emit("me.ready", this.me);
         });
       }
     },
@@ -63,6 +66,9 @@ window.app = new Vue({
     },
     fbCallback() {
       this.$emit("fb.loaded");
+    },
+    loadStripe() {
+      this.stripe = Stripe(process.env.VUE_APP_STRIPE_TOKEN);
     }
   }
 });

@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/globalsign/mgo/bson"
 	"github.com/gorilla/websocket"
 )
 
@@ -24,10 +25,11 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		conn:          conn,
 		send:          make(chan []byte, 256),
 		subscriptions: map[string]chan bool{},
+		connectionID:  bson.NewObjectId().Hex(),
+		seq:           map[string]int64{},
+		closed:        false,
 	}
 
-	// Allow collection of memory referenced by the caller by doing all work in
-	// new goroutines.
 	go client.writePump()
 	go client.readPump()
 }

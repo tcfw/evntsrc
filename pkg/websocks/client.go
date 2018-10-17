@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -47,6 +48,11 @@ type Client struct {
 	//Auth mappings
 	auth    *AuthCommand
 	authKey *streamauth.StreamKey
+
+	connectionID string
+	seq          map[string]int64
+	seqLock      sync.Mutex
+	closed       bool
 }
 
 func (c *Client) subscribe(channel string) {
@@ -76,6 +82,7 @@ func (c *Client) subscribe(channel string) {
 
 		ackBytes, _ := json.Marshal(ack)
 		c.send <- ackBytes
+		go c.advertiseSub(channel)
 
 		if err == nil {
 			for {
@@ -113,6 +120,7 @@ func (c *Client) unsubscribe(channel string) {
 
 	ackBytes, _ := json.Marshal(ack)
 	c.send <- ackBytes
+	go c.advertiseUnsub(channel)
 }
 
 func (c *Client) close() {
@@ -121,6 +129,10 @@ func (c *Client) close() {
 		close(c.subscriptions[channel])
 		delete(c.subscriptions, channel)
 	}
+	if !c.closed {
+		go c.advertiseDisconnect()
+	}
+	c.closed = true
 }
 
 func (c *Client) readPump() {
@@ -192,9 +204,17 @@ func (c *Client) processCommand(command *InboundCommand, message []byte) {
 		rEvent.Metadata = map[string]string{}
 		rEvent.Metadata["source_ip"] = c.conn.RemoteAddr().String()
 
+		channel := fmt.Sprintf("_USER.%d.%s", c.auth.Stream, subcommand.Subject)
+
+		c.seqLock.Lock()
+		count := c.seq[channel]
+		count++
+		c.seq[channel] = count
+		rEvent.Metadata["relative_seq"] = fmt.Sprintf("%s-%d", c.connectionID, count)
+		c.seqLock.Unlock()
+
 		eventJSONBytes, _ := json.Marshal(rEvent)
 
-		channel := fmt.Sprintf("_USER.%d.%s", c.auth.Stream, subcommand.Subject)
 		natsConn.Publish(channel, eventJSONBytes)
 	case commandAuth:
 		subcommand := &AuthCommand{}
@@ -217,6 +237,7 @@ func (c *Client) processCommand(command *InboundCommand, message []byte) {
 		}
 		ackBytes, _ := json.Marshal(ack)
 		c.send <- ackBytes
+		go c.advertiseConnect()
 	case commandReplay:
 		subcommand := &ReplayCommand{}
 		json.Unmarshal(message, subcommand)

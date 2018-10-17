@@ -15,25 +15,25 @@
 	</div>
 </template>
 <script>
-import Avatar from "@/components/Avatar.vue"
+import Avatar from "@/components/Avatar.vue";
 
 export default {
-	name: "page-header",
-	components: {
-		Avatar
-	}
-}
+  name: "page-header",
+  components: {
+    Avatar
+  }
+};
 </script>
 <style lang="scss" scoped>
 .page-header {
-	position: relative;
-	height: 60px;
+  position: relative;
+  height: 60px;
 
-	#profile {
-		position: absolute;
-		top: 50%;
-		right: 10px;
-		transform: translateY(-50%);
-	}
+  #profile {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+  }
 }
 </style>

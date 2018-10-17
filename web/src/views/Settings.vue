@@ -14,9 +14,9 @@
 import settingsSideMenu from "@/components/SettingsSideMenu.vue";
 
 export default {
-    name: "settings",
-	components: {
-		settingsSideMenu
-	}
-}
+  name: "settings",
+  components: {
+    settingsSideMenu
+  }
+};
 </script>

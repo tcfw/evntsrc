@@ -49,7 +49,7 @@ export default new Router({
               path: "history",
               name: "stream-history",
               component: StreamHistory
-            }, 
+            },
             {
               path: "keys",
               name: "stream-auth",
@@ -87,7 +87,7 @@ export default new Router({
         {
           path: "billing",
           name: "billing",
-          component: () => 
+          component: () =>
             import(/* webpackChunkName: "billing" */ "./views/Settings/Billing.vue")
         },
         {

@@ -13,12 +13,11 @@
   </div>
 </template>
 <script>
-import pageHeader from "@/components/Header.vue"
-import sideMenu from "@/components/SideMenu.vue"
-
+import pageHeader from "@/components/Header.vue";
+import sideMenu from "@/components/SideMenu.vue";
 
 export default {
-  name: 'app',
+  name: "app",
   components: {
     pageHeader,
     sideMenu
@@ -26,16 +25,16 @@ export default {
   data() {
     return {
       appClass: ""
-    }
+    };
   },
   created() {
     this.$root.$refs.App = this;
   }
-}
+};
 </script>
 <style lang="scss">
 a {
-  color: #4A90E2;
+  color: #4a90e2;
   text-decoration: none;
 }
 </style>

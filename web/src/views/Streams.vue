@@ -14,9 +14,9 @@
 import streamSideMenu from "@/components/StreamSideMenu.vue";
 
 export default {
-	name: "streams",
-	components: {
-		streamSideMenu
-	}
-}
+  name: "streams",
+  components: {
+    streamSideMenu
+  }
+};
 </script>

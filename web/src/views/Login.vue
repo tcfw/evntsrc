@@ -57,450 +57,498 @@
 	</el-row>
 </template>
 <script>
-import passport from '@/protos/passport_pb.js';
-import errorReader from '@/protos/error.js';
-import Avatar from '@/components/Avatar';
+import passport from "@/protos/passport_pb.js";
+import errorReader from "@/protos/error.js";
+import Avatar from "@/components/Avatar";
 
 export default {
-	name: 'Login',
-	components: {
-		Avatar	
-	},
-	data () {
-		return {
-			submitting: false,
-			loading: false,
-			hasPriorKnowledge: false,
-			didClickThrough: false,
-			profileKnowledge: {
-				photo: null,
-				name: null,
-				email: null,
-				provider: "storage",
-				tokens: {},
-			},
-			loginForm: {
-				email: '',
-				password: ''
-			},
-			loginFormValidationRules: {
-				email: [
-					{ required: true, message: 'Please fill in your email', trigger: 'blur' }
-				],
-				password: [
-					{ required: true, message: 'Please fill in your password.', trigger: 'blur' },
-					{ type: 'string', min: 6, message: 'The password length cannot be less than 6 characters', trigger: 'blur' }
-				]
-			}
-		}
-	},
-	mounted() {
-		this.$root.$refs.App.appClass = "pg-login";
-		this.$root.$on('gapi.loaded', () => {
-			gapi.signin2.render('gapi-signin2', {
-				scope: 'profile email',
-				width: 220,
-				height: 28,
-				longtitle: true,
-				theme: 'light',
-				onSuccess: this.googleLoginCallback,
-				onError: this.googleLoginFailed,
-			});
-		});
-		this.$root.$on('fb.loaded', () => {
-			FB.XFBML.parse();
-			FB.getLoginStatus(r => {
-				if (r.status == "connected") {
-					this.profileKnowledge.tokens = r.authResponse;
-					this.fbLoginCallback();
-				}
-			});
-		});
-		this.checkForLocalProfileKnowledge();
+  name: "Login",
+  components: {
+    Avatar
+  },
+  data() {
+    return {
+      submitting: false,
+      loading: false,
+      hasPriorKnowledge: false,
+      didClickThrough: false,
+      profileKnowledge: {
+        photo: null,
+        name: null,
+        email: null,
+        provider: "storage",
+        tokens: {}
+      },
+      loginForm: {
+        email: "",
+        password: ""
+      },
+      loginFormValidationRules: {
+        email: [
+          {
+            required: true,
+            message: "Please fill in your email",
+            trigger: "blur"
+          }
+        ],
+        password: [
+          {
+            required: true,
+            message: "Please fill in your password.",
+            trigger: "blur"
+          },
+          {
+            type: "string",
+            min: 6,
+            message: "The password length cannot be less than 6 characters",
+            trigger: "blur"
+          }
+        ]
+      }
+    };
+  },
+  mounted() {
+    this.$root.$refs.App.appClass = "pg-login";
+    this.$root.$on("gapi.loaded", () => {
+      gapi.signin2.render("gapi-signin2", {
+        scope: "profile email",
+        width: 220,
+        height: 28,
+        longtitle: true,
+        theme: "light",
+        onSuccess: this.googleLoginCallback,
+        onError: this.googleLoginFailed
+      });
+    });
+    this.$root.$on("fb.loaded", () => {
+      FB.XFBML.parse();
+      FB.getLoginStatus(r => {
+        if (r.status == "connected") {
+          this.profileKnowledge.tokens = r.authResponse;
+          this.fbLoginCallback();
+        }
+      });
+    });
+    this.checkForLocalProfileKnowledge();
 
-		if("gapi" in window) {
-			this.$root.$emit("gapi.loaded");
-		}
-		if("FB" in window) {
-			this.$root.$emit("fb.loaded");
-		}
+    if ("gapi" in window) {
+      this.$root.$emit("gapi.loaded");
+    }
+    if ("FB" in window) {
+      this.$root.$emit("fb.loaded");
+    }
 
-		if(this.$root.loggedIn()) {
-			this.$router.push("/");
-		}
-	},
-	computed: {
-		logoColor() {
-			if(window.innerWidth < 768) {
-				return 'white';	
-			}
+    if (this.$root.loggedIn()) {
+      this.$router.push("/");
+    }
+  },
+  computed: {
+    logoColor() {
+      if (window.innerWidth < 768) {
+        return "white";
+      }
 
-			return 'black';
-		}
-	},
-	methods: {
-		clearKnowledge() {
-			this.hasPriorKnowledge = false;
+      return "black";
+    }
+  },
+  methods: {
+    clearKnowledge() {
+      this.hasPriorKnowledge = false;
 
-			if (this.profileKnowledge.provider == "google") {
-				gapi.auth2.getAuthInstance().disconnect();
-			}
-			if (this.profileKnowledge.provider == "facebook") {
-				FB.logout();
-			}
-			if (this.profileKnowledge.provider == "storage") {
-				localStorage.removeItem("prokno");
-				localStorage.removeItem("prokno-e");
-				localStorage.removeItem("prokno-n");
-				this.loginForm.email = "";
-			}
+      if (this.profileKnowledge.provider == "google") {
+        gapi.auth2.getAuthInstance().disconnect();
+      }
+      if (this.profileKnowledge.provider == "facebook") {
+        FB.logout();
+      }
+      if (this.profileKnowledge.provider == "storage") {
+        localStorage.removeItem("prokno");
+        localStorage.removeItem("prokno-e");
+        localStorage.removeItem("prokno-n");
+        this.loginForm.email = "";
+      }
 
-			this.profileKnowledge = {
-				photo: null,
-				name: null,
-				email: null,
-				provider: "storage",
-				tokens: {},
-			};
+      this.profileKnowledge = {
+        photo: null,
+        name: null,
+        email: null,
+        provider: "storage",
+        tokens: {}
+      };
+    },
+    checkForLocalProfileKnowledge() {
+      if (localStorage) {
+        if (
+          localStorage.getItem("prokno") !== null &&
+          localStorage.getItem("prokno-e") !== null &&
+          localStorage.getItem("prokno-n") !== null
+        ) {
+          this.profileKnowledge.provider = "storage";
+          this.loginForm.email = this.profileKnowledge.email = localStorage.getItem(
+            "prokno-e"
+          );
+          this.profileKnowledge.name = localStorage.getItem("prokno-n");
 
-		},
-		checkForLocalProfileKnowledge() {
-			if (localStorage) {
-				if (localStorage.getItem("prokno") !== null 
-					&& localStorage.getItem("prokno-e") !== null
-					&& localStorage.getItem("prokno-n") !== null) {
-					this.profileKnowledge.provider = "storage";
-					this.loginForm.email = this.profileKnowledge.email = localStorage.getItem("prokno-e");
-					this.profileKnowledge.name = localStorage.getItem("prokno-n");
+          this.hasPriorKnowledge = true;
+        } else {
+        }
+      }
+    },
+    googleClick() {
+      this.didClickThrough = true;
+    },
+    googleLoginCallback(r) {
+      if (!r) return;
+      let basicProfile = r.getBasicProfile();
+      this.profileKnowledge.provider = "google";
+      this.profileKnowledge.name = basicProfile.getName();
+      this.profileKnowledge.email = basicProfile.getEmail();
+      this.profileKnowledge.photo = basicProfile.getImageUrl();
+      this.profileKnowledge.tokens = r.getAuthResponse();
 
-					this.hasPriorKnowledge = true;
-				} else {
-				}
-			}
-		},
-		googleClick() {
-			this.didClickThrough = true;
-		},
-		googleLoginCallback(r) {
-			if (!r) return;
-			let basicProfile = r.getBasicProfile();
-			this.profileKnowledge.provider = "google";
-			this.profileKnowledge.name = basicProfile.getName();
-			this.profileKnowledge.email = basicProfile.getEmail();
-			this.profileKnowledge.photo = basicProfile.getImageUrl();
-			this.profileKnowledge.tokens = r.getAuthResponse();
+      this.hasPriorKnowledge = true;
 
-			this.hasPriorKnowledge = true;
+      if (this.didClickThrough == true) {
+        this.login();
+      }
+    },
+    googleLoginFailed() {
+      this.$Message.error("Failed to login using Google");
+    },
+    fbLoginCallback(callback) {
+      FB.getLoginStatus(r => {
+        FB.api("/me?fields=name,email,picture", r => {
+          if (r.error) {
+            return;
+          }
+          this.profileKnowledge.provider = "facebook";
+          this.profileKnowledge.name = r.name;
+          this.profileKnowledge.email = r.email;
+          if (r.picture) {
+            this.profileKnowledge.photo = r.picture.data.url;
+          }
+          this.profileKnowledge.tokens = FB.getAuthResponse();
 
-			if(this.didClickThrough == true) {
-				this.login();
-			}
-		},
-		googleLoginFailed() {
-			this.$Message.error("Failed to login using Google");
-		},
-		fbLoginCallback(callback) {
-			FB.getLoginStatus(r => {
-				FB.api('/me?fields=name,email,picture', r => {
-					if (r.error) {
-						return;
-					}
-					this.profileKnowledge.provider = "facebook";
-					this.profileKnowledge.name = r.name;
-					this.profileKnowledge.email = r.email;
-					if (r.picture) {
-						this.profileKnowledge.photo = r.picture.data.url;
-					}
-					this.profileKnowledge.tokens = FB.getAuthResponse();
+          this.hasPriorKnowledge = true;
 
-					this.hasPriorKnowledge = true;
+          if (callback) {
+            callback();
+          }
+        });
+      });
+    },
+    fbClickCallback() {
+      this.didClickThrough = true;
+      this.fbLoginCallback(this.login);
+    },
+    socialLogin() {
+      var socialTokens = new passport.Tokens();
 
-					if (callback) {
-						callback();
-					}
-				});
-			});
-		},
-		fbClickCallback() {
-			this.didClickThrough = true;
-			this.fbLoginCallback(this.login);
-		},
-		socialLogin() {
-			var socialTokens = new passport.Tokens;
+      switch (this.profileKnowledge.provider) {
+        case "facebook":
+          socialTokens.setToken(FB.getAccessToken());
+          break;
+        case "google":
+          socialTokens.setToken(
+            gapi.auth2
+              .getAuthInstance()
+              .currentUser.get()
+              .getAuthResponse().id_token
+          );
+          break;
+      }
 
-			switch(this.profileKnowledge.provider) {
-				case "facebook":
-					socialTokens.setToken(FB.getAccessToken());
-					break;
-				case "google":
-					socialTokens.setToken(gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().id_token)
-					break;
-			}
+      var socialRequest = new passport.SocialRequest();
+      socialRequest.setProvider(this.profileKnowledge.provider);
+      socialRequest.setIdptokens(socialTokens);
 
-			var socialRequest = new passport.SocialRequest;
-			socialRequest.setProvider(this.profileKnowledge.provider);
-			socialRequest.setIdptokens(socialTokens);
+      axios
+        .post(
+          this.$config.API + "/auth/social",
+          socialRequest.serializeBinary(),
+          {
+            headers: { "Content-Type": "application/protobuf" },
+            transformResponse: [
+              function(data) {
+                return data;
+              }
+            ],
+            responseType: "arraybuffer"
+          }
+        )
+        .then(d => {
+          this.loading = false;
+          if ("data" in d) {
+            this.readinAuthResponse(d, false);
+          }
+        })
+        .catch(e => {
+          this.loading = false;
+          this.$Message.error({
+            content: "Unable to log you in. Please try again.",
+            duration: 10
+          });
+        });
+    },
+    applyProfileKnowledgeFromStandard() {
+      localStorage.setItem("prokno", true);
+      localStorage.setItem("prokno-e", this.loginForm.email);
+      localStorage.setItem("prokno-n", this.loginForm.email);
+    },
+    readinAuthResponse(response, setProfileKnowledge) {
+      var authResponse = passport.AuthResponse.deserializeBinary(response.data);
 
-			axios.post(this.$config.API+"/auth/social", socialRequest.serializeBinary(),{
-				headers:{'Content-Type':'application/protobuf'},
-				transformResponse: [function (data) {
-					return data;
-				}],
-				responseType: 'arraybuffer'
-			}).then(d => {
-				this.loading = false;
-				if ("data" in d) {
-					this.readinAuthResponse(d, false);
-				}
-			}).catch(e => {
-				this.loading = false;
-				this.$Message.error({
-					content: "Unable to log you in. Please try again.", 
-					duration: 10
-				});
-			});
+      if (!authResponse.getSuccess()) {
+        this.$Message.error({
+          content: "Unable to log you in. Please try again.",
+          duration: 10
+        });
+        return;
+      }
 
-		},
-		applyProfileKnowledgeFromStandard() {
-			localStorage.setItem("prokno", true);
-			localStorage.setItem("prokno-e", this.loginForm.email);
-			localStorage.setItem("prokno-n", this.loginForm.email);
-		},
-		readinAuthResponse(response, setProfileKnowledge) {
-			var authResponse = passport.AuthResponse.deserializeBinary(response.data);
+      var expires = new Date(0);
+      expires.setUTCSeconds(
+        authResponse
+          .getTokens()
+          .getTokenexpire()
+          .getSeconds()
+      );
 
-			if(!authResponse.getSuccess()) {
-				this.$Message.error({
-					content: "Unable to log you in. Please try again.", 
-					duration: 10
-				});
-				return
-			}
+      this.$cookie.set("session", authResponse.getTokens().getToken(), {
+        expires: expires
+      });
+      this.$root.applySession();
 
-			var expires = new Date(0)
-			expires.setUTCSeconds(authResponse.getTokens().getTokenexpire().getSeconds())
+      if (setProfileKnowledge) {
+        this.applyProfileKnowledgeFromStandard();
+      }
 
-			this.$cookie.set('session', authResponse.getTokens().getToken(), {expires: expires})
-			this.$root.applySession()
+      this.$root.fetchMe();
+      this.$router.push("/");
+    },
+    login() {
+      if (
+        this.hasPriorKnowledge &&
+        this.profileKnowledge.provider != "storage"
+      ) {
+        this.loading = true;
+        this.socialLogin();
+      } else {
+        this.$refs["loginForm"].validate(valid => {
+          if (!valid) {
+            this.$Message.error("Failed to login");
+          } else {
+            this.submitting = true;
 
-			if (setProfileKnowledge) {
-				this.applyProfileKnowledgeFromStandard();
-			}
+            var userCreds = new passport.UserCreds();
+            userCreds.setPassword(this.loginForm.password);
+            userCreds.setUsername(this.loginForm.email);
 
-			this.$root.fetchMe();
-			this.$router.push('/');
-		},
-		login() {
-			if (this.hasPriorKnowledge && this.profileKnowledge.provider != "storage") {
-				this.loading = true;
-				this.socialLogin();
-			} else {
-				this.$refs['loginForm'].validate(valid => {
-					if (!valid) {
-						this.$Message.error('Failed to login');
-					} else {
-						this.submitting = true;
+            var authRequest = new passport.AuthRequest();
+            authRequest.setUsercreds(userCreds);
 
-						var userCreds = new passport.UserCreds;
-						userCreds.setPassword(this.loginForm.password);
-						userCreds.setUsername(this.loginForm.email);
-
-						var authRequest = new passport.AuthRequest;
-						authRequest.setUsercreds(userCreds);
-
-						axios.post(this.$config.API+"/auth/login", authRequest.serializeBinary(),{
-							headers:{'Content-Type':'application/protobuf'},
-							transformResponse: [function (data) {
-								return data;
-							}],
-							responseType: 'arraybuffer'
-						}).then(d => {
-							this.submitting = false;
-							this.readinAuthResponse(d, true)
-						}).catch(de => {
-							this.submitting = false;
-							var msg = "Incorrect login details";
-							if ("response" in de) { 
-								var error = JSON.parse(new TextDecoder("utf-8").decode(de.response.data))
-								if(de.response.status == 429) {
-									this.$message({
-										message: error.error,
-										duration: 30000,
-										type:"error"
-									});
-								} else {
-									if (error.error.includes("no reachable servers")) {
-										msg = "Unable to log you in. Please try again.";
-									}
-									this.$message({
-										message: msg,
-										duration: 30000,
-										type:"error"
-									});
-									throw error.message;
-								}
-							}
-						})
-					}
-				})
-			}
-		}
-	}
-}
+            axios
+              .post(
+                this.$config.API + "/auth/login",
+                authRequest.serializeBinary(),
+                {
+                  headers: { "Content-Type": "application/protobuf" },
+                  transformResponse: [
+                    function(data) {
+                      return data;
+                    }
+                  ],
+                  responseType: "arraybuffer"
+                }
+              )
+              .then(d => {
+                this.submitting = false;
+                this.readinAuthResponse(d, true);
+              })
+              .catch(de => {
+                this.submitting = false;
+                var msg = "Incorrect login details";
+                if ("response" in de) {
+                  var error = JSON.parse(
+                    new TextDecoder("utf-8").decode(de.response.data)
+                  );
+                  if (de.response.status == 429) {
+                    this.$message({
+                      message: error.error,
+                      duration: 30000,
+                      type: "error"
+                    });
+                  } else {
+                    if (error.error.includes("no reachable servers")) {
+                      msg = "Unable to log you in. Please try again.";
+                    }
+                    this.$message({
+                      message: msg,
+                      duration: 30000,
+                      type: "error"
+                    });
+                    throw error.message;
+                  }
+                }
+              });
+          }
+        });
+      }
+    }
+  }
+};
 </script>
 <style lang="scss">
 .pg-login {
-	&:after { //bg
-		content: "";
-		display: block;
-		position: fixed;
-		top: -10px;
-		left: -10px;
-		height: calc(100% + 20px);
-		width: calc(100% + 20px);
-		background:
-			linear-gradient(
-				rgba(0, 0,0,0.4), 
-				rgba(255, 255,255,0.1)
-			),
-			url("https://images.unsplash.com/photo-1515524738708-327f6b0037a7?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=ff90e72db15176afc516fac82d04f14f&auto=format&fit=crop&w=1950&q=80") no-repeat center;
-		background-size: cover;
-		filter: blur(3px);
-	}
+  &:after {
+    //bg
+    content: "";
+    display: block;
+    position: fixed;
+    top: -10px;
+    left: -10px;
+    height: calc(100% + 20px);
+    width: calc(100% + 20px);
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(255, 255, 255, 0.1)),
+      url("https://images.unsplash.com/photo-1515524738708-327f6b0037a7?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=ff90e72db15176afc516fac82d04f14f&auto=format&fit=crop&w=1950&q=80")
+        no-repeat center;
+    background-size: cover;
+    filter: blur(3px);
+  }
 
-	#login-btn {
-		float: right;
-		background: #1A1E30;
-		border-color: #1A1E30;
-		font-weight: 100;
+  #login-btn {
+    float: right;
+    background: #1a1e30;
+    border-color: #1a1e30;
+    font-weight: 100;
 
-		@media(max-width: 768px) {
-			width: 100%;
-		}
-	}
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
 
-	#forgot-btn {
-		float: left;
-		font-size: 11px;
+  #forgot-btn {
+    float: left;
+    font-size: 11px;
 
-		@media(max-width: 768px) {
-			padding-top: 75px;
-			display: block;
-			text-align: center;
-			float: inherit;
-			color: white;
-		}
-	}
+    @media (max-width: 768px) {
+      padding-top: 75px;
+      display: block;
+      text-align: center;
+      float: inherit;
+      color: white;
+    }
+  }
 
-	#create-btn {
-		margin-top: 20px;
-		font-size: 14px;
+  #create-btn {
+    margin-top: 20px;
+    font-size: 14px;
 
-		@media(max-width: 768px) {
-			margin-top: 35px;
+    @media (max-width: 768px) {
+      margin-top: 35px;
 
-			> a {
-				color: white;
-			}
-		}
-	}
+      > a {
+        color: white;
+      }
+    }
+  }
 
-	#welcome-back {
-		font-size: 18px;
-		color: #515151;
-		font-weight: 500;
-	}
+  #welcome-back {
+    font-size: 18px;
+    color: #515151;
+    font-weight: 500;
+  }
 
-	#profile-knowledge {
-		margin-top: -5px;
-	}
+  #profile-knowledge {
+    margin-top: -5px;
+  }
 
-	#profile-knowledge, #not-you {
-		font-size: 12px;
-		color: #515151;
-		font-weight: 100;
-	}
+  #profile-knowledge,
+  #not-you {
+    font-size: 12px;
+    color: #515151;
+    font-weight: 100;
+  }
 
-	#not-you {
-		margin-top: 5px;
-		margin-bottom: 25px;
-		cursor: pointer;
-	}
+  #not-you {
+    margin-top: 5px;
+    margin-bottom: 25px;
+    cursor: pointer;
+  }
 
-	#social-btns {
-		text-align: center;
+  #social-btns {
+    text-align: center;
 
-		@media(max-width: 768px) {
-			margin-top: 35px;
-		}
+    @media (max-width: 768px) {
+      margin-top: 35px;
+    }
 
-		.fb-wrapper {
-			display: inline-block;
-			background: #4267b2;
-			border-radius: 5px;
-			color: white;
-			height: 28px;
-			overflow: hidden;
-			text-align: center;
-			width: 220px;
-			margin: 0px;
-		}
+    .fb-wrapper {
+      display: inline-block;
+      background: #4267b2;
+      border-radius: 5px;
+      color: white;
+      height: 28px;
+      overflow: hidden;
+      text-align: center;
+      width: 220px;
+      margin: 0px;
+    }
 
-		.gapi-wrapper {
-			display: block;
+    .gapi-wrapper {
+      display: block;
 
-			#gapi-signin2 {
-				display: inline-block;
-				margin-left: -5px;
-				margin-top: 15px;
-				height: 28px;
-			}
-		}
-	}
+      #gapi-signin2 {
+        display: inline-block;
+        margin-left: -5px;
+        margin-top: 15px;
+        height: 28px;
+      }
+    }
+  }
 
-	.login-divider {
-		background-image: linear-gradient(to right, transparent 50%, #E5E5E5 50%);
-		background-size: 9px 100%;
-		height: 1px;
-		position: relative;
-		margin-bottom: 30px;
+  .login-divider {
+    background-image: linear-gradient(to right, transparent 50%, #e5e5e5 50%);
+    background-size: 9px 100%;
+    height: 1px;
+    position: relative;
+    margin-bottom: 30px;
 
-		@media(max-width: 768px) {
-			display: none;
-		}
+    @media (max-width: 768px) {
+      display: none;
+    }
 
-		&:after {
-			content: "or";
-			display: block;
-			position: absolute;
-			top: -9px;
-			left: 50%;
-			background: white;
-			padding: 0px 14px;
-			color: #BBBBBB;
-			font-size: 12px;
-			transform: translateX(-50%);
+    &:after {
+      content: "or";
+      display: block;
+      position: absolute;
+      top: -9px;
+      left: 50%;
+      background: white;
+      padding: 0px 14px;
+      color: #bbbbbb;
+      font-size: 12px;
+      transform: translateX(-50%);
+    }
+  }
 
-		}
-	}
+  .el-avatar-large {
+    width: 60px;
+    height: 60px;
+    border-radius: 60px;
+    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2);
+  }
 
-	.el-avatar-large {
-		width: 60px;
-		height: 60px;
-		border-radius: 60px;
-		box-shadow: 0px 2px 2px rgba(0,0,0,0.2)
-	}
+  @media (max-width: 768px) {
+    .el-card {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+    }
 
-	@media(max-width: 768px) {
-		.el-card {
-			background: transparent;
-			border: none;
-			box-shadow: none;
-		}
-
-		.el-input {
-			box-shadow: none;
-		}
-	}
+    .el-input {
+      box-shadow: none;
+    }
+  }
 }
 </style>

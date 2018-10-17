@@ -47,128 +47,146 @@
 import users_pb from "@/protos/users_pb.js";
 
 export default {
-    data () {
-        return {
-            submittingEditProfileForm: false,
-            editProfileForm: {
-                name: "",
-                email: "",
-                company: "",
-                current_password: "",
-                new_password: "",
-                c_new_password: "",
-            }
-        }
-    },
-    computed: {
-        editProfileRules() {
-            return {
-                name: [
-                    {required: true, trigger: "blur"}
-                ],
-                email: [
-                    {required: true, trigger: "blur"},
-                    {type: "email", trigger: "blur"}
-                ],
-                new_password: [
-                    {required: this.editProfileForm.current_password != "", trigger: "blur"}
-                ],
-                c_new_password: [
-                    {required: this.editProfileForm.current_password != "", trigger: "blur"}
-                ]
-            }
-        }
-    },
-    mounted() {
-        axios.get(this.$config.API+"/me").then(d => {
-            this.editProfileForm = d.data
-            this.editProfileForm.current_password = "";
-            this.editProfileForm.new_password = "";
-            this.editProfileForm.c_new_password = "";
-        })
-    },
-    methods: {
-        saveProfile() {
-            this.$refs["editProfileForm"].validate((valid) => {
-                if (valid) {
-                    this.submittingEditProfileForm = true;
-                    var user = new proto.evntsrc.users.User;
-                    user.setEmail(this.editProfileForm.email);
-                    user.setName(this.editProfileForm.name);
-                    user.setCompany(this.editProfileForm.company);
-
-                    var updateRequest = new proto.evntsrc.users.UserUpdateRequest;
-                    updateRequest.setUser(user);
-                    axios.post(this.$config.API+"/me", updateRequest.toObject()).then(resp => {
-                        this.$root.me = resp.data;
-                        this.$message({
-                                message: 'Profile updated successfully',
-                                type: 'success'
-                            });
-
-                        if (
-                            this.editProfileForm.current_password != "" 
-                            && this.editProfileForm.new_password != ""
-                            && this.editProfileForm.c_new_password != ""
-                            && this.editProfileForm.new_password == this.editProfileForm.c_new_password
-                        ) {
-                            var passRequest = new proto.evntsrc.users.PasswordUpdateRequest
-                            passRequest.setCurrentPassword(this.editProfileForm.current_password)
-                            passRequest.setPassword(this.editProfileForm.new_password)
-                            axios.post(this.$config.API+"/me/password", passRequest.toObject()).then(d => {
-                                this.submittingEditProfileForm = false;
-                                this.editProfileForm.current_password = "";
-                                this.editProfileForm.new_password = "";
-                                this.editProfileForm.c_new_password = "";
-                                this.$message({
-                                    message: 'Profile and password updated successfully',
-                                    type: 'success'
-                                });
-                            }).catch(err => {
-                                this.submittingEditProfileForm = false;
-                                const h = this.$createElement;
-                                this.$message({
-                                    message: h('div', {class: "el-message__content"}, [
-                                        h('div', null, 'Failed to update profile. Please try again.'),
-                                        h('small', null, err.response.data.error)
-                                    ]),
-                                    type: 'error'
-                                });
-                            })
-                        } else {
-                            this.submittingEditProfileForm = false;
-                        }
-                    
-                    }).catch(err => {
-                        this.submittingEditProfileForm = false;
-                        var errMsg = ""
-                        if (err != undefined) {
-                            errMsg += err.response.data.error
-                        }
-                        const h = this.$createElement;
-                        this.$message({
-                            message: h('div', {class: "el-message__content"}, [
-                                h('div', null, 'Failed to update profile. Please try again.'),
-                                h('small', null, errMsg)
-                            ]),
-                            type: 'error'
-                        });
-                    });
-                }
-            })
-
-        }
+  data() {
+    return {
+      submittingEditProfileForm: false,
+      editProfileForm: {
+        name: "",
+        email: "",
+        company: "",
+        current_password: "",
+        new_password: "",
+        c_new_password: ""
+      }
+    };
+  },
+  computed: {
+    editProfileRules() {
+      return {
+        name: [{ required: true, trigger: "blur" }],
+        email: [
+          { required: true, trigger: "blur" },
+          { type: "email", trigger: "blur" }
+        ],
+        new_password: [
+          {
+            required: this.editProfileForm.current_password != "",
+            trigger: "blur"
+          }
+        ],
+        c_new_password: [
+          {
+            required: this.editProfileForm.current_password != "",
+            trigger: "blur"
+          }
+        ]
+      };
     }
-}    
+  },
+  mounted() {
+    axios.get(this.$config.API + "/me").then(d => {
+      this.editProfileForm = d.data;
+      this.editProfileForm.current_password = "";
+      this.editProfileForm.new_password = "";
+      this.editProfileForm.c_new_password = "";
+    });
+  },
+  methods: {
+    saveProfile() {
+      this.$refs["editProfileForm"].validate(valid => {
+        if (valid) {
+          this.submittingEditProfileForm = true;
+          var user = new proto.evntsrc.users.User();
+          user.setEmail(this.editProfileForm.email);
+          user.setName(this.editProfileForm.name);
+          user.setCompany(this.editProfileForm.company);
+
+          var updateRequest = new proto.evntsrc.users.UserUpdateRequest();
+          updateRequest.setUser(user);
+          axios
+            .post(this.$config.API + "/me", updateRequest.toObject())
+            .then(resp => {
+              this.$root.me = resp.data;
+              this.$message({
+                message: "Profile updated successfully",
+                type: "success"
+              });
+
+              if (
+                this.editProfileForm.current_password != "" &&
+                this.editProfileForm.new_password != "" &&
+                this.editProfileForm.c_new_password != "" &&
+                this.editProfileForm.new_password ==
+                  this.editProfileForm.c_new_password
+              ) {
+                var passRequest = new proto.evntsrc.users.PasswordUpdateRequest();
+                passRequest.setCurrentPassword(
+                  this.editProfileForm.current_password
+                );
+                passRequest.setPassword(this.editProfileForm.new_password);
+                axios
+                  .post(
+                    this.$config.API + "/me/password",
+                    passRequest.toObject()
+                  )
+                  .then(d => {
+                    this.submittingEditProfileForm = false;
+                    this.editProfileForm.current_password = "";
+                    this.editProfileForm.new_password = "";
+                    this.editProfileForm.c_new_password = "";
+                    this.$message({
+                      message: "Profile and password updated successfully",
+                      type: "success"
+                    });
+                  })
+                  .catch(err => {
+                    this.submittingEditProfileForm = false;
+                    const h = this.$createElement;
+                    this.$message({
+                      message: h("div", { class: "el-message__content" }, [
+                        h(
+                          "div",
+                          null,
+                          "Failed to update profile. Please try again."
+                        ),
+                        h("small", null, err.response.data.error)
+                      ]),
+                      type: "error"
+                    });
+                  });
+              } else {
+                this.submittingEditProfileForm = false;
+              }
+            })
+            .catch(err => {
+              this.submittingEditProfileForm = false;
+              var errMsg = "";
+              if (err != undefined) {
+                errMsg += err.response.data.error;
+              }
+              const h = this.$createElement;
+              this.$message({
+                message: h("div", { class: "el-message__content" }, [
+                  h("div", null, "Failed to update profile. Please try again."),
+                  h("small", null, errMsg)
+                ]),
+                type: "error"
+              });
+            });
+        }
+      });
+    }
+  }
+};
 </script>
 <style lang="scss" scoped>
 small {
-    font-size: 11px;
-    color: #aaa;
+  font-size: 11px;
+  color: #aaa;
 }
 
 h5 ~ small {
-    margin-top: -20px;
-    display: block;
+  margin-top: -20px;
+  display: block;
 }
 </style>

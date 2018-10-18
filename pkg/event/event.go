@@ -57,17 +57,15 @@ func (e *Event) Store() error {
 
 	collection := dbConn.DB("events").C("store")
 
-	err = collection.Insert(e)
-	if err != nil {
+	if err = collection.Insert(e); err != nil {
 		log.Println(err.Error())
 		return err
 	}
 
-	err = collection.EnsureIndex(mgo.Index{
+	if err = collection.EnsureIndex(mgo.Index{
 		Key:    []string{"stream"},
 		Unique: false,
-	})
-	if err != nil {
+	}); err != nil {
 		log.Printf("Error ensuring stream index: %s\n", err.Error())
 	}
 

@@ -31,8 +31,7 @@ func newUserClient(ctx context.Context) (userSvc.UserServiceClient, error) {
 	md, _ := metadata.FromIncomingContext(ctx)
 	authReq := ReqAuth{}
 
-	auth := md.Get("authorization")
-	if auth != nil {
+	if auth := md.Get("authorization"); auth != nil {
 		authReq.Token = auth[0]
 	}
 

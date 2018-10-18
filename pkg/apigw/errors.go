@@ -19,11 +19,9 @@ func CustomHTTPError(ctx context.Context, _ *runtime.ServeMux, marshaler runtime
 
 	w.Header().Set("Content-type", marshaler.ContentType())
 	w.WriteHeader(runtime.HTTPStatusFromCode(grpc.Code(err)))
-	jErr := json.NewEncoder(w).Encode(errorBody{
+	if jErr := json.NewEncoder(w).Encode(errorBody{
 		Err: grpc.ErrorDesc(err),
-	})
-
-	if jErr != nil {
+	}); jErr != nil {
 		w.Write([]byte(fallback))
 	}
 }

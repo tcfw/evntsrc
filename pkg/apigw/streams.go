@@ -9,8 +9,7 @@ import (
 )
 
 func registerStreams(ctx context.Context, mux *runtime.ServeMux, opts []grpc.DialOption) {
-	err := streams.RegisterStreamsServiceHandlerFromEndpoint(ctx, mux, "streams:443", opts)
-	if err != nil {
+	if err := streams.RegisterStreamsServiceHandlerFromEndpoint(ctx, mux, "streams:443", opts); err != nil {
 		panic(err)
 	}
 }

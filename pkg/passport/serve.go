@@ -91,8 +91,7 @@ func validateMFA(user *userSvc.User) (*pb.AuthResponse, error) {
 			return nil, err
 		}
 		userReg := &u2f.Registration{}
-		err = json.Unmarshal(user.Mfa.GetFIDO().Registration, userReg)
-		if err != nil {
+		if err = json.Unmarshal(user.Mfa.GetFIDO().Registration, userReg); err != nil {
 			return nil, err
 		}
 		r := U2FChallenge.SignRequest([]u2f.Registration{*userReg})
@@ -151,8 +150,7 @@ func (s *Server) Authenticate(ctx context.Context, request *pb.AuthRequest) (*pb
 		}
 
 		//Validate password hash
-		err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.GetUserCreds().GetPassword()))
-		if err != nil {
+		if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.GetUserCreds().GetPassword())); err != nil {
 			grpc.SendHeader(ctx, metadata.Pairs("Grpc-Metadata-X-RateLimit-Remaining", fmt.Sprintf("%d", remaining+1)))
 			events.BroadcastNonStreamingEvent(ctx, events.AuthenticateEvent{Event: &events.Event{Type: "io.evntsrc.passport.limite_increased"}, Err: fmt.Sprintf("limit increased"), IP: remoteIP.String(), User: user.Id})
 			incRateLimit(username, remoteIP)

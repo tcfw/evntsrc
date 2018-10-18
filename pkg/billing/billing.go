@@ -19,7 +19,7 @@ import (
 	pb "github.com/tcfw/evntsrc/pkg/billing/protos"
 )
 
-const UserMetadataCustomerId = "stripe_customer_id"
+const UserMetadataCustomerID = "stripe_customer_id"
 
 //Server core struct
 type Server struct {
@@ -107,7 +107,7 @@ func (s *Server) CreateCustomerFromUser(ctx context.Context, request *pb.CreateR
 		return nil, err
 	}
 
-	user.Metadata[UserMetadataCustomerId] = []byte(customer.ID)
+	user.Metadata[UserMetadataCustomerID] = []byte(customer.ID)
 	_, err = users.Update(ctx, &evntsrc_users.UserUpdateRequest{Id: user.Id, User: user})
 	if err != nil {
 		return nil, fmt.Errorf("Failed to set customer id to user (%s => %s)", user.Id, customer.ID)
@@ -132,7 +132,7 @@ func (s *Server) AttachPaymentMethod(ctx context.Context, request *pb.CreateRequ
 		return nil, err
 	}
 
-	customerID, ok := user.Metadata[UserMetadataCustomerId]
+	customerID, ok := user.Metadata[UserMetadataCustomerID]
 	if !ok {
 		_, err := s.CreateCustomerFromUser(ctx, request)
 		return nil, err
@@ -161,7 +161,7 @@ func (s *Server) GetUserInfo(ctx context.Context, request *pb.InfoRequest) (*pb.
 		return nil, err
 	}
 
-	customerID, ok := user.Metadata[UserMetadataCustomerId]
+	customerID, ok := user.Metadata[UserMetadataCustomerID]
 	if !ok {
 		createResp, err := s.CreateCustomerFromUser(ctx, &pb.CreateRequest{UserId: request.UserId})
 		if err != nil {

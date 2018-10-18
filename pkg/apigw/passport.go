@@ -11,8 +11,7 @@ import (
 const passportEndpoint = "passport:443"
 
 func registerPassport(ctx context.Context, mux *runtime.ServeMux, opts []grpc.DialOption) {
-	err := passport.RegisterAuthSeviceHandlerFromEndpoint(ctx, mux, passportEndpoint, opts)
-	if err != nil {
+	if err := passport.RegisterAuthSeviceHandlerFromEndpoint(ctx, mux, passportEndpoint, opts); err != nil {
 		panic(err)
 	}
 }

@@ -11,8 +11,7 @@ import (
 const billingEndpoint = "billing:443"
 
 func registerBilling(ctx context.Context, mux *runtime.ServeMux, opts []grpc.DialOption) {
-	err := billing.RegisterBillingServiceHandlerFromEndpoint(ctx, mux, billingEndpoint, opts)
-	if err != nil {
+	if err := billing.RegisterBillingServiceHandlerFromEndpoint(ctx, mux, billingEndpoint, opts); err != nil {
 		panic(err)
 	}
 }

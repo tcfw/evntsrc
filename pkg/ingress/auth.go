@@ -38,8 +38,7 @@ func ValidateAuth(next http.Handler) http.Handler {
 		}
 		cli := streamauth.NewStreamAuthServiceClient(conn)
 
-		_, err = cli.ValidateKeySecret(context.Background(), &streamauth.KSRequest{Stream: *stream, Key: key, Secret: secret})
-		if err != nil {
+		if _, err = cli.ValidateKeySecret(context.Background(), &streamauth.KSRequest{Stream: *stream, Key: key, Secret: secret}); err != nil {
 			log.Println(err.Error())
 			http.Error(w, "Forbidden", http.StatusForbidden)
 			return

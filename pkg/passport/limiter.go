@@ -116,8 +116,7 @@ func redisClient() (*redis.Client, error) {
 		DB:       0,  // use default DB
 	})
 
-	_, err := client.Ping().Result()
-	if err != nil {
+	if _, err := client.Ping().Result(); err != nil {
 		return nil, err
 	}
 

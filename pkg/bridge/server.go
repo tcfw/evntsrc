@@ -22,8 +22,7 @@ func newServer() *server {
 }
 
 func (s *server) Publish(ctx context.Context, request *pb.PublishRequest) (*pb.GeneralResponse, error) {
-	err := s.ValidateAuth(request)
-	if err != nil {
+	if err := s.ValidateAuth(request); err != nil {
 		return nil, err
 	}
 
@@ -45,8 +44,7 @@ func (s *server) Subscribe(request *pb.SubscribeRequest, stream pb.BridgeService
 	}
 
 	ch := make(chan *nats.Msg, 64)
-	_, err = natsConn.ChanSubscribe(fmt.Sprintf("_USER.%d.%s", request.Stream, request.Channel), ch)
-	if err != nil {
+	if _, err = natsConn.ChanSubscribe(fmt.Sprintf("_USER.%d.%s", request.Stream, request.Channel), ch); err != nil {
 		return err
 	}
 

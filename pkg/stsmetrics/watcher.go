@@ -48,25 +48,22 @@ func StartWatch(natsEndpoint string) {
 
 		metricsCollection := dbConn.DB("metrics").C("storage_count")
 
-		err = metricsCollection.Insert(metric)
-		if err != nil && m.Reply != "" {
+		if err = metricsCollection.Insert(metric); err != nil && m.Reply != "" {
 			natsConn.Publish(m.Reply, []byte(err.Error()))
 			return
 		}
 
-		err = metricsCollection.EnsureIndex(mgo.Index{
+		if err = metricsCollection.EnsureIndex(mgo.Index{
 			Key:    []string{"stream"},
 			Unique: false,
-		})
-		if err != nil {
+		}); err != nil {
 			log.Printf("Failed to ensure index: %s", err.Error())
 		}
 
-		err = metricsCollection.EnsureIndex(mgo.Index{
+		if err = metricsCollection.EnsureIndex(mgo.Index{
 			Key:    []string{"time"},
 			Unique: false,
-		})
-		if err != nil {
+		}); err != nil {
 			log.Printf("Failed to ensure index: %s", err.Error())
 		}
 	})

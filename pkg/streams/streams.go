@@ -52,8 +52,7 @@ func (s *Server) validateCreate(request *pb.Stream) error {
 
 //Create @TODO
 func (s *Server) Create(ctx context.Context, request *pb.Stream) (*pb.Stream, error) {
-	err := s.validateCreate(request)
-	if err != nil {
+	if err := s.validateCreate(request); err != nil {
 		return nil, status.Errorf(codes.FailedPrecondition, err.Error())
 	}
 
@@ -73,8 +72,7 @@ func (s *Server) Create(ctx context.Context, request *pb.Stream) (*pb.Stream, er
 	request.Owner = userClaims["sub"].(string)
 	request.ID = int32(time.Now().Unix())
 
-	err = collection.Insert(request)
-	if err != nil {
+	if err = collection.Insert(request); err != nil {
 		log.Println(err.Error())
 		return nil, err
 	}
@@ -105,8 +103,7 @@ func (s *Server) List(ctx context.Context, request *pb.Empty) (*pb.StreamList, e
 	}
 
 	streams := []*pb.Stream{}
-	err = query.All(&streams)
-	if err != nil {
+	if err = query.All(&streams); err != nil {
 		return nil, err
 	}
 
@@ -137,8 +134,7 @@ func (s *Server) Get(ctx context.Context, request *pb.GetRequest) (*pb.Stream, e
 	}
 
 	stream := pb.Stream{}
-	err = query.One(&stream)
-	if err != nil {
+	if err = query.One(&stream); err != nil {
 		return nil, err
 	}
 

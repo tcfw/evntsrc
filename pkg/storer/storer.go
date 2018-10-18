@@ -36,8 +36,7 @@ func (ep *eventProcessor) Handle(job interface{}) {
 		return
 	}
 
-	err := usrEvent.Store()
-	if err != nil {
+	if err := usrEvent.Store(); err != nil {
 		log.Printf("%s\n", err.Error())
 	}
 }

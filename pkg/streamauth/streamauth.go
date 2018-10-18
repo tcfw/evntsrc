@@ -35,13 +35,11 @@ func newServer() *server {
 
 //Create creates a new stream key
 func (s *server) Create(ctx context.Context, request *pb.StreamKey) (*pb.StreamKey, error) {
-	err := request.Validate(true)
-	if err != nil {
+	if err := request.Validate(true); err != nil {
 		return nil, err
 	}
 
-	err = s.validateOwnership(ctx, request.GetStream())
-	if err != nil {
+	if err := s.validateOwnership(ctx, request.GetStream()); err != nil {
 		return nil, err
 	}
 
@@ -68,17 +66,15 @@ func (s *server) Create(ctx context.Context, request *pb.StreamKey) (*pb.StreamK
 	request.Key = key
 	request.Secret = secret
 
-	err = collection.Insert(request)
-	if err != nil {
+	if err = collection.Insert(request); err != nil {
 		log.Println(err.Error())
 		return nil, err
 	}
 
-	err = collection.EnsureIndex(mgo.Index{
+	if err = collection.EnsureIndex(mgo.Index{
 		Key:    []string{"stream"},
 		Unique: false,
-	})
-	if err != nil {
+	}); err != nil {
 		log.Printf("Error ensuring stream index: %s\n", err.Error())
 	}
 
@@ -89,8 +85,7 @@ func (s *server) Create(ctx context.Context, request *pb.StreamKey) (*pb.StreamK
 func randString(n int) (string, error) {
 	const letters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz."
 	bytes := make([]byte, n)
-	_, err := rand.Read(bytes)
-	if err != nil {
+	if _, err := rand.Read(bytes); err != nil {
 		return "", err
 	}
 
@@ -103,8 +98,7 @@ func randString(n int) (string, error) {
 
 //List gets all user stream keys for a single stream
 func (s *server) List(ctx context.Context, request *pb.ListRequest) (*pb.KeyList, error) {
-	err := s.validateOwnership(ctx, request.GetStream())
-	if err != nil {
+	if err := s.validateOwnership(ctx, request.GetStream()); err != nil {
 		return nil, err
 	}
 
@@ -124,8 +118,7 @@ func (s *server) List(ctx context.Context, request *pb.ListRequest) (*pb.KeyList
 	}
 
 	streamKeys := []*pb.StreamKey{}
-	err = query.All(&streamKeys)
-	if err != nil {
+	if err = query.All(&streamKeys); err != nil {
 		return nil, err
 	}
 
@@ -152,8 +145,8 @@ func (s *server) ListAll(ctx context.Context, request *pb.Empty) (*pb.KeyList, e
 	}
 
 	streamKeys := []*pb.StreamKey{}
-	err = query.All(&streamKeys)
-	if err != nil {
+
+	if err = query.All(&streamKeys); err != nil {
 		return nil, err
 	}
 
@@ -162,8 +155,7 @@ func (s *server) ListAll(ctx context.Context, request *pb.Empty) (*pb.KeyList, e
 
 //Get retreives a single key for user stream
 func (s *server) Get(ctx context.Context, request *pb.GetRequest) (*pb.StreamKey, error) {
-	err := s.validateOwnership(ctx, request.GetStream())
-	if err != nil {
+	if err := s.validateOwnership(ctx, request.GetStream()); err != nil {
 		return nil, err
 	}
 
@@ -183,8 +175,7 @@ func (s *server) Get(ctx context.Context, request *pb.GetRequest) (*pb.StreamKey
 	}
 
 	key := pb.StreamKey{}
-	err = query.One(&key)
-	if err != nil {
+	if err = query.One(&key); err != nil {
 		return nil, err
 	}
 
@@ -207,8 +198,7 @@ func (s *server) Update(ctx context.Context, request *pb.StreamKey) (*pb.StreamK
 
 //Delete @TODO
 func (s *server) Delete(ctx context.Context, request *pb.StreamKey) (*pb.Empty, error) {
-	err := s.validateOwnership(ctx, request.GetStream())
-	if err != nil {
+	if err := s.validateOwnership(ctx, request.GetStream()); err != nil {
 		return nil, err
 	}
 

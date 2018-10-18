@@ -11,8 +11,7 @@ import (
 const streamauthEndpoint = "streamauth:443"
 
 func registerStreamAuth(ctx context.Context, mux *runtime.ServeMux, opts []grpc.DialOption) {
-	err := streamauth.RegisterStreamAuthServiceHandlerFromEndpoint(ctx, mux, streamauthEndpoint, opts)
-	if err != nil {
+	if err := streamauth.RegisterStreamAuthServiceHandlerFromEndpoint(ctx, mux, streamauthEndpoint, opts); err != nil {
 		panic(err)
 	}
 }

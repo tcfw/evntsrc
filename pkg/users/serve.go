@@ -47,7 +47,6 @@ func (s *server) Create(ctx context.Context, request *protos.User) (*protos.User
 	collection := dbConn.DB(dbName).C(dbCollection)
 
 	id := bson.NewObjectId().Hex()
-
 	now := time.Now()
 
 	request.CreatedAt = &now
@@ -55,8 +54,7 @@ func (s *server) Create(ctx context.Context, request *protos.User) (*protos.User
 	request.Password = *password
 	request.Id = id
 
-	err = collection.Insert(request)
-	if err != nil {
+	if err = collection.Insert(request); err != nil {
 		return nil, err
 	}
 
@@ -89,14 +87,12 @@ func (s *server) Delete(ctx context.Context, request *protos.UserRequest) (*prot
 
 	switch reqType := request.Query.(type) {
 	case *protos.UserRequest_Id:
-		err = collection.RemoveId(user.Id)
-		if err == nil {
+		if err = collection.RemoveId(user.Id); err == nil {
 			events.BroadcastEvent(ctx, &events.UserEvent{Event: &events.Event{Type: "io.evntsrc.users.deleted"}, UserID: user.Id})
 		}
 		return &protos.Empty{}, err
 	case *protos.UserRequest_Email:
-		err = collection.Remove(bson.M{"email": user.Email})
-		if err == nil {
+		if err = collection.Remove(bson.M{"email": user.Email}); err == nil {
 			events.BroadcastEvent(ctx, &events.UserEvent{Event: &events.Event{Type: "io.evntsrc.users.deleted"}, UserID: user.Id})
 		}
 		return &protos.Empty{}, err
@@ -202,14 +198,11 @@ func (s *server) SetPassword(ctx context.Context, request *protos.PasswordUpdate
 	}
 
 	user := &protos.User{}
-
-	err = query.One(user)
-	if err != nil {
+	if err = query.One(user); err != nil {
 		return nil, err
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.GetCurrentPassword()))
-	if err != nil {
+	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.GetCurrentPassword())); err != nil {
 		return nil, errors.New("Current password doesn't match")
 	}
 
@@ -278,8 +271,7 @@ func (s *server) Update(ctx context.Context, request *protos.UserUpdateRequest) 
 		}
 	} else {
 		user := &protos.User{}
-		err = query.One(user)
-		if err != nil {
+		if err = query.One(user); err != nil {
 			return nil, err
 		}
 
@@ -290,8 +282,7 @@ func (s *server) Update(ctx context.Context, request *protos.UserUpdateRequest) 
 			user.Metadata[k] = v
 		}
 
-		err = collection.UpdateId(request.Id, user)
-		if err != nil {
+		if err = collection.UpdateId(request.Id, user); err != nil {
 			return nil, err
 		}
 	}

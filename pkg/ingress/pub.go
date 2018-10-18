@@ -18,8 +18,7 @@ import (
 func HandlePub(w http.ResponseWriter, r *http.Request) {
 	urlParts := mux.Vars(r)
 
-	_, ok := urlParts["stream"]
-	if !ok {
+	if _, ok := urlParts["stream"]; !ok {
 		http.Error(w, "Unable to determine stream", http.StatusBadRequest)
 		return
 	}

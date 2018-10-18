@@ -17,6 +17,9 @@
 # Certificates
 *.pem
 
+# Production config
+*.production
+
 # Vendor packages
 vendor
 node_modules

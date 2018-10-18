@@ -2,7 +2,6 @@ package websocks
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -13,7 +12,6 @@ import (
 	nats "github.com/nats-io/go-nats"
 	"github.com/tcfw/evntsrc/pkg/event"
 	streamauth "github.com/tcfw/evntsrc/pkg/streamauth/protos"
-	"google.golang.org/grpc"
 )
 
 const (
@@ -49,29 +47,150 @@ type Client struct {
 	auth    *AuthCommand
 	authKey *streamauth.StreamKey
 
+	//Connection state
 	connectionID string
 	seq          map[string]int64
 	seqLock      sync.Mutex
 	closed       bool
 }
 
-func (c *Client) subscribe(channel string) {
+func (c *Client) close() {
+	c.conn.Close()
+
+	if !c.closed {
+		go c.broadcastDisconnect()
+	}
+	c.closed = true
+
+	for channel := range c.subscriptions {
+		close(c.subscriptions[channel])
+		delete(c.subscriptions, channel)
+	}
+}
+
+func (c *Client) sendStruct(msg interface{}) error {
+	msgBytes, err := json.Marshal(msg)
+	if err != nil {
+		return err
+	}
+
+	c.send <- msgBytes
+	return nil
+}
+
+func (c *Client) processCommand(command *InboundCommand, message []byte) {
+	switch command.Command {
+	case commandSubscribe:
+		subcommand := &SubscribeCommand{}
+		if err := json.Unmarshal(message, subcommand); err != nil {
+			c.sendStruct(&AckCommand{Acktype: "Error", Error: "Failed to parse command"})
+			return
+		}
+		c.Subscribe(subcommand.Subject)
+
+	case commandUnsubscribe:
+		subcommand := &UnsubscribeCommand{}
+		if err := json.Unmarshal(message, subcommand); err != nil {
+			c.sendStruct(&AckCommand{Acktype: "Error", Error: "Failed to parse command"})
+			return
+		}
+		c.Unsubscribe(subcommand.Subject)
+
+	case commandPublish:
+		subcommand := &PublishCommand{}
+		if err := json.Unmarshal(message, subcommand); err != nil {
+			c.sendStruct(&AckCommand{Acktype: "Error", Error: "Failed to parse command"})
+			return
+		}
+
+		rEvent := &event.Event{}
+		rEvent.SetID()
+		rEvent.Stream = c.auth.Stream
+		rEvent.Subject = subcommand.Subject
+		rEvent.CEVersion = "0.1"
+		rEvent.Type = subcommand.Type
+		rEvent.TypeVersion = subcommand.TypeVersion
+		rEvent.ContentType = subcommand.ContentType
+		rEvent.Data = []byte(subcommand.Data)
+		rEvent.Time = event.ZeroableTime{Time: time.Now()}
+		rEvent.Metadata = map[string]string{"source_ip": c.conn.RemoteAddr().String()}
+		rEvent.Source = subcommand.Source
+		if rEvent.Source == "" {
+			rEvent.Source = "ws"
+		}
+
+		channel := fmt.Sprintf("_USER.%d.%s", c.auth.Stream, subcommand.Subject)
+
+		c.seqLock.Lock()
+		c.seq[channel]++
+		rEvent.Metadata["relative_seq"] = fmt.Sprintf("%s-%d", c.connectionID, c.seq[channel])
+		c.seqLock.Unlock()
+
+		eventJSONBytes, _ := json.Marshal(rEvent)
+		natsConn.Publish(channel, eventJSONBytes)
+
+	case commandAuth:
+		subcommand := &AuthCommand{}
+		if err := json.Unmarshal(message, subcommand); err != nil {
+			c.sendStruct(&AckCommand{Acktype: "Error", Error: "Failed to parse command"})
+			return
+		}
+
+		if err := c.validateAuth(subcommand); err != nil {
+			c.sendStruct(&AckCommand{
+				Acktype: "Failed",
+				Error:   err.Error(),
+			})
+			return
+		}
+
+		c.auth = subcommand
+		c.sendStruct(&AckCommand{
+			Acktype: "OK",
+		})
+		go c.broadcastConnect()
+
+	case commandReplay:
+		subcommand := &ReplayCommand{}
+		if err := json.Unmarshal(message, subcommand); err != nil {
+			c.sendStruct(&AckCommand{Acktype: "Error", Error: "Failed to parse command"})
+			return
+		}
+		subcommand.Stream = c.auth.Stream
+
+		//Request replay to storer svc
+		repubBytes, _ := json.Marshal(subcommand)
+		msg, err := natsConn.Request("replay.broadcast", repubBytes, time.Second*10)
+		ack := &AckCommand{
+			Acktype: "err",
+		}
+		if err != nil {
+			ack.Error = err.Error()
+		} else {
+			ack.Error = string(msg.Data)
+		}
+		c.sendStruct(ack)
+	}
+}
+
+//Subscribe opens a NATS subscription for the websocket
+func (c *Client) Subscribe(channel string) {
 	if _, ok := c.subscriptions[channel]; ok {
-		ack := &AckSubUnSucCommand{
+		c.sendStruct(&AckCommand{
 			Acktype: "err",
 			Error:   fmt.Sprintf("already subscribed to %s", channel),
 			Channel: channel,
-		}
-		ackBytes, _ := json.Marshal(ack)
-		c.send <- ackBytes
+		})
 		return
 	}
+
 	c.subscriptions[channel] = make(chan bool)
 
+	//Subscribe to NATS user channel and forward events to websocket
 	go func(c *Client, channel string, unsub chan bool) {
 		ch := make(chan *nats.Msg, 64)
 		sub, err := natsConn.ChanSubscribe(fmt.Sprintf("_USER.%d.%s", c.auth.Stream, channel), ch)
-		ack := &AckSubUnSucCommand{
+		ack := &AckCommand{
 			Acktype: "sub",
 			Channel: channel,
 		}
@@ -80,9 +199,8 @@ func (c *Client) subscribe(channel string) {
 			ack.Error = err.Error()
 		}
 
-		ackBytes, _ := json.Marshal(ack)
-		c.send <- ackBytes
-		go c.advertiseSub(channel)
+		c.sendStruct(ack)
+		go c.broadcastSub(channel)
 
 		if err == nil {
 			for {
@@ -99,40 +217,24 @@ func (c *Client) subscribe(channel string) {
 	}(c, channel, c.subscriptions[channel])
 }
 
-func (c *Client) unsubscribe(channel string) {
+//Unsubscribe closes a subscription to NATS
+func (c *Client) Unsubscribe(channel string) {
 	if _, ok := c.subscriptions[channel]; !ok {
-		ack := &AckSubUnSucCommand{
+		c.sendStruct(&AckCommand{
 			Acktype: "err",
 			Error:   fmt.Sprintf("not subscribed to %s", channel),
 			Channel: channel,
-		}
-		ackBytes, _ := json.Marshal(ack)
-		c.send <- ackBytes
+		})
 		return
 	}
 	close(c.subscriptions[channel])
 	delete(c.subscriptions, channel)
 
-	ack := &AckSubUnSucCommand{
+	c.sendStruct(&AckCommand{
 		Acktype: "unsub",
 		Channel: channel,
-	}
-
-	ackBytes, _ := json.Marshal(ack)
-	c.send <- ackBytes
-	go c.advertiseUnsub(channel)
-}
-
-func (c *Client) close() {
-	c.conn.Close()
-	for channel := range c.subscriptions {
-		close(c.subscriptions[channel])
-		delete(c.subscriptions, channel)
-	}
-	if !c.closed {
-		go c.advertiseDisconnect()
-	}
-	c.closed = true
+	})
+	go c.broadcastUnsub(channel)
 }
 
 func (c *Client) readPump() {
@@ -155,112 +257,21 @@ func (c *Client) readPump() {
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 
 		command := &InboundCommand{}
-		err = json.Unmarshal(message, command)
-		if err != nil {
+		if err = json.Unmarshal(message, command); err != nil {
 			log.Printf("Failed to parse command: %s\n", err.Error())
-		} else {
-			if command.Command != commandAuth && c.auth == nil {
-				ack := &AckSubUnSucCommand{
-					Acktype: "err",
-					Error:   "No auth sent yet",
-				}
-				ackBytes, _ := json.Marshal(ack)
-				c.send <- ackBytes
-			} else {
-				c.processCommand(command, message)
-			}
-		}
-	}
-}
-
-func (c *Client) processCommand(command *InboundCommand, message []byte) {
-	switch command.Command {
-	case commandSubscribe:
-		subcommand := &SubscribeCommand{}
-		json.Unmarshal(message, subcommand)
-		c.subscribe(subcommand.Subject)
-	case commandUnsubscribe:
-		subcommand := &UnsubscribeCommand{}
-		json.Unmarshal(message, subcommand)
-		c.unsubscribe(subcommand.Subject)
-	case commandPublish:
-		subcommand := &PublishCommand{}
-		json.Unmarshal(message, subcommand)
-
-		rEvent := &event.Event{}
-		rEvent.SetID()
-		rEvent.Stream = c.auth.Stream
-		rEvent.Source = subcommand.Source
-		if rEvent.Source == "" {
-			rEvent.Source = "ws"
-		}
-		rEvent.Subject = subcommand.Subject
-		rEvent.CEVersion = "0.1"
-		rEvent.Type = subcommand.Type
-		rEvent.TypeVersion = subcommand.TypeVersion
-		rEvent.ContentType = subcommand.ContentType
-		rEvent.Data = []byte(subcommand.Data)
-		rEvent.Time = event.ZeroableTime{Time: time.Now()}
-		rEvent.Metadata = map[string]string{}
-		rEvent.Metadata["source_ip"] = c.conn.RemoteAddr().String()
-
-		channel := fmt.Sprintf("_USER.%d.%s", c.auth.Stream, subcommand.Subject)
-
-		c.seqLock.Lock()
-		count := c.seq[channel]
-		count++
-		c.seq[channel] = count
-		rEvent.Metadata["relative_seq"] = fmt.Sprintf("%s-%d", c.connectionID, count)
-		c.seqLock.Unlock()
-
-		eventJSONBytes, _ := json.Marshal(rEvent)
-
-		natsConn.Publish(channel, eventJSONBytes)
-	case commandAuth:
-		subcommand := &AuthCommand{}
-		json.Unmarshal(message, subcommand)
-
-		if err := c.validateAuth(subcommand); err != nil {
-			ack := &AckSubUnSucCommand{
-				Acktype: "Failed",
-				Error:   err.Error(),
-			}
-			ackBytes, _ := json.Marshal(ack)
-			c.send <- ackBytes
-			return
+			c.sendStruct(&AckCommand{Acktype: "Error", Error: "Failed to parse command"})
+			continue
 		}
 
-		//TODO verify auth info
-		c.auth = subcommand
-		ack := &AckSubUnSucCommand{
-			Acktype: "OK",
-		}
-		ackBytes, _ := json.Marshal(ack)
-		c.send <- ackBytes
-		go c.advertiseConnect()
-	case commandReplay:
-		subcommand := &ReplayCommand{}
-		json.Unmarshal(message, subcommand)
-		subcommand.Stream = c.auth.Stream
-
-		repubBytes, _ := json.Marshal(subcommand)
-
-		msg, err := natsConn.Request("replay.broadcast", repubBytes, time.Second*10)
-		if err != nil {
-			ack := &AckSubUnSucCommand{
+		if command.Command != commandAuth && c.auth == nil {
+			c.sendStruct(&AckCommand{
 				Acktype: "err",
-				Error:   err.Error(),
-			}
-			ackBytes, _ := json.Marshal(ack)
-			c.send <- ackBytes
-		} else {
-			ack := &AckSubUnSucCommand{
-				Acktype: "err",
-				Error:   string(msg.Data),
-			}
-			ackBytes, _ := json.Marshal(ack)
-			c.send <- ackBytes
+				Error:   "No auth sent yet",
+			})
+			continue
 		}
+
+		c.processCommand(command, message)
 	}
 }
 
@@ -270,6 +281,7 @@ func (c *Client) writePump() {
 		ticker.Stop()
 		c.close()
 	}()
+
 	for {
 		select {
 		case message, ok := <-c.send:
@@ -303,18 +315,4 @@ func (c *Client) writePump() {
 			}
 		}
 	}
-}
-
-func (c *Client) validateAuth(auth *AuthCommand) error {
-	//@TODO pass through passport instead
-	conn, err := grpc.Dial("streamauth:443", grpc.WithInsecure())
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-	cli := streamauth.NewStreamAuthServiceClient(conn)
-
-	sk, err := cli.ValidateKeySecret(context.Background(), &streamauth.KSRequest{Stream: auth.Stream, Key: auth.Key, Secret: auth.Secret})
-	c.authKey = sk
-	return err
 }

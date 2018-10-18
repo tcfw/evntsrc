@@ -9,7 +9,7 @@ import (
 	"github.com/tcfw/evntsrc/pkg/event"
 )
 
-func (c *Client) publishAdvert(eventType string, data []byte) {
+func (c *Client) publishBroadcast(eventType string, data []byte) {
 	rEvent := &event.Event{}
 	rEvent.SetID()
 	rEvent.Stream = c.auth.Stream
@@ -36,18 +36,18 @@ func (c *Client) publishAdvert(eventType string, data []byte) {
 	natsConn.Publish(channel, eventJSONBytes)
 }
 
-func (c *Client) advertiseConnect() {
-	c.publishAdvert("connect", nil)
+func (c *Client) broadcastConnect() {
+	c.publishBroadcast("connect", nil)
 }
 
-func (c *Client) advertiseDisconnect() {
-	c.publishAdvert("disconnect", nil)
+func (c *Client) broadcastDisconnect() {
+	c.publishBroadcast("disconnect", nil)
 }
 
-func (c *Client) advertiseSub(subject string) {
-	c.publishAdvert("subscribe", []byte(subject))
+func (c *Client) broadcastSub(subject string) {
+	c.publishBroadcast("subscribe", []byte(subject))
 }
 
-func (c *Client) advertiseUnsub(subject string) {
-	c.publishAdvert("unsubscribe", []byte(subject))
+func (c *Client) broadcastUnsub(subject string) {
+	c.publishBroadcast("unsubscribe", []byte(subject))
 }

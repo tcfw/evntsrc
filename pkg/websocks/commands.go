@@ -45,8 +45,8 @@ type UnsubscribeCommand struct {
 	Subject string `json:"subject"`
 }
 
-//AckSubUnSucCommand provides error responses to WS clients
-type AckSubUnSucCommand struct {
+//AckCommand provides error responses to WS clients
+type AckCommand struct {
 	Acktype string `json:"acktype"`
 	Channel string `json:"string"`
 	Error   string `json:"error,omitempty"`

@@ -15,7 +15,7 @@ import (
 )
 
 func TestCreate(t *testing.T) {
-	os.Setenv("DB_HOST", "192.168.99.100:32577")
+	os.Setenv("DB_HOST", "localhost:27017")
 
 	s := &server{}
 	s.streamConn = NewMockStreamClient()
@@ -59,7 +59,7 @@ func TestInvalidCreate(t *testing.T) {
 }
 
 func TestGet(t *testing.T) {
-	os.Setenv("DB_HOST", "192.168.99.100:32577")
+	os.Setenv("DB_HOST", "localhost:27017")
 
 	s := &server{}
 	s.streamConn = NewMockStreamClient()
@@ -87,7 +87,7 @@ func TestGet(t *testing.T) {
 	s.Delete(ctx, sk)
 }
 func TestList(t *testing.T) {
-	os.Setenv("DB_HOST", "192.168.99.100:32577")
+	os.Setenv("DB_HOST", "localhost:27017")
 
 	s := &server{}
 	s.streamConn = NewMockStreamClient()
@@ -126,7 +126,7 @@ func TestList(t *testing.T) {
 //TestValidateOwnership tests remove validation of stream ownership
 func TestValidateOwnership(t *testing.T) {
 
-	os.Setenv("DB_HOST", "192.168.99.100:32577")
+	os.Setenv("DB_HOST", "localhost:27017")
 
 	s := &server{}
 	s.streamConn = NewMockStreamClient()

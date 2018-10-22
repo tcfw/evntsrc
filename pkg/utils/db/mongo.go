@@ -10,7 +10,7 @@ import (
 func NewMongoDBSession() (*mgo.Session, error) {
 	dbConnHost, exists := os.LookupEnv("DB_HOST")
 	if exists == false {
-		dbConnHost = "localhost:30180"
+		dbConnHost = "localhost:27017"
 	}
 
 	session, err := mgo.Dial(dbConnHost)

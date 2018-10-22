@@ -188,7 +188,6 @@ service BillingService {
 			body: "*"
 		};
 	}
-	rpc GetUserSubscriptions (UserSubscriptionsRequest) returns (UserSubscriptionsResponse);
 	rpc SubscribeUser (SubscribeRequest) returns (SubscribeResponse);
 	rpc TerminateSubscription (TerminateRequest) returns (Empty);
 }

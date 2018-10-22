@@ -6,17 +6,15 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/tcfw/evntsrc/pkg/users/protos"
-
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-
 	stripe "github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/customer"
 	"github.com/stripe/stripe-go/plan"
 	"github.com/stripe/stripe-go/product"
 	"github.com/stripe/stripe-go/sub"
 	pb "github.com/tcfw/evntsrc/pkg/billing/protos"
+	"github.com/tcfw/evntsrc/pkg/users/protos"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 const userMetadataCustomerID = "stripe_customer_id"
@@ -265,11 +263,6 @@ func (s *Server) GetUserInfo(ctx context.Context, request *pb.InfoRequest) (*pb.
 	wg.Wait()
 
 	return rCustomer, nil
-}
-
-//GetUserSubscriptions @TODO
-func (s *Server) GetUserSubscriptions(ctx context.Context, request *pb.UserSubscriptionsRequest) (*pb.UserSubscriptionsResponse, error) {
-	return nil, status.Errorf(codes.Unavailable, "Not implemented")
 }
 
 //SubscribeUser @TODO

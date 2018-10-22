@@ -1,5 +1,5 @@
-hash: 6c6a757f49ad3ad0e633eb30a1451a06bffd658c27eaff7be05c76c065cd9e6b
-updated: 2018-10-19T10:49:02.270399+11:00
+hash: b79d9d085ddc445acc26da5c4d1449489eda6729e030c0bc05fd606c89df437d
+updated: 2018-10-23T10:42:53.713304+11:00
 imports:
 - name: github.com/beorn7/perks
   version: 3a771d992973f24aa725d07868b467d1ddfceafb
@@ -57,7 +57,7 @@ imports:
 - name: github.com/gorilla/websocket
   version: 66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d
 - name: github.com/grpc-ecosystem/grpc-gateway
-  version: 1771d343101c454e385245932874d7b5b078819d
+  version: f7cf64976c2a46ce866933fa726e89cbb6f31977
   subpackages:
   - runtime
   - runtime/internal
@@ -99,7 +99,7 @@ imports:
 - name: github.com/pelletier/go-toml
   version: c2dbbc24a97911339e01bda0b8cabdbd8f13b602
 - name: github.com/prometheus/client_golang
-  version: 1cafe34db7fdec6022e17e00e1c1ea501022f3e4
+  version: 16f375c74db6ccf880e1cd9c6c6087a6d58e5d12
   subpackages:
   - prometheus
   - prometheus/internal
@@ -108,7 +108,7 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: bcb74de08d37a417cb6789eec1d6c810040f0470
+  version: 7e9e6cabbd393fc208072eedef99188d0ce788b6
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
@@ -140,13 +140,15 @@ imports:
 - name: github.com/spf13/viper
   version: 2c12c60302a5a0e62ee102ca9bc996277c2f64f5
 - name: github.com/stripe/stripe-go
-  version: 5d00b1a66777515527a2a5eb7828ede4cf7d4ed2
+  version: 08bc5b80342e37468259c836503cb81760871eb7
   subpackages:
   - customer
   - form
   - plan
   - product
   - sub
+- name: github.com/tcfw/go-queue
+  version: 64cb287a1bcce8546e25cc41b5e417d5ab55cf04
 - name: github.com/tstranex/u2f
   version: d21a03e0b1d9fc1df59ff54e7a513655c1748b0c
 - name: golang.org/x/crypto

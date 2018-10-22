@@ -25,3 +25,4 @@ import:
   version: ^1.0.0
 - package: github.com/stripe/stripe-go
   version: ^51.3.0
+- package: github.com/tcfw/go-queue

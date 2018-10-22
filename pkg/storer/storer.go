@@ -6,13 +6,12 @@ import (
 	"log"
 	"runtime"
 
-	"github.com/tcfw/evntsrc/pkg/event"
-	"github.com/tcfw/evntsrc/pkg/utils/db"
-	"github.com/tcfw/evntsrc/pkg/utils/hvwq"
-	"github.com/tcfw/evntsrc/pkg/websocks"
-
 	"github.com/globalsign/mgo/bson"
 	nats "github.com/nats-io/go-nats"
+	"github.com/tcfw/evntsrc/pkg/event"
+	"github.com/tcfw/evntsrc/pkg/utils/db"
+	"github.com/tcfw/evntsrc/pkg/websocks"
+	"github.com/tcfw/go-queue"
 )
 
 //StartMonitor subscripts to all user channels
@@ -44,7 +43,7 @@ func (ep *eventProcessor) Handle(job interface{}) {
 func monitorUserStreams() {
 	log.Println("Watching for user streams...")
 
-	dispatcher := hvwq.NewDispatcher(&eventProcessor{})
+	dispatcher := queue.NewDispatcher(&eventProcessor{})
 	if c := runtime.NumCPU(); c < 4 {
 		dispatcher.MaxWorkers = 4
 	}

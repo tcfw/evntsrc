@@ -18,6 +18,8 @@ func Run(port int) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
+	go startMetrics()
+
 	runtime.HTTPError = CustomHTTPError
 
 	// defaultMarshaler := runtime.WithMarshalerOption(runtime.MIMEWildcard, &protoutil.JSONPb{OrigName: true})
@@ -35,6 +37,7 @@ func Run(port int) error {
 	registerBilling(ctx, mux, opts)
 
 	handler := tracingWrapper(mux)
+	handler = metricsMiddleware(mux)
 	handler = authGuard(handler)
 	handler = logger.Handler(handler, os.Stdout, logger.CommonLoggerType)
 	handler = cors.AllowAll().Handler(handler)

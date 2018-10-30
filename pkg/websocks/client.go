@@ -10,6 +10,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	nats "github.com/nats-io/go-nats"
+	metrics "github.com/rcrowley/go-metrics"
 	"github.com/tcfw/evntsrc/pkg/event"
 	streamauth "github.com/tcfw/evntsrc/pkg/streamauth/protos"
 )
@@ -59,6 +60,8 @@ func (c *Client) close() {
 
 	if !c.closed {
 		go c.broadcastDisconnect()
+		m := metrics.GetOrRegisterCounter("wsConnections", nil)
+		m.Dec(1)
 	}
 	c.closed = true
 

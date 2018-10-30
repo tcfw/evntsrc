@@ -4,18 +4,24 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 //startHTTPServer provides a HTTP server for / and websockets
 func startHTTPServer(port int) {
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+	mux := mux.NewRouter()
+
+	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		serveWs(w, r)
 	})
+
+	mux.Use(metricsMiddleware)
 
 	addr := fmt.Sprintf(":%d", port)
 
 	log.Println("Starting HTTP server...")
-	err := http.ListenAndServe(addr, nil)
+	err := http.ListenAndServe(addr, mux)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
@@ -25,6 +31,8 @@ func startHTTPServer(port int) {
 func Run(webPort int, natsEndpoint string) {
 	connectNats(natsEndpoint)
 	defer natsConn.Close()
+
+	startMetrics()
 
 	startHTTPServer(webPort)
 }

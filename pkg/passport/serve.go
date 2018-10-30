@@ -236,7 +236,7 @@ func (s *Server) SocialLogin(ctx context.Context, request *pb.SocialRequest) (*p
 	info, err := getSocialInfo(request)
 
 	if err != nil || info.Email == "" {
-		return &pb.AuthResponse{Success: false}, fmt.Errorf("failed to login using provided tokens")
+		return &pb.AuthResponse{Success: false}, fmt.Errorf("failed to login using provided tokens: %s", err)
 	}
 
 	users, err := newUserClient(ctx)

@@ -176,7 +176,7 @@ func TestRunAdapterV8SyntaxError(t *testing.T) {
 
 	_, _, err := RunV8Adapter(adapter, event)
 
-	assert.Error(t, err, "An exception should have occured")
+	assert.Error(t, err, "An exception should have occurred")
 	assert.Equal(t, "Uncaught", string(err.Error()[0:8]))
 }
 
@@ -218,7 +218,7 @@ document.head.appendChild(script);
 
 	_, _, err := RunV8Adapter(adapter, event)
 
-	assert.Error(t, err, "An exception should have occured")
+	assert.Error(t, err, "An exception should have occurred")
 }
 
 func TestRunAdapterV8AttemptXHR(t *testing.T) {
@@ -235,5 +235,5 @@ xhttp.send();
 
 	_, _, err := RunV8Adapter(adapter, event)
 
-	assert.Error(t, err, "An exception should have occured")
+	assert.Error(t, err, "An exception should have occurred")
 }

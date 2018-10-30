@@ -1,8 +1,10 @@
-hash: b79d9d085ddc445acc26da5c4d1449489eda6729e030c0bc05fd606c89df437d
-updated: 2018-10-23T10:42:53.713304+11:00
+hash: 7debaaf616e47d89cf74efc85fd079298adcdf060fc7ac4061fdb930c567d7b5
+updated: 2018-10-29T14:54:41.494532+11:00
 imports:
+- name: github.com/augustoroman/v8
+  version: ba08a518420f19b3c2829438394e418651409d1c
 - name: github.com/beorn7/perks
-  version: 3a771d992973f24aa725d07868b467d1ddfceafb
+  version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
   subpackages:
   - quantile
 - name: github.com/dgrijalva/jwt-go
@@ -53,7 +55,7 @@ imports:
 - name: github.com/google/uuid
   version: d460ce9f8df2e77fb1ba55ca87fafed96c607494
 - name: github.com/gorilla/mux
-  version: deb579d6e030503f430978ee229008b9bc912d40
+  version: 521ea7b17d02faf8d3afea6737573942ceac59c5
 - name: github.com/gorilla/websocket
   version: 66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d
 - name: github.com/grpc-ecosystem/grpc-gateway
@@ -76,10 +78,21 @@ imports:
   - json/token
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
+- name: github.com/influxdata/influxdb
+  version: 6a98bb8aa401741099a73f2c7ee1acdb0466e999
+  subpackages:
+  - client
+  - models
+  - pkg/escape
+- name: github.com/influxdata/platform
+  version: cf46ff8f49f313dd7219b068c06a3e0bc549f027
+  subpackages:
+  - models
+  - pkg/escape
 - name: github.com/magiconair/properties
   version: c2353362d570a7bfa228149c62842019201cfb71
 - name: github.com/matttproud/golang_protobuf_extensions
-  version: c12348ce28de40eed0136aa2b644d0ee0650e56c
+  version: 3247c84500bff8d9fb6d579d800f20b3e091582c
   subpackages:
   - pbutil
 - name: github.com/mitchellh/mapstructure
@@ -99,26 +112,28 @@ imports:
 - name: github.com/pelletier/go-toml
   version: c2dbbc24a97911339e01bda0b8cabdbd8f13b602
 - name: github.com/prometheus/client_golang
-  version: 16f375c74db6ccf880e1cd9c6c6087a6d58e5d12
+  version: 1cafe34db7fdec6022e17e00e1c1ea501022f3e4
   subpackages:
   - prometheus
   - prometheus/internal
 - name: github.com/prometheus/client_model
-  version: 5c3871d89910bfb32f5fcab2aa4b9ec68e65a99f
+  version: 99fa1f4be8e564e8a6b613da7fa6f46c9edafc6c
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: 7e9e6cabbd393fc208072eedef99188d0ce788b6
+  version: e4aa40a9169a88835b849a6efb71e05dc04b88f0
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: 185b4288413d2a0dd0806f78c90dde719829e5ae
+  version: 54d17b57dd7d4a3aa092476596b3f8a933bde349
   subpackages:
   - internal/util
   - nfs
   - xfs
+- name: github.com/rcrowley/go-metrics
+  version: 3113b8401b8a98917cde58f8bbd42a1b1c03b1fd
 - name: github.com/robfig/cron
   version: b41be1df696709bb6395fe435af20370037c0b4c
 - name: github.com/rs/cors
@@ -148,16 +163,18 @@ imports:
   - product
   - sub
 - name: github.com/tcfw/go-queue
-  version: 64cb287a1bcce8546e25cc41b5e417d5ab55cf04
+  version: d9d11e86c81c29f05e990d20e6c10700e5460e08
 - name: github.com/tstranex/u2f
   version: d21a03e0b1d9fc1df59ff54e7a513655c1748b0c
+- name: github.com/vrischmann/go-metrics-influxdb
+  version: 43af8332c303f62ef62663b02b3b7d8a9802002a
 - name: golang.org/x/crypto
   version: a49355c7e3f8fe157a85be2f77e6e269a0f89602
   subpackages:
   - bcrypt
   - blowfish
 - name: golang.org/x/net
-  version: a337091b0525af65de94df2eb7e98bd9962dcbe2
+  version: 92b859f39abd2d91a854c9f9c4621b2f5054a92d
   subpackages:
   - context
   - http2
@@ -167,11 +184,11 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/sys
-  version: d0be0721c37eeb5299f245a996a483160fc36940
+  version: d8e400bc7db4870d786864138af681469693d18c
   subpackages:
   - unix
 - name: golang.org/x/text
-  version: 5c1cf69b5978e5a34c5f9ba09a83e56acc4b7877
+  version: f21a4dfb5e38f5895301dc265a8def02365cc3d0
   subpackages:
   - secure/bidirule
   - transform
@@ -182,7 +199,7 @@ imports:
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: 32fb0ac620c32ba40a4626ddf94d90d12cce3455
+  version: 168a6198bcb0ef175f7dacec0b8691fc141dc9b8
   subpackages:
   - balancer
   - balancer/base
@@ -196,9 +213,7 @@ imports:
   - internal
   - internal/backoff
   - internal/channelz
-  - internal/envconfig
   - internal/grpcrand
-  - internal/transport
   - keepalive
   - metadata
   - naming
@@ -209,6 +224,7 @@ imports:
   - stats
   - status
   - tap
+  - transport
 - name: gopkg.in/mgo.v2
   version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
   subpackages:
@@ -220,7 +236,7 @@ testImports:
 - name: github.com/corpix/uarand
   version: 2b8494104d86337cdd41d0a49cbed8e4583c0ab4
 - name: github.com/davecgh/go-spew
-  version: d8f796af33cc11cb798c1aaeb27a4ebc5099927d
+  version: 346938d642f2ec3594ed81d874461961cd0faa76
   subpackages:
   - spew
 - name: github.com/icrowley/fake
@@ -230,6 +246,6 @@ testImports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: 04af85275a5c7ac09d16bb3b9b2e751ed45154e5
+  version: f35b8ab0b5a2cef36673838d662e249dd9c94686
   subpackages:
   - assert

@@ -2,15 +2,22 @@
 
 # Components
 ## Ingress
-- http -> converters
+- http -> adapters
 - ws
 - grpc
 
 ## Store
-- mongodb?
+- mongodb
 
 ## Cluster Distribution
 - NATS
+
+## Adapters
+- JS V8 engine
+- Python
+- Lua
+- Built in adapters:
+  - bitbucket
 
 ## Egress
 - http -> webhooks

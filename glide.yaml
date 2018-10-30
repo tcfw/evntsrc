@@ -26,3 +26,6 @@ import:
 - package: github.com/stripe/stripe-go
   version: ^51.3.0
 - package: github.com/tcfw/go-queue
+- package: github.com/rcrowley/go-metrics
+- package: github.com/vrischmann/go-metrics-influxdb
+- package: github.com/augustoroman/v8

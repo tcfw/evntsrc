@@ -28,13 +28,12 @@ spec:
     spec:
       containers:
       - name: passport
-        imagePullPolicy: Never
         image: asia.gcr.io/evntsrc-io/passport:latest
         ports:
         - containerPort: 443
         env:
         - name: NATS_HOST
-          value: "nats:4222"
+          value: "nats.nats-io:4222"
         - name: REDIS_HOST
           value: "redis:6379"
         volumeMounts:

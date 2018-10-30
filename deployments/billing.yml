@@ -28,7 +28,6 @@ spec:
     spec:
       containers:
       - name: billing
-        imagePullPolicy: Never
         image: asia.gcr.io/evntsrc-io/billing:latest
         ports:
         - containerPort: 443

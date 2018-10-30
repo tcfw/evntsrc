@@ -28,7 +28,6 @@ spec:
     spec:
       containers:
       - name: streamauth
-        imagePullPolicy: Never
         image: asia.gcr.io/evntsrc-io/streamauth:latest
         ports:
         - containerPort: 443

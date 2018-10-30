@@ -28,7 +28,6 @@ spec:
     spec:
       containers:
       - name: streams
-        imagePullPolicy: Never
         image: asia.gcr.io/evntsrc-io/streams:latest
         ports:
         - containerPort: 443

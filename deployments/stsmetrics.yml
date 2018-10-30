@@ -17,12 +17,11 @@ spec:
     spec:
       containers:
       - name: stsmetrics
-        imagePullPolicy: Never
         image: asia.gcr.io/evntsrc-io/stsmetrics:latest
         args:
         - stsmetrics
         - cron
-        - --nats=nats 
+        - --nats=nats.nats-io
         env:
         - name: DB_HOST
           value: "mongo-mongodb.default:27017"
@@ -46,7 +45,6 @@ spec:
     spec:
       containers:
       - name: stsmetrics
-        imagePullPolicy: Never
         image: asia.gcr.io/evntsrc-io/stsmetrics:latest
         args:
         - stsmetrics

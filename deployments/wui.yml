@@ -1,55 +1,53 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: api-ingress
+  name: wui-ingress
   annotations:
     kubernetes.io/tls-acme: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/enable-cors: "true"
 spec:
   tls:
-  - secretName: api-ingress
+  - secretName: wui-ingress
     hosts:
-    - api.staging.evntsrc.io
+    - staging.evntsrc.io
   rules:
-  - host: api.staging.evntsrc.io
+  - host: staging.evntsrc.io
     http:
       paths:
       - backend:
-          serviceName: api
+          serviceName: wui
           servicePort: 80
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: api
+  name: wui
 spec:
   ports:
   - port: 80
     name: http
   selector:
-    run: apigw
-  type: NodePort
+    run: wui
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: apigw
+  name: wui
 spec:
   replicas: 1
   template:
     metadata:
       labels:
         version: v1
-        run: apigw
-        app: apigw
-        service: apigw
-        tier: middlewear
+        run: wui
+        app: wui
+        service: wui
+        tier: frontend
       annotations:
         prometheus.io/scrape: "false"
     spec:
       containers:
-      - name: apigw
-        image: asia.gcr.io/evntsrc-io/apigw:latest
+      - name: wui
+        image: asia.gcr.io/evntsrc-io/wui:latest
         ports:
         - containerPort: 80

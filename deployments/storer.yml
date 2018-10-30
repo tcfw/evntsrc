@@ -17,7 +17,6 @@ spec:
     spec:
       containers:
       - name: storer
-        imagePullPolicy: Never
         image: asia.gcr.io/evntsrc-io/storer:latest
         args:
         - storer
@@ -26,4 +25,4 @@ spec:
         - name: DB_HOST
           value: "mongo-mongodb.default:27017"
         - name: NATS_HOST
-          value: "nats:4222"
+          value: "nats.nats-io:4222"

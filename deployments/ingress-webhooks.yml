@@ -1,3 +1,24 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-webhooks-ingress
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+spec:
+  tls:
+  - secretName: ingress-webhooks
+    hosts:
+    - ingress.staging.evntsrc.io
+  rules:
+  - host: ingress.staging.evntsrc.io
+    http:
+      paths:
+      - backend:
+          serviceName: ingress-webhooks
+          servicePort: 80
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -29,10 +50,9 @@ spec:
     spec:
       containers:
       - name: ingress-webhooks
-        imagePullPolicy: Never
         image: asia.gcr.io/evntsrc-io/ingress:latest
         ports:
         - containerPort: 80
         env:
         - name: NATS_HOST
-          value: "nats:4222"
+          value: "nats.nats-io:4222"

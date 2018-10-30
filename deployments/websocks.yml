@@ -28,7 +28,6 @@ spec:
     spec:
       containers:
       - name: websocks
-        imagePullPolicy: Never
         image: asia.gcr.io/evntsrc-io/websocks:latest
         ports:
         - containerPort: 80
@@ -37,4 +36,4 @@ spec:
         - serve
         env:
         - name: NATS_HOST
-          value: "nats:4222"
+          value: "nats.nats-io:4222"

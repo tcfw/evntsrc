@@ -28,12 +28,11 @@ spec:
     spec:
       containers:
       - name: users
-        imagePullPolicy: Never
         image: asia.gcr.io/evntsrc-io/users:latest
         ports:
         - containerPort: 443
         env:
         - name: NATS_HOST
-          value: "nats:4222"
+          value: "nats.nats-io:4222"
         - name: DB_HOST
           value: "mongo-mongodb.default:27017"

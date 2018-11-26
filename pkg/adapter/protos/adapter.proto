@@ -2,6 +2,7 @@ syntax="proto3";
 
 import "github.com/gogo/protobuf/gogoproto/gogo.proto";
 // import "google/api/annotations.proto";
+import "github.com/tcfw/evntsrc/pkg/event/protos/event.proto";
 
 package evntsrc.adapter;
 
@@ -37,4 +38,18 @@ message Adapter {
 	}
 
 	map<string, string> metadata = 8;
+}
+
+message ExecuteRequest {
+	Adapter adapter = 1;
+	evntsrc.event.Event event = 2; 
+}
+
+message ExecuteResponse {
+	evntsrc.event.Event event = 1;
+	repeated string log = 2;
+}
+
+service AdapterService {
+	rpc Execute(ExecuteRequest) returns (ExecuteResponse) {};
 }

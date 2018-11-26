@@ -17,6 +17,7 @@ func NewDefaultCommand() *cobra.Command {
 	}
 
 	cmds.AddCommand(NewServeCmd())
+	cmds.AddCommand(NewTestCmd())
 
 	return cmds
 }

@@ -1,3 +1,4 @@
+FROM augustoroman/v8-lib:6.7.290 as libv8
 FROM golang:latest as builder
 
 #Install XZ
@@ -22,7 +23,8 @@ COPY glide.lock glide.lock
 RUN glide install --strip-vendor
 
 #Install V8
-RUN gem install libv8 -v 6.7.288.46.1
+COPY --from=libv8 /v8/include ./vendor/github.com/augustoroman/v8/include
+COPY --from=libv8 /v8/lib ./vendor/github.com/augustoroman/v8/libv8
 
 #Build
 COPY . .
@@ -36,8 +38,5 @@ FROM ubuntu:latest
 
 WORKDIR /bin
 COPY --from=builder /go/src/github.com/tcfw/evntsrc/adapter adapter
-
-#Install V8
-RUN gem install libv8 -v 6.7.288.46.1
 
 CMD [ "adapter", "serve" ]

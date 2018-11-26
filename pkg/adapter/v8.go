@@ -11,13 +11,13 @@ import (
 )
 
 //RunV8Adapter takes in an adapter and executes the code in a V8 VM
-func RunV8Adapter(adapter *evntsrc_adapter.Adapter, srcEvent *evntsrc_event.Event) (*evntsrc_event.Event, []string, error) {
+func RunV8Adapter(s *Server, adapter *evntsrc_adapter.Adapter, srcEvent *evntsrc_event.Event) (*evntsrc_event.Event, []string, error) {
 
 	if adapter.GetEngine() != evntsrc_adapter.Adapter_V8 {
 		return nil, nil, fmt.Errorf("wrong adapter type passed")
 	}
 
-	ctx := v8.NewIsolate().NewContext()
+	ctx := <-s.v8Pool
 
 	jsEvent, err := ctx.Create(srcEvent)
 	if err != nil {

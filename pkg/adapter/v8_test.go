@@ -4,12 +4,22 @@ import (
 	"testing"
 	"time"
 
+	"github.com/augustoroman/v8"
 	"github.com/stretchr/testify/assert"
 	"github.com/tcfw/evntsrc/pkg/adapter/protos"
 	"github.com/tcfw/evntsrc/pkg/event/protos"
 )
 
+func TestStartV8Pool(t *testing.T) {
+	s := NewServer()
+	s.StartV8Pool()
+	ctx := <-s.v8Pool
+	close(s.v8PoolStop)
+	assert.NotEmpty(t, ctx)
+}
+
 func TestRunAdapterV8BitbucketExample(t *testing.T) {
+	s := PopPool()
 	adapter := &evntsrc_adapter.Adapter{
 		ID:     "",
 		Engine: evntsrc_adapter.Adapter_V8,
@@ -74,7 +84,7 @@ func TestRunAdapterV8BitbucketExample(t *testing.T) {
 		`),
 	}
 
-	retEvent, _, err := RunV8Adapter(adapter, event)
+	retEvent, _, err := RunV8Adapter(s, adapter, event)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -83,6 +93,8 @@ func TestRunAdapterV8BitbucketExample(t *testing.T) {
 }
 
 func TestRunAdapterV8Cancel(t *testing.T) {
+	s := PopPool()
+
 	adapter := &evntsrc_adapter.Adapter{
 		ID:     "",
 		Engine: evntsrc_adapter.Adapter_V8,
@@ -103,13 +115,15 @@ func TestRunAdapterV8Cancel(t *testing.T) {
 		Data:        []byte(""),
 	}
 
-	_, _, err := RunV8Adapter(adapter, event)
+	_, _, err := RunV8Adapter(s, adapter, event)
 
 	assert.Error(t, err, "An error should have been thrown")
 	assert.EqualError(t, err, "Event Cancelled")
 }
 
 func TestRunAdapterV8Log(t *testing.T) {
+	s := PopPool()
+
 	adapter := &evntsrc_adapter.Adapter{
 		Engine: evntsrc_adapter.Adapter_V8,
 		Code:   []byte(`log("hi");`),
@@ -117,7 +131,7 @@ func TestRunAdapterV8Log(t *testing.T) {
 
 	event := &evntsrc_event.Event{}
 
-	_, log, err := RunV8Adapter(adapter, event)
+	_, log, err := RunV8Adapter(s, adapter, event)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -127,6 +141,8 @@ func TestRunAdapterV8Log(t *testing.T) {
 }
 
 func TestRunAdapterV8ImmutableOverride(t *testing.T) {
+	s := PopPool()
+
 	adapter := &evntsrc_adapter.Adapter{
 		Engine: evntsrc_adapter.Adapter_V8,
 		Code: []byte(`
@@ -154,7 +170,7 @@ func TestRunAdapterV8ImmutableOverride(t *testing.T) {
 		Data: []byte(""),
 	}
 
-	retEvent, _, err := RunV8Adapter(adapter, event)
+	retEvent, _, err := RunV8Adapter(s, adapter, event)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -165,6 +181,8 @@ func TestRunAdapterV8ImmutableOverride(t *testing.T) {
 }
 
 func TestRunAdapterV8SyntaxError(t *testing.T) {
+	s := PopPool()
+
 	adapter := &evntsrc_adapter.Adapter{
 		Engine: evntsrc_adapter.Adapter_V8,
 		Code: []byte(`
@@ -174,13 +192,15 @@ func TestRunAdapterV8SyntaxError(t *testing.T) {
 
 	event := &evntsrc_event.Event{}
 
-	_, _, err := RunV8Adapter(adapter, event)
+	_, _, err := RunV8Adapter(s, adapter, event)
 
 	assert.Error(t, err, "An exception should have occurred")
 	assert.Equal(t, "Uncaught", string(err.Error()[0:8]))
 }
 
 func TestRunAdapterV8Timeout(t *testing.T) {
+	s := PopPool()
+
 	adapter := &evntsrc_adapter.Adapter{
 		Engine: evntsrc_adapter.Adapter_V8,
 		Code: []byte(`
@@ -199,12 +219,14 @@ wait(20000);
 
 	event := &evntsrc_event.Event{}
 
-	_, _, err := RunV8Adapter(adapter, event)
+	_, _, err := RunV8Adapter(s, adapter, event)
 
 	assert.EqualError(t, err, "Execution timeout")
 }
 
 func TestRunAdapterV8AttemptLoadExternalJSviaDom(t *testing.T) {
+	s := PopPool()
+
 	adapter := &evntsrc_adapter.Adapter{
 		Engine: evntsrc_adapter.Adapter_V8,
 		Code: []byte(`
@@ -216,12 +238,14 @@ document.head.appendChild(script);
 
 	event := &evntsrc_event.Event{}
 
-	_, _, err := RunV8Adapter(adapter, event)
+	_, _, err := RunV8Adapter(s, adapter, event)
 
 	assert.Error(t, err, "An exception should have occurred")
 }
 
 func TestRunAdapterV8AttemptXHR(t *testing.T) {
+	s := PopPool()
+
 	adapter := &evntsrc_adapter.Adapter{
 		Engine: evntsrc_adapter.Adapter_V8,
 		Code: []byte(`
@@ -233,7 +257,14 @@ xhttp.send();
 
 	event := &evntsrc_event.Event{}
 
-	_, _, err := RunV8Adapter(adapter, event)
+	_, _, err := RunV8Adapter(s, adapter, event)
 
 	assert.Error(t, err, "An exception should have occurred")
+}
+
+func PopPool() *Server {
+	s := NewServer()
+	s.v8Pool = make(chan *v8.Context, 1)
+	s.v8Pool <- v8.NewIsolate().NewContext()
+	return s
 }

@@ -1,5 +1,5 @@
 hash: 7debaaf616e47d89cf74efc85fd079298adcdf060fc7ac4061fdb930c567d7b5
-updated: 2018-10-29T14:54:41.494532+11:00
+updated: 2018-11-27T09:50:55.105528+11:00
 imports:
 - name: github.com/augustoroman/v8
   version: ba08a518420f19b3c2829438394e418651409d1c
@@ -53,13 +53,13 @@ imports:
   - ptypes/struct
   - ptypes/timestamp
 - name: github.com/google/uuid
-  version: d460ce9f8df2e77fb1ba55ca87fafed96c607494
+  version: 9b3b1e0f5f99ae461456d768e7d301a7acdaa2d8
 - name: github.com/gorilla/mux
-  version: 521ea7b17d02faf8d3afea6737573942ceac59c5
+  version: 3d80bc801bb034e17cae38591335b3b1110f1c47
 - name: github.com/gorilla/websocket
   version: 66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d
 - name: github.com/grpc-ecosystem/grpc-gateway
-  version: f7cf64976c2a46ce866933fa726e89cbb6f31977
+  version: d8ad87ee91e1062c2a6117bda0b5523e9cb949ef
   subpackages:
   - runtime
   - runtime/internal
@@ -79,13 +79,13 @@ imports:
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/influxdata/influxdb
-  version: 6a98bb8aa401741099a73f2c7ee1acdb0466e999
+  version: 4eeb5ad19177521d9d4943dfad655ce7e0d5dcf7
   subpackages:
   - client
   - models
   - pkg/escape
 - name: github.com/influxdata/platform
-  version: cf46ff8f49f313dd7219b068c06a3e0bc549f027
+  version: a01391a21b8f11688f2db90c57110c3d4eb9a2a4
   subpackages:
   - models
   - pkg/escape
@@ -112,7 +112,7 @@ imports:
 - name: github.com/pelletier/go-toml
   version: c2dbbc24a97911339e01bda0b8cabdbd8f13b602
 - name: github.com/prometheus/client_golang
-  version: 1cafe34db7fdec6022e17e00e1c1ea501022f3e4
+  version: abad2d1bd44235a26707c172eab6bca5bf2dbad3
   subpackages:
   - prometheus
   - prometheus/internal
@@ -234,7 +234,7 @@ imports:
   version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
 testImports:
 - name: github.com/corpix/uarand
-  version: 2b8494104d86337cdd41d0a49cbed8e4583c0ab4
+  version: 37c9140f52f6bf4998ff7617c456d554d6a2dc2f
 - name: github.com/davecgh/go-spew
   version: 346938d642f2ec3594ed81d874461961cd0faa76
   subpackages:

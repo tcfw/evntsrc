@@ -36,9 +36,6 @@
 				<div v-show="profileKnowledge.provider == 'storage' || !hasPriorKnowledge">
 					<div class="login-divider"></div>
 					<div id="social-btns">
-						<div class="fb-wrapper">
-							<div class="fb-login-button" data-scope="public_profile,email" data-width="220px" data-max-rows="1" data-size="medium" data-button-type="continue_with" data-show-faces="false" data-auto-logout-link="false" data-onlogin="app.$route.matched[0].instances.default.fbClickCallback()"></div>
-						</div>
 						<div class="gapi-wrapper" @click="googleClick">
 							<div id="gapi-signin2"></div>
 						</div>
@@ -120,15 +117,6 @@ export default {
         onError: this.googleLoginFailed
       });
     });
-    this.$root.$on("fb.loaded", () => {
-      FB.XFBML.parse();
-      FB.getLoginStatus(r => {
-        if (r.status == "connected") {
-          this.profileKnowledge.tokens = r.authResponse;
-          this.fbLoginCallback();
-        }
-      });
-    });
     this.checkForLocalProfileKnowledge();
 
     if ("gapi" in window) {
@@ -158,9 +146,7 @@ export default {
       if (this.profileKnowledge.provider == "google") {
         gapi.auth2.getAuthInstance().disconnect();
       }
-      if (this.profileKnowledge.provider == "facebook") {
-        FB.logout();
-      }
+      
       if (this.profileKnowledge.provider == "storage") {
         localStorage.removeItem("prokno");
         localStorage.removeItem("prokno-e");
@@ -215,39 +201,10 @@ export default {
     googleLoginFailed() {
       this.$Message.error("Failed to login using Google");
     },
-    fbLoginCallback(callback) {
-      FB.getLoginStatus(r => {
-        FB.api("/me?fields=name,email,picture", r => {
-          if (r.error) {
-            return;
-          }
-          this.profileKnowledge.provider = "facebook";
-          this.profileKnowledge.name = r.name;
-          this.profileKnowledge.email = r.email;
-          if (r.picture) {
-            this.profileKnowledge.photo = r.picture.data.url;
-          }
-          this.profileKnowledge.tokens = FB.getAuthResponse();
-
-          this.hasPriorKnowledge = true;
-
-          if (callback) {
-            callback();
-          }
-        });
-      });
-    },
-    fbClickCallback() {
-      this.didClickThrough = true;
-      this.fbLoginCallback(this.login);
-    },
     socialLogin() {
       var socialTokens = new passport.Tokens();
 
       switch (this.profileKnowledge.provider) {
-        case "facebook":
-          socialTokens.setToken(FB.getAccessToken());
-          break;
         case "google":
           socialTokens.setToken(
             gapi.auth2
@@ -481,18 +438,6 @@ export default {
 
     @media (max-width: 768px) {
       margin-top: 35px;
-    }
-
-    .fb-wrapper {
-      display: inline-block;
-      background: #4267b2;
-      border-radius: 5px;
-      color: white;
-      height: 28px;
-      overflow: hidden;
-      text-align: center;
-      width: 220px;
-      margin: 0px;
     }
 
     .gapi-wrapper {

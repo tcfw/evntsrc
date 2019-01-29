@@ -6,7 +6,6 @@ import "./plugins/lodash.js";
 import "./plugins/axios.js";
 import "./plugins/config.js";
 import "./plugins/google.js";
-import "./plugins/facebook.js";
 import "./plugins/cookie.js";
 import "./plugins/moment.js";
 import "@/styles/app.scss";
@@ -63,9 +62,6 @@ window.app = new Vue({
     },
     gapiCallback() {
       this.$emit("gapi.loaded");
-    },
-    fbCallback() {
-      this.$emit("fb.loaded");
     },
     loadStripe() {
       this.stripe = Stripe(process.env.VUE_APP_STRIPE_TOKEN);

@@ -1,18 +1,18 @@
 hash: 7debaaf616e47d89cf74efc85fd079298adcdf060fc7ac4061fdb930c567d7b5
-updated: 2018-11-27T09:50:55.105528+11:00
+updated: 2019-02-05T21:52:49.503797+11:00
 imports:
 - name: github.com/augustoroman/v8
-  version: ba08a518420f19b3c2829438394e418651409d1c
+  version: 41c28ac8c5566b20bb9f90aa624364389418edfe
 - name: github.com/beorn7/perks
-  version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
+  version: 3a771d992973f24aa725d07868b467d1ddfceafb
   subpackages:
   - quantile
 - name: github.com/dgrijalva/jwt-go
-  version: 06ea1031745cb8b3dab3f6a236daf2b0aa468b7e
+  version: 3af4c746e1c248ee8491a3e0c6f7a9cd831e95f8
 - name: github.com/fsnotify/fsnotify
   version: ccc981bf80385c528a65fbfdd49bf2d8da22aa23
 - name: github.com/globalsign/mgo
-  version: 1ca0a4f7cbcbe61c005d1bd43fdd8bb8b71df6bc
+  version: eeefdecb41b842af6dc652aaea4026e8403e62df
   subpackages:
   - bson
   - internal/json
@@ -21,21 +21,20 @@ imports:
 - name: github.com/go-http-utils/logger
   version: f3a42dcdeae6e445c9e986b7fda289d98db10414
 - name: github.com/go-redis/redis
-  version: f3bba01df2026fc865f7782948845db9cf44cf23
+  version: 228e43ba24ff3565d70cffafe21138cba3511743
   subpackages:
   - internal
   - internal/consistenthash
   - internal/hashtag
   - internal/pool
   - internal/proto
-  - internal/singleflight
   - internal/util
 - name: github.com/gogo/googleapis
   version: 8558fb44d2f1fc223118afc694129d2c2d2924d1
   subpackages:
   - google/api
 - name: github.com/gogo/protobuf
-  version: 636bf0302bc95575d69441b25a2603156ffdddf1
+  version: 8e4a75f11384d0fb2188d872d456407e41f33fc0
   subpackages:
   - gogoproto
   - proto
@@ -43,26 +42,31 @@ imports:
   - sortkeys
   - types
 - name: github.com/golang/protobuf
-  version: b4deda0973fb4c70b50d226b1af49f3da59f5265
+  version: 347cf4a86c1cb8d262994d8ef5924d4576c5b331
   subpackages:
   - jsonpb
   - proto
+  - protoc-gen-go/descriptor
+  - protoc-gen-go/generator
+  - protoc-gen-go/generator/internal/remap
+  - protoc-gen-go/plugin
   - ptypes
   - ptypes/any
   - ptypes/duration
   - ptypes/struct
   - ptypes/timestamp
+  - ptypes/wrappers
 - name: github.com/google/uuid
   version: 9b3b1e0f5f99ae461456d768e7d301a7acdaa2d8
 - name: github.com/gorilla/mux
-  version: 3d80bc801bb034e17cae38591335b3b1110f1c47
+  version: a7962380ca08b5a188038c69871b8d3fbdf31e89
 - name: github.com/gorilla/websocket
   version: 66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d
 - name: github.com/grpc-ecosystem/grpc-gateway
-  version: d8ad87ee91e1062c2a6117bda0b5523e9cb949ef
+  version: 1b220ea401fc5adad31a4259514d934f76c74280
   subpackages:
+  - internal
   - runtime
-  - runtime/internal
   - utilities
 - name: github.com/hashicorp/hcl
   version: 65a6292f0157eff210d03ed1bf6c59b190b8b906
@@ -78,56 +82,52 @@ imports:
   - json/token
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
-- name: github.com/influxdata/influxdb
-  version: 4eeb5ad19177521d9d4943dfad655ce7e0d5dcf7
-  subpackages:
-  - client
-  - models
-  - pkg/escape
-- name: github.com/influxdata/platform
-  version: a01391a21b8f11688f2db90c57110c3d4eb9a2a4
+- name: github.com/influxdata/influxdb1-client
+  version: 16c852ea613fa2d42fcdccc9a8b0802a8bdc6140
   subpackages:
   - models
   - pkg/escape
 - name: github.com/magiconair/properties
-  version: c2353362d570a7bfa228149c62842019201cfb71
+  version: 7757cc9fdb852f7579b24170bcacda2c7471bb6a
 - name: github.com/matttproud/golang_protobuf_extensions
-  version: 3247c84500bff8d9fb6d579d800f20b3e091582c
+  version: c182affec369e30f25d3eb8cd8a478dee585ae7d
   subpackages:
   - pbutil
 - name: github.com/mitchellh/mapstructure
-  version: fa473d140ef3c6adf42d6b391fe76707f1f243c8
+  version: 3536a929edddb9a5b34bd6861dc4a9647cb459fe
 - name: github.com/nats-io/go-nats
-  version: fb0396ee0bdb8018b0fef30d6d1de798ce99cd05
+  version: 13c7fc7590db68b18f2015600f8765a02d705b5d
   subpackages:
   - encoders/builtin
   - util
+- name: github.com/nats-io/nkeys
+  version: 1546a3320a8f195a5b5c84aef8309377c2e411d5
 - name: github.com/nats-io/nuid
   version: 3024a71c3cbe30667286099921591e6fcc328230
 - name: github.com/opentracing/opentracing-go
-  version: 1949ddbfd147afd4d964a9f00b24eb291e0e7c38
+  version: 8b5a441dc60e8d9bb9bf9d22060b6d94fa599983
   subpackages:
   - ext
   - log
 - name: github.com/pelletier/go-toml
-  version: c2dbbc24a97911339e01bda0b8cabdbd8f13b602
+  version: 27c6b39a135b7dc87a14afb068809132fb7a9a8f
 - name: github.com/prometheus/client_golang
-  version: abad2d1bd44235a26707c172eab6bca5bf2dbad3
+  version: 505eaef017263e299324067d40ca2c48f6a2cf50
   subpackages:
   - prometheus
   - prometheus/internal
 - name: github.com/prometheus/client_model
-  version: 99fa1f4be8e564e8a6b613da7fa6f46c9edafc6c
+  version: fd36f4220a901265f90734c3183c5f0c91daa0b8
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: e4aa40a9169a88835b849a6efb71e05dc04b88f0
+  version: cfeb6f9992ffa54aaa4f2170ade4067ee478b250
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: 54d17b57dd7d4a3aa092476596b3f8a933bde349
+  version: 488faf799f863e27e50c516468f76ae8f1da20a5
   subpackages:
   - internal/util
   - nfs
@@ -141,19 +141,19 @@ imports:
 - name: github.com/simplereach/timeutils
   version: 1a719258b86a08630289b86902ab16817ba641e9
 - name: github.com/spf13/afero
-  version: d40851caa0d747393da1ffb28f7f9d8b4eeffebd
+  version: f4711e4db9e9a1d3887343acb72b2bbfc2f686f5
   subpackages:
   - mem
 - name: github.com/spf13/cast
-  version: 8965335b8c7107321228e3e3702cab9832751bac
+  version: 8c9545af88b134710ab1cd196795e7f2388358d7
 - name: github.com/spf13/cobra
   version: ef82de70bb3f60c65fb8eebacbb2d122ef517385
 - name: github.com/spf13/jwalterweatherman
-  version: 4a4406e478ca629068e7768fc33f3f044173c0a6
+  version: 94f6ae3ed3bceceafa716478c5fbf8d29ca601a1
 - name: github.com/spf13/pflag
-  version: 3ebe029320b2676d667ae88da602a5f854788a8a
+  version: 24fa6976df40757dce6aea913e7b81ade90530e1
 - name: github.com/spf13/viper
-  version: 2c12c60302a5a0e62ee102ca9bc996277c2f64f5
+  version: 6d33b5a963d922d182c91e8a1c88d81fd150cfd4
 - name: github.com/stripe/stripe-go
   version: 08bc5b80342e37468259c836503cb81760871eb7
   subpackages:
@@ -167,53 +167,63 @@ imports:
 - name: github.com/tstranex/u2f
   version: d21a03e0b1d9fc1df59ff54e7a513655c1748b0c
 - name: github.com/vrischmann/go-metrics-influxdb
-  version: 43af8332c303f62ef62663b02b3b7d8a9802002a
+  version: 4457d7e0175cb32fae2bc835bbd3e36c4feffd59
 - name: golang.org/x/crypto
-  version: a49355c7e3f8fe157a85be2f77e6e269a0f89602
+  version: b8fe1690c61389d7d2a8074a507d1d40c5d30448
   subpackages:
   - bcrypt
   - blowfish
+  - ed25519
+  - ed25519/internal/edwards25519
 - name: golang.org/x/net
-  version: 92b859f39abd2d91a854c9f9c4621b2f5054a92d
+  version: d26f9f9a57f3fab6a695bec0d84433c2c50f8bbf
   subpackages:
   - context
+  - http/httpguts
   - http2
   - http2/hpack
   - idna
   - internal/timeseries
-  - lex/httplex
   - trace
 - name: golang.org/x/sys
-  version: d8e400bc7db4870d786864138af681469693d18c
+  version: 41f3e6584952bb034a481797859f6ab34b6803bd
   subpackages:
   - unix
 - name: golang.org/x/text
-  version: f21a4dfb5e38f5895301dc265a8def02365cc3d0
+  version: e6919f6577db79269a6443b9dc46d18f2238fb5d
   subpackages:
   - secure/bidirule
   - transform
   - unicode/bidi
   - unicode/norm
 - name: google.golang.org/genproto
-  version: 11a468237815f3a3ddf9f7c6e8b6b3b382a24d15
+  version: 4b09977fb92221987e99d190c8f88f2c92727a29
   subpackages:
   - googleapis/rpc/status
+  - protobuf/field_mask
 - name: google.golang.org/grpc
-  version: 168a6198bcb0ef175f7dacec0b8691fc141dc9b8
+  version: d14ffaeb5c61a81b5b4c20f71a12dc27a099e885
   subpackages:
   - balancer
   - balancer/base
   - balancer/roundrobin
+  - binarylog/grpc_binarylog_v1
   - codes
   - connectivity
   - credentials
+  - credentials/internal
   - encoding
   - encoding/proto
   - grpclog
   - internal
   - internal/backoff
+  - internal/binarylog
   - internal/channelz
+  - internal/envconfig
   - internal/grpcrand
+  - internal/grpcsync
+  - internal/syscall
+  - internal/transport
   - keepalive
   - metadata
   - naming
@@ -224,28 +234,27 @@ imports:
   - stats
   - status
   - tap
-  - transport
 - name: gopkg.in/mgo.v2
-  version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
+  version: 9856a29383ce1c59f308dd1cf0363a79b5bef6b5
   subpackages:
   - bson
   - internal/json
 - name: gopkg.in/yaml.v2
-  version: 5420a8b6744d3b0345ab293f6fcba19c978f1183
+  version: 51d6538a90f86fe93ac480b35f37b2be17fef232
 testImports:
 - name: github.com/corpix/uarand
   version: 37c9140f52f6bf4998ff7617c456d554d6a2dc2f
 - name: github.com/davecgh/go-spew
-  version: 346938d642f2ec3594ed81d874461961cd0faa76
+  version: d8f796af33cc11cb798c1aaeb27a4ebc5099927d
   subpackages:
   - spew
 - name: github.com/icrowley/fake
   version: 4178557ae428460c3780a381c824a1f3aceb6325
 - name: github.com/pmezard/go-difflib
-  version: 792786c7400a136282c1664665ae0a8db921c6c2
+  version: 5d4384ee4fb2527b0a1256a821ebfc92f91efefc
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: f35b8ab0b5a2cef36673838d662e249dd9c94686
+  version: 363ebb24d041ccea8068222281c2e963e997b9dc
   subpackages:
   - assert

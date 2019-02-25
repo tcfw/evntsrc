@@ -14,6 +14,17 @@ type socialUserInfo struct {
 	Email string `json:"email"`
 }
 
+func getSocialInfo(request *pb.SocialRequest) (*socialUserInfo, error) {
+	switch provider := request.GetProvider(); provider {
+	case "google":
+		return validateGoogleLogin(request)
+	case "github":
+		return validateGithubLogin(request)
+	default:
+		return nil, fmt.Errorf("Unknown social provider %s", provider)
+	}
+}
+
 func validateGoogleLogin(request *pb.SocialRequest) (*socialUserInfo, error) {
 	var netClient = &http.Client{
 		Timeout: time.Second * 10,
@@ -36,12 +47,12 @@ func validateGoogleLogin(request *pb.SocialRequest) (*socialUserInfo, error) {
 	return userInfo, nil
 }
 
-func validateFacebookLogin(request *pb.SocialRequest) (*socialUserInfo, error) {
+func validateGithubLogin(request *pb.SocialRequest) (*socialUserInfo, error) {
 	var netClient = &http.Client{
 		Timeout: time.Second * 10,
 	}
 
-	req, err := http.NewRequest("POST", "https://graph.facebook.com/me?fields=name,email,picture", nil)
+	req, err := http.NewRequest("POST", "https://api.github.com/user", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -56,15 +67,4 @@ func validateFacebookLogin(request *pb.SocialRequest) (*socialUserInfo, error) {
 	json.NewDecoder(resp.Body).Decode(userInfo)
 
 	return userInfo, nil
-}
-
-func getSocialInfo(request *pb.SocialRequest) (*socialUserInfo, error) {
-	switch provider := request.GetProvider(); provider {
-	case "google":
-		return validateGoogleLogin(request)
-	case "facebook":
-		return validateFacebookLogin(request)
-	default:
-		return nil, fmt.Errorf("Unknown social provider %s", provider)
-	}
 }

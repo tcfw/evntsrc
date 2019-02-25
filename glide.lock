@@ -1,5 +1,5 @@
 hash: 7debaaf616e47d89cf74efc85fd079298adcdf060fc7ac4061fdb930c567d7b5
-updated: 2019-02-17T19:29:20.411566+11:00
+updated: 2019-02-25T17:13:45.837277+11:00
 imports:
 - name: github.com/augustoroman/v8
   version: 41c28ac8c5566b20bb9f90aa624364389418edfe
@@ -21,7 +21,7 @@ imports:
 - name: github.com/go-http-utils/logger
   version: f3a42dcdeae6e445c9e986b7fda289d98db10414
 - name: github.com/go-redis/redis
-  version: 688771467ee466c0e4a6a0e3eb60c65a7fdc158e
+  version: bd542089bb6e776e6fced5038edac8a0f526aa53
   subpackages:
   - internal
   - internal/consistenthash
@@ -34,7 +34,7 @@ imports:
   subpackages:
   - google/api
 - name: github.com/gogo/protobuf
-  version: 8e4a75f11384d0fb2188d872d456407e41f33fc0
+  version: ba06b47c162d49f2af050fb4c75bcbc86a159d5c
   subpackages:
   - gogoproto
   - proto
@@ -59,11 +59,11 @@ imports:
 - name: github.com/google/uuid
   version: 9b3b1e0f5f99ae461456d768e7d301a7acdaa2d8
 - name: github.com/gorilla/mux
-  version: a7962380ca08b5a188038c69871b8d3fbdf31e89
+  version: 8559a4f775fc329165fe32bd4c2543de8ada8fce
 - name: github.com/gorilla/websocket
   version: 66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d
 - name: github.com/grpc-ecosystem/grpc-gateway
-  version: 8ce214f0a04eec043d200b9571af112b716c9a04
+  version: 9a7c952d3c7e6c0239ddb5d1d351e0fdb6c3c8d3
   subpackages:
   - internal
   - runtime
@@ -96,7 +96,7 @@ imports:
 - name: github.com/mitchellh/mapstructure
   version: 3536a929edddb9a5b34bd6861dc4a9647cb459fe
 - name: github.com/nats-io/go-nats
-  version: 13c7fc7590db68b18f2015600f8765a02d705b5d
+  version: 70fe06cee50d4b6f98248d9675fb55f2a3aa7228
   subpackages:
   - encoders/builtin
   - util
@@ -105,7 +105,7 @@ imports:
 - name: github.com/nats-io/nuid
   version: 3024a71c3cbe30667286099921591e6fcc328230
 - name: github.com/opentracing/opentracing-go
-  version: de56207ee69b19033e89021115aa06d16bb8b0be
+  version: 25a84ff92183e2f8ac018ba1db54f8a07b3c0e04
   subpackages:
   - ext
   - log
@@ -121,15 +121,16 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: f866ba39776a736ba5d34760f5fae4ad74e63f2e
+  version: 7a3416fd1f41341905f138746c51a5092e7ddf7a
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: f8d8b3f739bd91a7c0462cb55235ef63c79c9abc
+  version: e4d4a2206da023361ed100d85c5f2cf9c8364e9f
   subpackages:
   - internal/util
+  - iostats
   - nfs
   - xfs
 - name: github.com/rcrowley/go-metrics
@@ -169,7 +170,7 @@ imports:
 - name: github.com/vrischmann/go-metrics-influxdb
   version: 4457d7e0175cb32fae2bc835bbd3e36c4feffd59
 - name: golang.org/x/crypto
-  version: 74369b46fc6756741c016591724fd1cb8e26845f
+  version: ffb98f73852f696ea2bb21a617a5c4b3e067a439
   subpackages:
   - bcrypt
   - blowfish
@@ -186,7 +187,7 @@ imports:
   - internal/timeseries
   - trace
 - name: golang.org/x/sys
-  version: d0b11bdaac8adb652bff00e49bcacf992835621a
+  version: cd391775e71e684db52b63df9affd58269495083
   subpackages:
   - unix
 - name: golang.org/x/text
@@ -197,12 +198,12 @@ imports:
   - unicode/bidi
   - unicode/norm
 - name: google.golang.org/genproto
-  version: bd968387e4aa590b3c6e4ba38ecac1ed314d43ad
+  version: 082222b4a5c572e33e82ee9162d1352c7cf38682
   subpackages:
   - googleapis/rpc/status
   - protobuf/field_mask
 - name: google.golang.org/grpc
-  version: 29c406a5bd0ed61c5752d00c6aabd9fa036ed328
+  version: 2773c7bbcf81cf358d3f0038b1469b2d44062acb
   subpackages:
   - balancer
   - balancer/base
@@ -255,6 +256,6 @@ testImports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: 78018b09cde1da8ab313a2344fa4395b86026def
+  version: ffdc059bfe9ce6a4e144ba849dbedead332c6053
   subpackages:
   - assert

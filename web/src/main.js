@@ -48,6 +48,7 @@ window.app = new Vue({
       return this.$cookie.get("session") != null;
     },
     logout() {
+      axios.post(this.$config.API + "/auth/revoke");
       this.$cookie.delete("session");
       this.applySession();
       this.$message({

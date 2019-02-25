@@ -89,6 +89,8 @@ message Revoke {
     string reason = 3;
 }
 
+message Empty {}
+
 service AuthSevice {
     rpc verifyToken(VerifyTokenRequest) returns (VerifyTokenResponse) {
         option (google.api.http) = {
@@ -106,6 +108,12 @@ service AuthSevice {
     rpc socialLogin(SocialRequest) returns (AuthResponse) {
         option (google.api.http) = {
             post: "/v1/auth/social",
+            body: "*"
+        };
+    };
+    rpc revokeToken(Revoke) returns (Empty) {
+        option (google.api.http) = {
+            post: "/v1/auth/revoke",
             body: "*"
         };
     };

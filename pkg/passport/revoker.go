@@ -9,7 +9,7 @@ import (
 	events "github.com/tcfw/evntsrc/pkg/utils/sysevents"
 )
 
-const dbName = "pssport"
+const dbName = "passport"
 const dbCollection = "revokes"
 
 func isTokenRevoked(jti string) (bool, error) {

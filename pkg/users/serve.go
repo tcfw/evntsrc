@@ -253,7 +253,8 @@ func (s *server) Update(ctx context.Context, request *protos.UserUpdateRequest) 
 
 	if request.Id == "" {
 		request.Id = claims["sub"].(string)
-	} else if _, ok := claims["admin"]; request.Id != claims["sub"].(string) && !ok {
+	}
+	if _, ok := claims["admin"]; request.Id != claims["sub"].(string) && !ok {
 		return nil, status.Errorf(codes.PermissionDenied, "Unauthorized")
 	}
 

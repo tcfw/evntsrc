@@ -14,6 +14,7 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 	pb "github.com/tcfw/evntsrc/pkg/passport/protos"
 	userSvc "github.com/tcfw/evntsrc/pkg/users/protos"
+	utils "github.com/tcfw/evntsrc/pkg/utils/authorization"
 	rpcUtils "github.com/tcfw/evntsrc/pkg/utils/rpc"
 	events "github.com/tcfw/evntsrc/pkg/utils/sysevents"
 	"github.com/tstranex/u2f"
@@ -309,6 +310,59 @@ func (s *Server) SocialLogin(ctx context.Context, request *pb.SocialRequest) (*p
 			RefreshExpire: &pb.Timestamp{Seconds: time.Now().Add(time.Hour * 8).Unix()},
 		},
 	}, nil
+}
+
+//RevokeToken adds a token to the revoked tokens list
+func (s *Server) RevokeToken(ctx context.Context, request *pb.Revoke) (*pb.Empty, error) {
+
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("failed to parse metadata")
+	}
+
+	auth := md.Get("grpcgateway-authorization")
+
+	if auth == nil || len(auth) == 0 {
+		auth = md.Get("authorization")
+		if auth == nil || len(auth) == 0 {
+			return nil, fmt.Errorf("no authorization sent")
+		}
+	}
+
+	token := auth[0]
+
+	resp, err := s.VerifyToken(ctx, &pb.VerifyTokenRequest{Token: token})
+	if err != nil || resp.Revoked || !resp.Valid {
+		return nil, status.Errorf(codes.PermissionDenied, "Unauthorized")
+	}
+
+	claims, err := utils.TokenClaimsFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if request.Id == "" {
+		request.Id = claims["sub"].(string)
+	}
+
+	if request.Jti == "" {
+		request.Jti = claims["jti"].(string)
+	}
+
+	if _, ok := claims["admin"]; request.Id != claims["sub"].(string) && !ok {
+		return nil, status.Errorf(codes.PermissionDenied, "Unauthorized")
+	}
+
+	if request.Reason == "" {
+		request.Reason = "LOGOUT"
+	}
+
+	err = revokeToken(claims, request.Reason)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.Empty{}, nil
 }
 
 //RunGRPC starts the GRPC server

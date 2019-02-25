@@ -83,6 +83,12 @@ message SocialRequest {
     Tokens idpTokens = 2;
 }
 
+message Revoke {
+    string id = 1 [(gogoproto.moretags) = "bson:\"_id\""];
+    string jti = 2;
+    string reason = 3;
+}
+
 service AuthSevice {
     rpc verifyToken(VerifyTokenRequest) returns (VerifyTokenResponse) {
         option (google.api.http) = {

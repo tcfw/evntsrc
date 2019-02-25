@@ -1,16 +1,14 @@
 package passport
 
 import (
-	"math/rand"
+	"crypto/rand"
+	"encoding/hex"
 )
 
-const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-
-//RandomString generates a n lengthed string of random proportions!
+//RandomString generates a n lengthed string (cryptographically)
 func RandomString(n int) string {
-	b := make([]byte, n)
-	for i := range b {
-		b[i] = letterBytes[rand.Intn(len(letterBytes))]
-	}
-	return string(b)
+	var randomBytes = make([]byte, n/2)
+	rand.Read(randomBytes)
+
+	return hex.EncodeToString(randomBytes)
 }

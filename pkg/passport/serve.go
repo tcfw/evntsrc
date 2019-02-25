@@ -5,6 +5,7 @@ import (
 	fmt "fmt"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"reflect"
 	"sync"
@@ -157,7 +158,7 @@ func (s *Server) Authenticate(ctx context.Context, request *pb.AuthRequest) (*pb
 			return &pb.AuthResponse{Success: false}, status.Errorf(codes.Unauthenticated, "incorrect username or password")
 		}
 
-		clearRateLimit(username, remoteIP)
+		// clearRateLimit(username, remoteIP)
 		extraClaims = UserClaims(user)
 
 	case *pb.AuthRequest_OauthClientSecretCreds:
@@ -180,6 +181,14 @@ func (s *Server) Authenticate(ctx context.Context, request *pb.AuthRequest) (*pb
 		AuthType: fmt.Sprintf("%v", reflect.TypeOf(request.Creds)),
 		Success:  true,
 	})
+
+	nounce, err := genNounce()
+	if err != nil {
+		return nil, fmt.Errorf("Failed to generate nounce")
+	}
+
+	cookie := http.Cookie{Name: "snounce", Value: nounce, Domain: "evntsrc.io", Path: "/", Expires: time.Now().Add(1 * time.Hour)}
+	grpc.SendHeader(ctx, metadata.Pairs("Grpc-Metadata-Set-Cookie", cookie.String()))
 
 	return &pb.AuthResponse{
 		Success: true,
@@ -222,6 +231,33 @@ func (s *Server) VerifyToken(ctx context.Context, request *pb.VerifyTokenRequest
 
 	claims, _ := token.Claims.(jwt.MapClaims)
 
+	isRevoked, err := isTokenRevoked(claims["jti"].(string))
+	if err != nil {
+		return nil, fmt.Errorf("Failed to validate token")
+	}
+	if isRevoked {
+		return &pb.VerifyTokenResponse{
+			Valid:   false,
+			Revoked: true,
+		}, nil
+	}
+
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("Failed to get metadata from request context")
+	}
+	snounces := md.Get("grpcgateway-snounce")
+	if len(snounces) != 0 {
+		snounce := snounces[0]
+		newSnounce, err := validateSNounce(claims["jti"].(string), snounce)
+		if err != nil {
+			return nil, err
+		}
+
+		cookie := http.Cookie{Name: "snounce", Value: newSnounce, Domain: "evntsrc.io", Path: "/", Expires: time.Now().Add(1 * time.Hour)}
+		grpc.SendHeader(ctx, metadata.Pairs("Grpc-Metadata-Set-Cookie", cookie.String()))
+	}
+
 	return &pb.VerifyTokenResponse{
 		Valid:       token.Valid,
 		TokenExpire: &pb.Timestamp{Seconds: int64(claims["exp"].(float64))},
@@ -251,7 +287,7 @@ func (s *Server) SocialLogin(ctx context.Context, request *pb.SocialRequest) (*p
 	}
 
 	extraClaims := UserClaims(user)
-	clearRateLimit(info.Email, remoteIP)
+	// clearRateLimit(info.Email, remoteIP)
 
 	tokenString, token, _ := MakeNewToken(extraClaims)
 	refreshToken := MakeNewRefresh()

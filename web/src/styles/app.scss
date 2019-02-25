@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Open+Sans:100,300,400');
+@import url('https://use.typekit.net/qdo5nud.css');
 
 body, html, #app {
 	padding: 0px;
@@ -6,12 +6,16 @@ body, html, #app {
 	height: 100vh;
 	min-height: 100%;
 	background: #F4F8FB;
-	font-family: 'Open Sans', sans-serif;
+	font-family: "proxima-nova", sans-serif;
 	overflow: hidden;
 	position: absolute;
 	top: 0;
 	left: 0;
 	width: 100%;
+}
+
+button, input {
+	font-family: "proxima-nova", sans-serif;
 }
 
 .el-header {

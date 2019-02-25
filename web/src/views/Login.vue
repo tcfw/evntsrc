@@ -5,7 +5,7 @@
 				<div :style="{textAlign: 'center', marginBottom: '45px', marginTop: '5px'}">
 					<img src="../assets/logo_b.png" :style="{height: '25px'}" />
 				</div>
-				<el-form ref="loginForm" :model="loginForm" :rules="loginFormValidationRules" @submit.native.prevent="login">
+				<el-form ref="loginForm" :model="loginForm" :rules="loginFormValidationRules" @submit.native.prevent.stop="login">
 					<div v-if="hasPriorKnowledge">
 						<el-row>
 							<el-col :span=5 :offset=5>
@@ -23,10 +23,10 @@
 						</el-row>
 					</div>
 					<el-form-item prop="email" v-if="!hasPriorKnowledge">
-						<el-input type="text" v-model="loginForm.email" placeholder="Email" />
+						<el-input type="text" v-model="loginForm.email" placeholder="Email" @keydown.enter.stop.prevent.native="login"/>
 					</el-form-item>
 					<el-form-item prop="password" v-if="!hasPriorKnowledge || profileKnowledge.provider=='storage'">
-						<el-input type="password" v-model="loginForm.password" placeholder="Password" />
+						<el-input type="password" v-model="loginForm.password" placeholder="Password" @keydown.enter.stop.prevent.native="login" />
 					</el-form-item>
 					<el-form-item>
 						<el-button :loading="submitting" size="medium" ref="loginSubmitBtn" type="primary" @click="login()" id="login-btn">Log in</el-button>
@@ -170,11 +170,10 @@ export default {
           localStorage.getItem("prokno-n") !== null
         ) {
           this.profileKnowledge.provider = "storage";
-          this.loginForm.email = this.profileKnowledge.email = localStorage.getItem(
+          this.profileKnowledge.photo = this.loginForm.email = this.profileKnowledge.email = localStorage.getItem(
             "prokno-e"
           );
           this.profileKnowledge.name = localStorage.getItem("prokno-n");
-
           this.hasPriorKnowledge = true;
         } else {
         }
@@ -256,12 +255,14 @@ export default {
       var authResponse = passport.AuthResponse.deserializeBinary(response.data);
 
       if (!authResponse.getSuccess()) {
-        this.$Message.error({
+        this.$message.error({
           content: "Unable to log you in. Please try again.",
           duration: 10
         });
         return;
       }
+
+      this.$message.closeAll();
 
       var expires = new Date(0);
       expires.setUTCSeconds(

@@ -70,8 +70,8 @@ export default {
       return style;
     },
     rSrc() {
-      if (this.src == undefined) {
-        return this.gravatarURL();
+      if (this.src == undefined || this.src.indexOf("@") > -1) {
+        return this.gravatarURL(this.src);
       }
       return this.src;
     }
@@ -91,12 +91,16 @@ export default {
         }
       }
     },
-    gravatarURL() {
+    gravatarURL(email) {
       if ("email" in this.$root.me) {
+        email = this.$root.me.email;
+      }
+
+      if (email != undefined) {
         return (
           "https://www.gravatar.com/avatar/" +
-          md5(this.$root.me.email) +
-          "?d=404&s=90"
+          md5(email) +
+          "?d=mp&s=90"
         );
       }
     }

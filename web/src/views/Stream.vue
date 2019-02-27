@@ -60,7 +60,6 @@ export default {
     font-weight: 300;
     color: #50566f;
     padding-bottom: 45px;
-    text-transform: uppercase;
 
     &.is-active {
       font-weight: 400;

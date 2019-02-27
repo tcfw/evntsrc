@@ -24,6 +24,9 @@ export default {};
   background: #1a1e30;
   height: 100%;
   box-shadow: 2px 2px 4px 0 rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  position: absolute;
+  width: 220px;
 
   img {
     height: 18px;

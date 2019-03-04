@@ -1,5 +1,5 @@
 hash: 7debaaf616e47d89cf74efc85fd079298adcdf060fc7ac4061fdb930c567d7b5
-updated: 2019-02-25T17:13:45.837277+11:00
+updated: 2019-03-01T20:35:28.581443+11:00
 imports:
 - name: github.com/augustoroman/v8
   version: 41c28ac8c5566b20bb9f90aa624364389418edfe
@@ -21,7 +21,7 @@ imports:
 - name: github.com/go-http-utils/logger
   version: f3a42dcdeae6e445c9e986b7fda289d98db10414
 - name: github.com/go-redis/redis
-  version: bd542089bb6e776e6fced5038edac8a0f526aa53
+  version: 69c8af34df7a2f3e80754203614031ea9386cba9
   subpackages:
   - internal
   - internal/consistenthash
@@ -42,7 +42,7 @@ imports:
   - sortkeys
   - types
 - name: github.com/golang/protobuf
-  version: c823c79ea1570fb5ff454033735a8e68575d1d0f
+  version: b5d812f8a3706043e23a9cd5babf2e5423744d30
   subpackages:
   - jsonpb
   - proto
@@ -57,13 +57,13 @@ imports:
   - ptypes/timestamp
   - ptypes/wrappers
 - name: github.com/google/uuid
-  version: 9b3b1e0f5f99ae461456d768e7d301a7acdaa2d8
+  version: 0cd6bf5da1e1c83f8b45653022c74f71af0538a4
 - name: github.com/gorilla/mux
-  version: 8559a4f775fc329165fe32bd4c2543de8ada8fce
+  version: 15a353a636720571d19e37b34a14499c3afa9991
 - name: github.com/gorilla/websocket
   version: 66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d
 - name: github.com/grpc-ecosystem/grpc-gateway
-  version: 9a7c952d3c7e6c0239ddb5d1d351e0fdb6c3c8d3
+  version: 0c2b3b165f486a2c49b627e71880172d27607a04
   subpackages:
   - internal
   - runtime
@@ -127,7 +127,7 @@ imports:
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: e4d4a2206da023361ed100d85c5f2cf9c8364e9f
+  version: bbced9601137e764853b2fad7ec3e2dc4c504e02
   subpackages:
   - internal/util
   - iostats
@@ -170,14 +170,14 @@ imports:
 - name: github.com/vrischmann/go-metrics-influxdb
   version: 4457d7e0175cb32fae2bc835bbd3e36c4feffd59
 - name: golang.org/x/crypto
-  version: ffb98f73852f696ea2bb21a617a5c4b3e067a439
+  version: 8dd112bcdc25174059e45e07517d9fc663123347
   subpackages:
   - bcrypt
   - blowfish
   - ed25519
   - ed25519/internal/edwards25519
 - name: golang.org/x/net
-  version: 3a22650c66bd7f4fb6d1e8072ffd7b75c8a27898
+  version: 92fc7df08ae7536330f5a21328292abfa70520a8
   subpackages:
   - context
   - http/httpguts
@@ -187,23 +187,23 @@ imports:
   - internal/timeseries
   - trace
 - name: golang.org/x/sys
-  version: cd391775e71e684db52b63df9affd58269495083
+  version: a34e9553db1e492c9a76e60db2296ae7e5fbb772
   subpackages:
   - unix
 - name: golang.org/x/text
-  version: 6c92c7dc7f53607809182301b96e4cc1975143f1
+  version: d14c52b222ee852cdba8b07206ca0c614b389876
   subpackages:
   - secure/bidirule
   - transform
   - unicode/bidi
   - unicode/norm
 - name: google.golang.org/genproto
-  version: 082222b4a5c572e33e82ee9162d1352c7cf38682
+  version: 4f5b463f9597cbe0dd13a6a2cd4f85e788d27508
   subpackages:
   - googleapis/rpc/status
   - protobuf/field_mask
 - name: google.golang.org/grpc
-  version: 2773c7bbcf81cf358d3f0038b1469b2d44062acb
+  version: 914c52b240b05e4562b1d09e5e7cf3c57495d442
   subpackages:
   - balancer
   - balancer/base

@@ -13,6 +13,7 @@ import (
 	metrics "github.com/rcrowley/go-metrics"
 	"github.com/tcfw/evntsrc/pkg/event"
 	streamauth "github.com/tcfw/evntsrc/pkg/streamauth/protos"
+	"gopkg.in/mgo.v2/bson"
 )
 
 const (
@@ -53,6 +54,18 @@ type Client struct {
 	seq          map[string]int64
 	seqLock      sync.Mutex
 	closed       bool
+}
+
+//NewClient constructs a new websocket evntsrc client
+func NewClient(conn *websocket.Conn) *Client {
+	return &Client{
+		conn:          conn,
+		send:          make(chan []byte, 256),
+		subscriptions: map[string]chan bool{},
+		connectionID:  bson.NewObjectId().Hex(),
+		seq:           map[string]int64{},
+		closed:        false,
+	}
 }
 
 func (c *Client) close() {
@@ -240,6 +253,11 @@ func (c *Client) Unsubscribe(channel string) {
 	go c.broadcastUnsub(channel)
 }
 
+type readPRPC struct {
+	command *InboundCommand
+	message []byte
+}
+
 func (c *Client) readPump() {
 	defer func() {
 		c.close()
@@ -249,32 +267,56 @@ func (c *Client) readPump() {
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 
-	for {
-		_, message, err := c.conn.ReadMessage()
-		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("error: %v", err)
+	timeoutEnabled := true
+
+	readCh := make(chan *readPRPC, 50)
+	closed := make(chan bool, 1)
+	initTimeout := time.After(15 * time.Second)
+
+	go func() {
+		for {
+			_, message, err := c.conn.ReadMessage()
+			if err != nil {
+				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+					log.Printf("error: %v", err)
+				}
+				closed <- true
+				return
 			}
-			break
-		}
-		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
+			timeoutEnabled = false
+			message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 
-		command := &InboundCommand{}
-		if err = json.Unmarshal(message, command); err != nil {
-			log.Printf("Failed to parse command: %s\n", err.Error())
-			c.sendStruct(&AckCommand{Acktype: "Error", Error: "Failed to parse command"})
-			continue
-		}
+			command := &InboundCommand{}
+			if err = json.Unmarshal(message, command); err != nil {
+				log.Printf("Failed to parse command: %s\n", err.Error())
+				c.sendStruct(&AckCommand{Acktype: "Error", Error: "Failed to parse command"})
+				continue
+			}
 
-		if command.Command != commandAuth && c.auth == nil {
-			c.sendStruct(&AckCommand{
-				Acktype: "err",
-				Error:   "No auth sent yet",
-			})
-			continue
-		}
+			if command.Command != commandAuth && c.auth == nil {
+				c.sendStruct(&AckCommand{
+					Acktype: "err",
+					Error:   "No auth sent yet",
+				})
+				continue
+			}
 
-		c.processCommand(command, message)
+			readCh <- &readPRPC{command, message}
+		}
+	}()
+
+	for {
+		select {
+		case <-closed:
+			return
+		case rpc := <-readCh:
+			c.processCommand(rpc.command, rpc.message)
+		case <-initTimeout:
+			if timeoutEnabled {
+				c.close()
+				return
+			}
+		}
 	}
 }
 

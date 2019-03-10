@@ -12,7 +12,7 @@ import (
 func (c *Client) publishBroadcast(eventType string, data []byte) {
 	rEvent := &event.Event{}
 	rEvent.SetID()
-	rEvent.Stream = c.auth.Stream
+	rEvent.Stream = c.authKey.Stream
 	rEvent.Source = "ws"
 	rEvent.Subject = "advertisement"
 	rEvent.CEVersion = "0.1"
@@ -29,7 +29,7 @@ func (c *Client) publishBroadcast(eventType string, data []byte) {
 		rEvent.Metadata["host"] = hostname
 	}
 
-	channel := fmt.Sprintf("_CONN.%d.%s", c.auth.Stream, rEvent.Subject)
+	channel := fmt.Sprintf("_CONN.%d.%s", c.authKey.Stream, rEvent.Subject)
 
 	eventJSONBytes, _ := json.Marshal(rEvent)
 

@@ -27,6 +27,9 @@
 ## Websocks
 - Handles websocket connections to end users
 
+## Billing
+- Manages account billing
+
 
 # Future Services
 
@@ -42,6 +45,3 @@
 
 ## Limits
 - Manages agreed service limites of services
-
-## Billing
-- Manages account billing

@@ -16,6 +16,10 @@ func startHTTPServer(port int) {
 		serveWs(w, r)
 	})
 
+	mux.HandleFunc("/ws/{stream:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
+		serveWs(w, r)
+	})
+
 	mux.Use(metricsMiddleware)
 
 	addr := fmt.Sprintf(":%d", port)

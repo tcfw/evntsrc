@@ -59,7 +59,6 @@ const (
 func (api *APIClient) readPump() {
 	api.socket.SetReadLimit(512)
 	api.socket.SetPongHandler(func(string) error {
-		fmt.Println("handled pong")
 		return nil
 	})
 

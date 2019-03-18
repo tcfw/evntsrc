@@ -37,7 +37,7 @@ func Run(port int) error {
 	registerBilling(ctx, mux, opts)
 
 	handler := tracingWrapper(mux)
-	handler = metricsMiddleware(mux)
+	handler = metricsMiddleware(handler)
 	handler = authGuard(handler)
 	handler = logger.Handler(handler, os.Stdout, logger.CommonLoggerType)
 	handler = cors.AllowAll().Handler(handler)

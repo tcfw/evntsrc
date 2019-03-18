@@ -12,11 +12,11 @@ import (
 func startHTTPServer(port int) {
 	mux := mux.NewRouter()
 
-	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/v1/", func(w http.ResponseWriter, r *http.Request) {
 		serveWs(w, r)
 	})
 
-	mux.HandleFunc("/ws/{stream:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/v1/{stream:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
 		serveWs(w, r)
 	})
 

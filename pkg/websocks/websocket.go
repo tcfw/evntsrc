@@ -45,7 +45,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	client := NewClient(conn)
 
 	if useAuthHeader {
-		streamint, _ := strconv.ParseInt(r.URL.Path[len("/ws/"):], 10, 64)
+		streamint, _ := strconv.ParseInt(r.URL.Path[len("/v1/"):], 10, 64)
 		fmt.Printf("Attempting to use auth (stream: %v)\n", streamint)
 		err := client.authFromHeader(apiKey, apiSec, int32(streamint))
 		if err != nil {
@@ -54,12 +54,16 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 			conn.Close()
 			return
 		}
+		client.sendStruct(&ConnectionInfo{
+			Ref:          "conn",
+			ConnectionID: client.connectionID,
+		})
+		go client.broadcastConnect()
 	}
 
 	m := metrics.GetOrRegisterCounter("wsConnections", nil)
 	m.Inc(1)
 
-	go client.broadcastConnect()
 	go client.writePump()
 	go client.readPump()
 }

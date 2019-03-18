@@ -1,3 +1,26 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-websocks-ingress
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "86400"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "86400"
+spec:
+  tls:
+  - secretName: ingress-websocks
+    hosts:
+    - realtime.staging.evntsrc.io
+  rules:
+  - host: realtime.staging.evntsrc.io
+    http:
+      paths:
+      - backend:
+          serviceName: websocks
+          servicePort: 80
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -37,3 +60,4 @@ spec:
         env:
         - name: NATS_HOST
           value: "nats.nats-io:4222"
+        imagePullPolicy: Always

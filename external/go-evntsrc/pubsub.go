@@ -178,6 +178,12 @@ func (api *APIClient) doPublish(data *websocks.PublishCommand) error {
 
 //Publish publishes an event through evntsrc
 func (api *APIClient) Publish(subject string, data []byte, eventType string) error {
+	if api.socket == nil {
+		if err := api.openConn(); err != nil {
+			return fmt.Errorf("Failed to publish: %s", err.Error())
+		}
+	}
+
 	pubMsg := &websocks.PublishCommand{
 		SubscribeCommand: &websocks.SubscribeCommand{InboundCommand: &websocks.InboundCommand{Ref: uuid.New().String(), Command: "pub"}, Subject: subject},
 		Data:             base64.StdEncoding.EncodeToString(data),

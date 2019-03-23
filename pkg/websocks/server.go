@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -25,7 +26,7 @@ func startHTTPServer(port int) {
 	addr := fmt.Sprintf(":%d", port)
 
 	log.Println("Starting HTTP server...")
-	err := http.ListenAndServe(addr, mux)
+	err := http.ListenAndServe(addr, handlers.RecoveryHandler()(mux))
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}

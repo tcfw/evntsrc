@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	maxMessageSize = 2048
+	maxMessageSize = 4096
 
 	// Time allowed to write a message to the peer.
 	writeWait = 10 * time.Second
@@ -216,7 +216,7 @@ func (c *Client) Subscribe(channel string, cmd *InboundCommand) {
 
 	//Subscribe to NATS user channel and forward events to websocket
 	go func(c *Client, channel string, unsub chan bool) {
-		ch := make(chan *nats.Msg, 64)
+		ch := make(chan *nats.Msg, 1024)
 		sub, err := natsConn.ChanSubscribe(fmt.Sprintf("_USER.%d.%s", c.auth.Stream, channel), ch)
 		ack := &AckCommand{
 			Ref:     cmd.Ref,
@@ -363,13 +363,6 @@ func (c *Client) writePump() {
 				return
 			}
 			w.Write(message)
-
-			// Add queued messages to the current websocket message.
-			n := len(c.send)
-			for i := 0; i < n; i++ {
-				w.Write(newline)
-				w.Write(<-c.send)
-			}
 
 			if err := w.Close(); err != nil {
 				return

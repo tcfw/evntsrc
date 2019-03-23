@@ -57,7 +57,7 @@ const (
 )
 
 func (api *APIClient) readPump() {
-	api.socket.SetReadLimit(512)
+	api.socket.SetReadLimit(4096)
 	api.socket.SetPongHandler(func(string) error {
 		return nil
 	})

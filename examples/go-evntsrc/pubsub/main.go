@@ -22,70 +22,67 @@ var subOnly bool
 var pubOnly bool
 var channel string
 
-func main() {
-	flags()
+var sent int
+var received int
+var close bool
 
-	client, err := newClient()
+func main() {
+	setup()
+
+	client, _ := newClient()
 	if channel == "" {
 		channel = randChanName()
 	}
 
-	sent := 0
-	received := 0
-	close := false
+	both := !pubOnly && !subOnly
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	go func() {
-		<-c
-		fmt.Printf("\nSent: %v  Received: %v\n", sent, received)
-
-		close = true
-		os.Exit(0)
-	}()
-
-	if (subOnly && !pubOnly) || (!pubOnly && !subOnly) {
-		fmt.Printf("Subscribing (%v)...\n", channel)
-		client.SubscribeFunc(channel, func(evnt *evntsrc.Event) {
-			//Dislay ping latency results
-			//TODO move decoding to client lib
-			decoded, _ := base64.StdEncoding.DecodeString(string(evnt.Data))
-			msg := &testMsg{}
-			json.Unmarshal(decoded, msg)
-			received++
-			fmt.Printf("Took %v\n", time.Since(msg.Ts))
-		})
-
-		if subOnly && !pubOnly {
-			//Hang
-			select {}
-		}
+	if !subOnly && pubOnly || both {
+		go startPublish(client)
 	}
 
-	if (!subOnly && pubOnly) || (!pubOnly && !subOnly) {
-		//Send ping every 5 seconds
-		fmt.Printf("Publishing (%v)...\n", channel)
-		for {
-			if close {
-				break
-			}
+	if subOnly && !pubOnly || both {
+		go startSubscribe(client)
+	}
 
-			testMsg := &testMsg{Ts: time.Now()}
-			msgBytes, _ := json.Marshal(testMsg)
+	select {}
+}
+
+func startSubscribe(client *evntsrc.APIClient) {
+	fmt.Printf("Subscribing (%v)...\n", channel)
+	client.SubscribeFunc(channel, func(evnt *evntsrc.Event) {
+		//Dislay ping latency results
+		//TODO move decoding to client lib
+		decoded, _ := base64.StdEncoding.DecodeString(string(evnt.Data))
+		msg := &testMsg{}
+		json.Unmarshal(decoded, msg)
+		received++
+		fmt.Printf("Took %v\n", time.Since(msg.Ts))
+	})
+}
+
+func startPublish(client *evntsrc.APIClient) {
+	//Send ping every 5 seconds
+	fmt.Printf("Publishing (%v)...\n", channel)
+	for {
+		if close {
+			break
+		}
+
+		testMsg := &testMsg{Ts: time.Now()}
+		msgBytes, _ := json.Marshal(testMsg)
+
+		err := client.Publish(channel, msgBytes, "test")
+		if err != nil {
+			fmt.Printf("PUB ERR: %v\n", err.Error())
+		} else {
+			sent++
 
 			if !subOnly && pubOnly {
 				fmt.Printf(".")
 			}
-
-			err = client.Publish(channel, msgBytes, "test")
-			if err != nil {
-				fmt.Printf("PUB ERR: %v\n", err.Error())
-			} else {
-				sent++
-			}
-
-			time.Sleep(1 * time.Second)
 		}
+
+		time.Sleep(1 * time.Second)
 	}
 }
 
@@ -128,6 +125,25 @@ func randChanName() string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return fmt.Sprintf("test_%s", string(b))
+}
+
+func setup() {
+	flags()
+
+	sent = 0
+	received = 0
+	close = false
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		<-c
+		fmt.Printf("\nSent: %v  Received: %v\n", sent, received)
+
+		close = true
+		os.Exit(0)
+	}()
+
 }
 
 func flags() {

@@ -11,6 +11,7 @@ import (
 	evntsrc "github.com/tcfw/evntsrc/external/go-evntsrc"
 )
 
+//Our simple test struct to record latency
 type testMsg struct {
 	Ts time.Time `json:"ts"`
 }
@@ -20,31 +21,25 @@ var subOnly bool
 var pubOnly bool
 var channel string
 
+var sent int
+var received int
+var startTime time.Time
+
 func main() {
-	flag.StringVar(&apiKey, "apikey", "", "API Key")
-	flag.StringVar(&channel, "channel", "", "Specify a channel")
-	flag.Parse()
+	//Setup config
+	setup()
 
-	client, err := newClient()
+	//Initialise a new Evntsrc API Client
+	client, _ := newClient()
 
-	if channel == "" {
-		channel = randChanName()
-	}
-
-	sent := 0
-	received := 0
-
-	startTime := time.Now()
-
-	//Publish some events
+	//Publish some events ~ to be later received
 	fmt.Printf("Publishing events (%v)\n", channel)
 	for i := 0; i < 10; i++ {
-		testMsg := &testMsg{Ts: time.Now()}
-		msgBytes, _ := json.Marshal(testMsg)
+		msgBytes, _ := json.Marshal(&testMsg{Ts: time.Now()})
 
-		err = client.Publish(channel, msgBytes, "test")
+		err := client.Publish(channel, msgBytes, "test")
 		if err != nil {
-			fmt.Printf("PUB ERR: %v\n", err.Error())
+			fmt.Printf("PUB ERR: %s\n", err.Error())
 		} else {
 			sent++
 			fmt.Printf("|")
@@ -63,10 +58,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	//Hang until exit
+	//Hang until received all sent
 	for {
 		if received >= sent {
-			fmt.Println("\nSuccessfully received all events :)")
+			fmt.Println("\nReceived all events :)")
 			return
 		}
 		time.Sleep(100 * time.Millisecond)
@@ -74,6 +69,7 @@ func main() {
 
 }
 
+//newClient create a new evntsrc API client
 func newClient() (*evntsrc.APIClient, error) {
 	//Create initial config
 	client, err := evntsrc.NewEvntSrcClient(apiKey, 1)
@@ -90,6 +86,7 @@ func newClient() (*evntsrc.APIClient, error) {
 	return client, err
 }
 
+//randChanName random test channel name
 func randChanName() string {
 	rand.Seed(time.Now().UnixNano())
 
@@ -101,4 +98,24 @@ func randChanName() string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return fmt.Sprintf("test_%s", string(b))
+}
+
+//setup read flag and set up globals
+func setup() {
+	flags()
+
+	if channel == "" {
+		channel = randChanName()
+	}
+
+	sent = 0
+	received = 0
+	startTime = time.Now()
+}
+
+//flags read in flags/config from command line
+func flags() {
+	flag.StringVar(&apiKey, "apikey", "", "API Key")
+	flag.StringVar(&channel, "channel", "", "Specify a channel")
+	flag.Parse()
 }

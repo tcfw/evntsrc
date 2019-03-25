@@ -13,6 +13,7 @@ import (
 	evntsrc "github.com/tcfw/evntsrc/external/go-evntsrc"
 )
 
+//Our simple test struct to record latency
 type testMsg struct {
 	Ts time.Time `json:"ts"`
 }
@@ -20,6 +21,7 @@ type testMsg struct {
 var apiKey string
 var subOnly bool
 var pubOnly bool
+var both bool
 var channel string
 
 var sent int
@@ -27,23 +29,23 @@ var received int
 var close bool
 
 func main() {
+	//Setup config
 	setup()
 
+	//Initialise a new Evntsrc API Client
 	client, _ := newClient()
-	if channel == "" {
-		channel = randChanName()
-	}
 
-	both := !pubOnly && !subOnly
-
-	if !subOnly && pubOnly || both {
+	if (!subOnly && pubOnly) || both {
+		//Start a publisher
 		go startPublish(client)
 	}
 
-	if subOnly && !pubOnly || both {
+	if (subOnly && !pubOnly) || both {
+		//Start a subscriber
 		go startSubscribe(client)
 	}
 
+	//Hang until interrupt sig (ctrl+c)
 	select {}
 }
 
@@ -60,8 +62,8 @@ func startSubscribe(client *evntsrc.APIClient) {
 	})
 }
 
+//startPublishing sends a ping struct ever 5 seconds
 func startPublish(client *evntsrc.APIClient) {
-	//Send ping every 5 seconds
 	fmt.Printf("Publishing (%v)...\n", channel)
 	for {
 		if close {
@@ -86,6 +88,7 @@ func startPublish(client *evntsrc.APIClient) {
 	}
 }
 
+//newClient create a new evntsrc API client
 func newClient() (*evntsrc.APIClient, error) {
 	//Create initial config
 	client, err := evntsrc.NewEvntSrcClient(apiKey, 1)
@@ -105,6 +108,7 @@ func newClient() (*evntsrc.APIClient, error) {
 	return client, err
 }
 
+//pipeErrors sends any global API errors to stdout
 func pipeErrors(client *evntsrc.APIClient) {
 	for {
 		select {
@@ -114,6 +118,7 @@ func pipeErrors(client *evntsrc.APIClient) {
 	}
 }
 
+//randChanName random test channel name
 func randChanName() string {
 	rand.Seed(time.Now().UnixNano())
 
@@ -127,12 +132,18 @@ func randChanName() string {
 	return fmt.Sprintf("test_%s", string(b))
 }
 
+//setup read flag and set up globals
 func setup() {
 	flags()
 
 	sent = 0
 	received = 0
 	close = false
+	both = !pubOnly && !subOnly
+
+	if channel == "" {
+		channel = randChanName()
+	}
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
@@ -143,9 +154,9 @@ func setup() {
 		close = true
 		os.Exit(0)
 	}()
-
 }
 
+//flags read in flags/config from command line
 func flags() {
 	flag.StringVar(&apiKey, "apikey", "", "API Key")
 	flag.BoolVar(&subOnly, "sub", false, "Subscription only")

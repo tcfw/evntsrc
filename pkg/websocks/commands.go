@@ -1,6 +1,12 @@
 package websocks
 
-import "time"
+import (
+	"encoding/json"
+	"fmt"
+	"time"
+
+	"github.com/tcfw/evntsrc/pkg/event"
+)
 
 const (
 	commandSubscribe   = "sub"
@@ -74,4 +80,119 @@ type ReplayRange struct {
 type ConnectionInfo struct {
 	Ref          string `json:"ref"`
 	ConnectionID string `json:"connectionID"`
+}
+
+func (c *Client) doSubscribe(command *InboundCommand, message []byte) {
+	subcommand := &SubscribeCommand{}
+	if err := json.Unmarshal(message, subcommand); err != nil {
+		c.sendStruct(&AckCommand{Ref: command.Ref, Acktype: "Error", Error: "Failed to parse command"})
+		return
+	}
+	c.Subscribe(subcommand.Subject, command)
+}
+
+func (c *Client) doUnsubscribe(command *InboundCommand, message []byte) {
+	subcommand := &UnsubscribeCommand{}
+	if err := json.Unmarshal(message, subcommand); err != nil {
+		c.sendStruct(&AckCommand{Ref: command.Ref, Acktype: "Error", Error: "Failed to parse command"})
+		return
+	}
+	c.Unsubscribe(subcommand.Subject, command)
+}
+
+func (c *Client) doPublish(command *InboundCommand, message []byte) {
+	subcommand := &PublishCommand{}
+	if err := json.Unmarshal(message, subcommand); err != nil {
+		c.sendStruct(&AckCommand{Ref: command.Ref, Acktype: "Error", Error: "Failed to parse command"})
+		return
+	}
+
+	rEvent := &event.Event{}
+	rEvent.SetID()
+	rEvent.Stream = c.auth.Stream
+	rEvent.Subject = subcommand.Subject
+	rEvent.CEVersion = "0.1"
+	rEvent.Type = subcommand.Type
+	rEvent.TypeVersion = subcommand.TypeVersion
+	rEvent.ContentType = subcommand.ContentType
+	rEvent.Data = []byte(subcommand.Data)
+	rEvent.Time = event.ZeroableTime{Time: time.Now()}
+	rEvent.Metadata = map[string]string{"source_ip": c.conn.RemoteAddr().String()}
+	rEvent.Source = subcommand.Source
+	if rEvent.Source == "" {
+		rEvent.Source = "ws"
+	}
+
+	channel := fmt.Sprintf("_USER.%d.%s", c.auth.Stream, subcommand.Subject)
+
+	c.seqLock.Lock()
+	c.seq[channel]++
+	rEvent.Metadata["relative_seq"] = fmt.Sprintf("%s-%d", c.connectionID, c.seq[channel])
+	c.seqLock.Unlock()
+
+	eventJSONBytes, _ := json.Marshal(rEvent)
+	natsConn.Publish(channel, eventJSONBytes)
+	c.sendStruct(&AckCommand{
+		Ref:     command.Ref,
+		Acktype: "OK",
+	})
+}
+
+func (c *Client) doAuth(command *InboundCommand, message []byte) {
+	subcommand := &AuthCommand{}
+	if err := json.Unmarshal(message, subcommand); err != nil {
+		c.sendStruct(&AckCommand{Ref: command.Ref, Acktype: "Error", Error: "Failed to parse command"})
+		return
+	}
+
+	if err := c.validateAuth(subcommand); err != nil {
+		c.sendStruct(&AckCommand{
+			Ref:     command.Ref,
+			Acktype: "Failed",
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	c.auth = subcommand
+	c.sendStruct(&AckCommand{
+		Ref:     command.Ref,
+		Acktype: "OK",
+	})
+	go c.broadcastConnect()
+	c.sendStruct(&ConnectionInfo{
+		Ref:          command.Ref,
+		ConnectionID: c.connectionID,
+	})
+}
+
+func (c *Client) doReplay(command *InboundCommand, message []byte) {
+	subcommand := &ReplayCommand{}
+	if err := json.Unmarshal(message, subcommand); err != nil {
+		c.sendStruct(&AckCommand{Ref: command.Ref, Acktype: "Error", Error: "Failed to parse command"})
+		return
+	}
+	subcommand.Stream = c.auth.Stream
+
+	if subcommand.JustMe {
+		subcommand.Dest = c.connectionID
+	}
+
+	//Request replay to storer svc
+	repubBytes, _ := json.Marshal(subcommand)
+	msg, err := natsConn.Request("replay.broadcast", repubBytes, time.Second*10)
+	ack := &AckCommand{
+		Ref:     command.Ref,
+		Acktype: "err",
+	}
+	if err != nil {
+		ack.Error = err.Error()
+	} else {
+		if string(msg.Data) != "OK" {
+			ack.Error = string(msg.Data)
+		} else {
+			ack.Acktype = "OK"
+		}
+	}
+	c.sendStruct(ack)
 }

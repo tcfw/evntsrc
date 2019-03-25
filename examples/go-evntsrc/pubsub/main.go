@@ -23,14 +23,9 @@ var pubOnly bool
 var channel string
 
 func main() {
-	flag.StringVar(&apiKey, "apikey", "", "API Key")
-	flag.BoolVar(&subOnly, "sub", false, "Subscription only")
-	flag.BoolVar(&pubOnly, "pub", false, "Publish only")
-	flag.StringVar(&channel, "channel", "", "Specify a channel")
-	flag.Parse()
+	flags()
 
 	client, err := newClient()
-
 	if channel == "" {
 		channel = randChanName()
 	}
@@ -50,7 +45,7 @@ func main() {
 	}()
 
 	if (subOnly && !pubOnly) || (!pubOnly && !subOnly) {
-		fmt.Printf("Subscribing(%v)...\n", channel)
+		fmt.Printf("Subscribing (%v)...\n", channel)
 		client.SubscribeFunc(channel, func(evnt *evntsrc.Event) {
 			//Dislay ping latency results
 			//TODO move decoding to client lib
@@ -69,10 +64,9 @@ func main() {
 
 	if (!subOnly && pubOnly) || (!pubOnly && !subOnly) {
 		//Send ping every 5 seconds
-		fmt.Printf("Publishing(%v)...\n", channel)
+		fmt.Printf("Publishing (%v)...\n", channel)
 		for {
 			if close {
-				fmt.Printf("Stopping publishing")
 				break
 			}
 
@@ -134,4 +128,12 @@ func randChanName() string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return fmt.Sprintf("test_%s", string(b))
+}
+
+func flags() {
+	flag.StringVar(&apiKey, "apikey", "", "API Key")
+	flag.BoolVar(&subOnly, "sub", false, "Subscription only")
+	flag.BoolVar(&pubOnly, "pub", false, "Publish only")
+	flag.StringVar(&channel, "channel", "", "Specify a channel")
+	flag.Parse()
 }

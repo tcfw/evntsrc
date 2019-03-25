@@ -1,6 +1,6 @@
 package websocks
 
-import "github.com/simplereach/timeutils"
+import "time"
 
 const (
 	commandSubscribe   = "sub"
@@ -57,9 +57,17 @@ type AckCommand struct {
 //ReplayCommand instructs events to rebroadcast all events stored since time
 type ReplayCommand struct {
 	*SubscribeCommand
-	Time   timeutils.Time `json:"startTime"`
-	Stream int32          `json:"stream"`
-	JustMe bool           `json:"justme"`
+	Stream int32       `json:"stream"`
+	JustMe bool        `json:"justme"`
+	Dest   string      `json:"dest"`
+	Query  ReplayRange `json:"query"`
+}
+
+//ReplayRange specifies the time and/or ID's to include in the replay
+type ReplayRange struct {
+	StartTime *time.Time `json:"startTime"`
+	EndTime   *time.Time `json:"endTime"`
+	EndID     string     `json:"endID"`
 }
 
 //ConnectionInfo basic information about the current connection

@@ -119,6 +119,17 @@ func (api *APIClient) writePump() {
 			if err := api.doPublish(msg); err != nil {
 				api.Errors <- err
 			}
+			break
+		case msg := <-api.replayPipe:
+			if err := api.doReplay(msg); err != nil {
+				api.Errors <- err
+			}
+			break
+		case msg := <-api.subPipe:
+			if err := api.doSendSubscribe(msg); err != nil {
+				api.Errors <- err
+			}
+			break
 		case <-api.close:
 			return
 		case <-ticker.C:
@@ -176,6 +187,26 @@ func (api *APIClient) doPublish(data *websocks.PublishCommand) error {
 	return api.socket.WriteJSON(data)
 }
 
+func (api *APIClient) doReplay(data *websocks.ReplayCommand) error {
+	if api.socket == nil {
+		if err := api.openConn(); err != nil {
+			return fmt.Errorf("Failed to publish: %s", err.Error())
+		}
+	}
+
+	return api.socket.WriteJSON(data)
+}
+
+func (api *APIClient) doSendSubscribe(data *websocks.SubscribeCommand) error {
+	if api.socket == nil {
+		if err := api.openConn(); err != nil {
+			return fmt.Errorf("Failed to publish: %s", err.Error())
+		}
+	}
+
+	return api.socket.WriteJSON(data)
+}
+
 //Publish publishes an event through evntsrc
 func (api *APIClient) Publish(subject string, data []byte, eventType string) error {
 	if api.socket == nil {
@@ -201,24 +232,16 @@ func (api *APIClient) Publish(subject string, data []byte, eventType string) err
 		return fmt.Errorf("Failed to publish: %s", err.Error())
 	}
 
-	return err
+	return nil
 }
 
 func (api *APIClient) doSubscribe(subject string) error {
-	if api.socket == nil {
-		if err := api.openConn(); err != nil {
-			return fmt.Errorf("Failed to subscribe: %s", err.Error())
-		}
-	}
-
 	subMsg := &websocks.SubscribeCommand{
 		InboundCommand: &websocks.InboundCommand{Ref: uuid.New().String(), Command: "sub"},
 		Subject:        subject,
 	}
 
-	if err := api.socket.WriteJSON(subMsg); err != nil {
-		return err
-	}
+	api.subPipe <- subMsg
 
 	_, err := api.waitForResponse(subMsg.Ref)
 	if err != nil {
@@ -279,4 +302,28 @@ func (api *APIClient) Unsubscribe(subject string) error {
 	}
 
 	return fmt.Errorf("No subscription for subject '%s'", subject)
+}
+
+//Replay starts replaying events in chronological order
+//Justme defaults to true if not specified
+func (api *APIClient) Replay(subject string, query ReplayQuery, justme *bool) error {
+	cmd := &websocks.ReplayCommand{
+		SubscribeCommand: &websocks.SubscribeCommand{
+			InboundCommand: &websocks.InboundCommand{Ref: uuid.New().String(), Command: "replay"},
+			Subject:        subject,
+		},
+		Query: query,
+	}
+
+	if justme == nil || *justme {
+		cmd.JustMe = true
+	}
+
+	api.replayPipe <- cmd
+
+	if _, err := api.waitForResponse(cmd.Ref); err != nil && err.Error() != "OK" {
+		return fmt.Errorf("Failed to start replay: %s", err.Error())
+	}
+
+	return nil
 }

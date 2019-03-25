@@ -34,12 +34,14 @@ type APIClient struct {
 	acks          map[string]*ackCT
 	subscriptions map[string][]*subscription
 
-	ReadPipe  chan []byte
-	writePipe chan *websocks.PublishCommand
-	close     chan bool
-	Errors    chan error
-	AcksCh    chan *websocks.AckCommand
-	ackL      sync.RWMutex
+	ReadPipe   chan []byte
+	writePipe  chan *websocks.PublishCommand
+	replayPipe chan *websocks.ReplayCommand
+	subPipe    chan *websocks.SubscribeCommand
+	close      chan bool
+	Errors     chan error
+	AcksCh     chan *websocks.AckCommand
+	ackL       sync.RWMutex
 
 	//Ignore events we published
 	IgnoreSelf bool
@@ -54,6 +56,8 @@ func NewEvntSrcClient(auth string, streamID int32) (*APIClient, error) {
 		httpClient:    newHTTPClient(),
 		ReadPipe:      make(chan []byte, 256),
 		writePipe:     make(chan *websocks.PublishCommand, 256),
+		replayPipe:    make(chan *websocks.ReplayCommand, 5),
+		subPipe:       make(chan *websocks.SubscribeCommand, 10),
 		close:         make(chan bool, 1),
 		Errors:        make(chan error, 256),
 		AcksCh:        make(chan *websocks.AckCommand, 256),
@@ -82,6 +86,9 @@ const (
 
 //Event is the main structure of an event
 type Event = event.Event
+
+//ReplayQuery specifies where to start the replay in time
+type ReplayQuery = websocks.ReplayRange
 
 type subscription struct {
 	subType subscriptionType

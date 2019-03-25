@@ -44,6 +44,7 @@ type Client struct {
 
 	//Subscription state
 	subscriptions map[string]chan bool
+	closeConnSub  chan bool
 
 	//Auth mappings
 	auth    *AuthCommand
@@ -65,6 +66,7 @@ func NewClient(conn *websocket.Conn) *Client {
 		connectionID:  bson.NewObjectId().Hex(),
 		seq:           map[string]int64{},
 		closed:        false,
+		closeConnSub:  make(chan bool, 1),
 	}
 }
 
@@ -82,6 +84,8 @@ func (c *Client) close() {
 		close(c.subscriptions[channel])
 		delete(c.subscriptions, channel)
 	}
+
+	c.closeConnSub <- true
 }
 
 func (c *Client) sendStruct(msg interface{}) error {
@@ -184,6 +188,10 @@ func (c *Client) processCommand(command *InboundCommand, message []byte) {
 		}
 		subcommand.Stream = c.auth.Stream
 
+		if subcommand.JustMe {
+			subcommand.Dest = c.connectionID
+		}
+
 		//Request replay to storer svc
 		repubBytes, _ := json.Marshal(subcommand)
 		msg, err := natsConn.Request("replay.broadcast", repubBytes, time.Second*10)
@@ -194,10 +202,36 @@ func (c *Client) processCommand(command *InboundCommand, message []byte) {
 		if err != nil {
 			ack.Error = err.Error()
 		} else {
-			ack.Error = string(msg.Data)
+			if string(msg.Data) != "OK" {
+				ack.Error = string(msg.Data)
+			} else {
+				ack.Acktype = "OK"
+			}
 		}
 		c.sendStruct(ack)
 	}
+}
+
+//ConnSub subscribes to a connection specific channel
+func (c *Client) ConnSub() error {
+	ch := make(chan *nats.Msg, 1024)
+	sub, err := natsConn.ChanSubscribe(fmt.Sprintf("_CONN.%s", c.connectionID), ch)
+	if err != nil {
+		return err
+	}
+
+	for {
+		select {
+		case msg := <-ch:
+			c.send <- msg.Data
+		case <-c.closeConnSub:
+			sub.Unsubscribe()
+			sub.Drain()
+			return nil
+		}
+	}
+
+	return nil
 }
 
 //Subscribe opens a NATS subscription for the websocket
@@ -277,6 +311,8 @@ func (c *Client) readPump() {
 	defer func() {
 		c.close()
 	}()
+
+	go c.ConnSub()
 
 	c.conn.SetReadLimit(maxMessageSize)
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))

@@ -1,5 +1,5 @@
 hash: 7debaaf616e47d89cf74efc85fd079298adcdf060fc7ac4061fdb930c567d7b5
-updated: 2019-03-01T20:35:28.581443+11:00
+updated: 2019-03-23T17:04:01.688497+11:00
 imports:
 - name: github.com/augustoroman/v8
   version: 41c28ac8c5566b20bb9f90aa624364389418edfe
@@ -10,7 +10,7 @@ imports:
 - name: github.com/dgrijalva/jwt-go
   version: 3af4c746e1c248ee8491a3e0c6f7a9cd831e95f8
 - name: github.com/fsnotify/fsnotify
-  version: ccc981bf80385c528a65fbfdd49bf2d8da22aa23
+  version: 1485a34d5d5723fea214f5710708e19a831720e4
 - name: github.com/globalsign/mgo
   version: eeefdecb41b842af6dc652aaea4026e8403e62df
   subpackages:
@@ -21,7 +21,7 @@ imports:
 - name: github.com/go-http-utils/logger
   version: f3a42dcdeae6e445c9e986b7fda289d98db10414
 - name: github.com/go-redis/redis
-  version: 69c8af34df7a2f3e80754203614031ea9386cba9
+  version: 9ecae37814bc6623672ec8967e2b322b23fd4540
   subpackages:
   - internal
   - internal/consistenthash
@@ -34,7 +34,7 @@ imports:
   subpackages:
   - google/api
 - name: github.com/gogo/protobuf
-  version: ba06b47c162d49f2af050fb4c75bcbc86a159d5c
+  version: 88dda4156dab6c722c91df813dd73f94253b09b6
   subpackages:
   - gogoproto
   - proto
@@ -42,7 +42,7 @@ imports:
   - sortkeys
   - types
 - name: github.com/golang/protobuf
-  version: b5d812f8a3706043e23a9cd5babf2e5423744d30
+  version: d3c38a4eb4970272b87a425ae00ccc4548e2f9bb
   subpackages:
   - jsonpb
   - proto
@@ -58,12 +58,14 @@ imports:
   - ptypes/wrappers
 - name: github.com/google/uuid
   version: 0cd6bf5da1e1c83f8b45653022c74f71af0538a4
+- name: github.com/gorilla/handlers
+  version: ac6d24f88de4584385a0cb3a88f953d08a2f7a05
 - name: github.com/gorilla/mux
-  version: 15a353a636720571d19e37b34a14499c3afa9991
+  version: c5c6c98bc25355028a63748a498942a6398ccd22
 - name: github.com/gorilla/websocket
   version: 66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d
 - name: github.com/grpc-ecosystem/grpc-gateway
-  version: 0c2b3b165f486a2c49b627e71880172d27607a04
+  version: 20f268a412e5b342ebfb1a0eef7c3b7bd6c260ea
   subpackages:
   - internal
   - runtime
@@ -110,7 +112,7 @@ imports:
   - ext
   - log
 - name: github.com/pelletier/go-toml
-  version: 27c6b39a135b7dc87a14afb068809132fb7a9a8f
+  version: f9070d3b400d7bf7c9b4e4e05916f92fd0b79e0c
 - name: github.com/prometheus/client_golang
   version: 505eaef017263e299324067d40ca2c48f6a2cf50
   subpackages:
@@ -121,13 +123,13 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: 7a3416fd1f41341905f138746c51a5092e7ddf7a
+  version: 1ab4d74fc89940cfbc3c2b3a89821336cdefa119
   subpackages:
   - expfmt
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: bbced9601137e764853b2fad7ec3e2dc4c504e02
+  version: 55ae3d9d557340b5bc24cd8aa5f6fa2c2ab31352
   subpackages:
   - internal/util
   - iostats
@@ -154,7 +156,7 @@ imports:
 - name: github.com/spf13/pflag
   version: 24fa6976df40757dce6aea913e7b81ade90530e1
 - name: github.com/spf13/viper
-  version: 6d33b5a963d922d182c91e8a1c88d81fd150cfd4
+  version: 9e56dacc08fbbf8c9ee2dbc717553c758ce42bc9
 - name: github.com/stripe/stripe-go
   version: 08bc5b80342e37468259c836503cb81760871eb7
   subpackages:
@@ -170,14 +172,14 @@ imports:
 - name: github.com/vrischmann/go-metrics-influxdb
   version: 4457d7e0175cb32fae2bc835bbd3e36c4feffd59
 - name: golang.org/x/crypto
-  version: 8dd112bcdc25174059e45e07517d9fc663123347
+  version: b7391e95e576cacdcdd422573063bc057239113d
   subpackages:
   - bcrypt
   - blowfish
   - ed25519
   - ed25519/internal/edwards25519
 - name: golang.org/x/net
-  version: 92fc7df08ae7536330f5a21328292abfa70520a8
+  version: addf6b3196f61cd44ce5a76657913698c73479d0
   subpackages:
   - context
   - http/httpguts
@@ -187,23 +189,23 @@ imports:
   - internal/timeseries
   - trace
 - name: golang.org/x/sys
-  version: a34e9553db1e492c9a76e60db2296ae7e5fbb772
+  version: f49334f85ddcf0f08d7fb6dd7363e9e6d6b777eb
   subpackages:
   - unix
 - name: golang.org/x/text
-  version: d14c52b222ee852cdba8b07206ca0c614b389876
+  version: fe223c5a2583471b2791ca99e716c65b4a76117e
   subpackages:
   - secure/bidirule
   - transform
   - unicode/bidi
   - unicode/norm
 - name: google.golang.org/genproto
-  version: 4f5b463f9597cbe0dd13a6a2cd4f85e788d27508
+  version: e79c0c59cdb5e117ef82a6f885294df3d74065d5
   subpackages:
   - googleapis/rpc/status
   - protobuf/field_mask
 - name: google.golang.org/grpc
-  version: 914c52b240b05e4562b1d09e5e7cf3c57495d442
+  version: ef9bac260455a9a77b29a082f5f7ee71b3d74dad
   subpackages:
   - balancer
   - balancer/base

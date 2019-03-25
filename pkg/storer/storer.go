@@ -68,6 +68,11 @@ func monitorReplayRequests() {
 		command := &websocks.ReplayCommand{}
 		json.Unmarshal(m.Data, command)
 
+		if command.JustMe && command.Dest == "" {
+			natsConn.Publish(m.Reply, []byte("failed: no socket dest set"))
+			return
+		}
+
 		dbConn, err := db.NewMongoDBSession()
 		if err != nil {
 			natsConn.Publish(m.Reply, []byte(fmt.Sprintf("failed: %s", err.Error())))
@@ -77,22 +82,31 @@ func monitorReplayRequests() {
 
 		collection := dbConn.DB("events").C("store")
 
-		fq := bson.M{"stream": command.Stream, "time": bson.M{"$gt": command.Time.Time}}
+		fq := bson.M{"stream": command.Stream}
+		if command.Query.StartTime != nil && command.Query.EndTime == nil {
+			fq["time.time"] = bson.M{"$gte": command.Query.StartTime}
+		}
+		if command.Query.StartTime != nil && command.Query.EndTime != nil {
+			fq["time.time"] = bson.M{"$gte": command.Query.StartTime, "$lte": command.Query.EndTime}
+		}
 		query := collection.Find(fq).Sort("time")
 
 		if c, _ := query.Count(); c == 0 {
 			natsConn.Publish(m.Reply, []byte("failed: no events"))
 		} else {
-			natsConn.Publish(m.Reply, []byte("starting"))
+			natsConn.Publish(m.Reply, []byte("OK"))
 			iter := query.Iter()
 			event := event.Event{}
 			for iter.Next(&event) {
+				if command.Query.EndID != "" && event.ID == command.Query.EndID {
+					break
+				}
 				event.Metadata["replay"] = "true"
 				jsonBytes, _ := json.Marshal(event)
 				if command.JustMe {
-					natsConn.Publish(m.Reply, jsonBytes)
+					natsConn.Publish(fmt.Sprintf("_CONN.%s", command.Dest), jsonBytes)
 				} else {
-					natsConn.Publish("_USER."+string(command.Stream)+"."+command.Subject, jsonBytes)
+					natsConn.Publish(fmt.Sprintf("_USER.%d.%s", command.Stream, command.Subject), jsonBytes)
 				}
 			}
 		}

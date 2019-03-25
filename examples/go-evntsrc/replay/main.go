@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"os/signal"
 	"time"
 
 	evntsrc "github.com/tcfw/evntsrc/external/go-evntsrc"
@@ -37,14 +36,7 @@ func main() {
 
 	startTime := time.Now()
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	go func() {
-		<-c
-		os.Exit(1)
-	}()
-
-	//Send ping every 5 seconds
+	//Publish some events
 	fmt.Printf("Publishing events (%v)\n", channel)
 	for i := 0; i < 10; i++ {
 		testMsg := &testMsg{Ts: time.Now()}
@@ -55,32 +47,30 @@ func main() {
 			fmt.Printf("PUB ERR: %v\n", err.Error())
 		} else {
 			sent++
-			fmt.Printf(".")
+			fmt.Printf("|")
 		}
 	}
 
-	fmt.Println("\nStarting replay")
-
+	//Start to listen for some events
 	client.SubscribeFunc(channel, func(evnt *evntsrc.Event) {
 		received++
 		fmt.Printf("+")
-		if received == sent {
-			time.Sleep(1 * time.Second)
-			fmt.Printf("\nSuccessfully received all events :)\n")
-			os.Exit(0)
-		}
 	})
 
-	//Wait for propagation
-	time.Sleep(1 * time.Second)
-
+	//Replay recent events
 	if err := client.Replay(channel, evntsrc.ReplayQuery{StartTime: &startTime}, nil); err != nil {
 		fmt.Printf("%s\n", err.Error())
 		os.Exit(1)
 	}
 
 	//Hang until exit
-	select {}
+	for {
+		if received >= sent {
+			fmt.Println("\nSuccessfully received all events :)")
+			return
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
 
 }
 

@@ -75,6 +75,7 @@ func HandlePub(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		pubEvent.SetDataFromString(r.URL.Query().Get("data"))
+		break
 	case "POST":
 		postData, err := ioutil.ReadAll(r.Body)
 		defer r.Body.Close()
@@ -83,6 +84,7 @@ func HandlePub(w http.ResponseWriter, r *http.Request) {
 		} else {
 			log.Println(err.Error())
 		}
+		break
 	}
 
 	eventJSONBytes, _ := json.Marshal(pubEvent)

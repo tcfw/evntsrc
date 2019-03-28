@@ -1,0 +1,31 @@
+syntax="proto3";
+
+package evntsrc.emails;
+
+message Email {
+  string from = 1;
+  repeated string to = 2;
+  string subject = 3;
+
+  string plain_text = 4;
+  string html = 5;
+
+  repeated Attachment attachments = 6;
+
+  map<string, string> headers = 7;
+}
+
+message Attachment {
+  string filename = 1;
+
+  oneof type {
+		bytes data = 2;
+		string uri = 3;
+	}
+}
+
+message EmailResponse {}
+
+service EmailService {
+	rpc Send(Email) returns (EmailResponse) {}
+}

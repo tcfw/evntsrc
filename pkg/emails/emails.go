@@ -2,8 +2,13 @@ package emails
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
+	"io/ioutil"
+	"mime"
+	"net/http"
 	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/sendgrid/sendgrid-go"
@@ -45,6 +50,10 @@ func (s *Server) Send(ctx context.Context, request *pb.Email) (*pb.EmailResponse
 
 	from := mail.NewEmail("EvntSrc.io", "no-reply@evntsrc.io")
 
+	if len(request.To) == 0 {
+		return nil, fmt.Errorf("Can't send to no one")
+	}
+
 	for _, email := range request.To {
 		to := mail.NewEmail("", email)
 		message := mail.NewSingleEmail(from, request.Subject, to, request.PlainText, request.Html)
@@ -82,5 +91,56 @@ func addAttachments(message *mail.SGMailV3, attachments []*pb.Attachment) (*mail
 }
 
 func fetchAttachment(attachment *pb.Attachment) (*mail.Attachment, error) {
-	return nil, fmt.Errorf("Failed to fetch attachment")
+
+	switch mtype := attachment.GetType().(type) {
+	case *pb.Attachment_Uri:
+		content, err := getURIContent(attachment.GetUri())
+		if err != nil {
+			return nil, fmt.Errorf("Failed to fetch attachment: %s", err.Error())
+		}
+
+		return &mail.Attachment{
+			Content:     base64.StdEncoding.EncodeToString(*content),
+			Filename:    attachment.Filename,
+			Type:        mimeFromFilename(attachment.Filename),
+			Disposition: "attachment",
+		}, nil
+
+	case *pb.Attachment_Data:
+		return &mail.Attachment{
+			Content:     base64.StdEncoding.EncodeToString(attachment.GetData()),
+			Filename:    attachment.Filename,
+			Type:        mimeFromFilename(attachment.Filename),
+			Disposition: "attachment",
+		}, nil
+
+	default:
+		return nil, fmt.Errorf("Unknown attachment type %T", mtype)
+	}
+
+}
+
+func mimeFromFilename(filename string) string {
+	ext := filepath.Ext(filename)
+	if mime := mime.TypeByExtension(ext); mime != "" {
+		return mime
+	}
+
+	return "application/octet-stream"
+}
+
+func getURIContent(uri string) (*[]byte, error) {
+	resp, err := http.Get(uri)
+	// handle the error if there is one
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	content, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return &content, nil
 }

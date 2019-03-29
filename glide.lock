@@ -1,5 +1,5 @@
 hash: 7debaaf616e47d89cf74efc85fd079298adcdf060fc7ac4061fdb930c567d7b5
-updated: 2019-03-23T17:04:01.688497+11:00
+updated: 2019-03-29T14:42:41.283429+11:00
 imports:
 - name: github.com/augustoroman/v8
   version: 41c28ac8c5566b20bb9f90aa624364389418edfe
@@ -21,7 +21,7 @@ imports:
 - name: github.com/go-http-utils/logger
   version: f3a42dcdeae6e445c9e986b7fda289d98db10414
 - name: github.com/go-redis/redis
-  version: 9ecae37814bc6623672ec8967e2b322b23fd4540
+  version: a679e614427ac801aafbf444481210440c8a2694
   subpackages:
   - internal
   - internal/consistenthash
@@ -34,7 +34,7 @@ imports:
   subpackages:
   - google/api
 - name: github.com/gogo/protobuf
-  version: 88dda4156dab6c722c91df813dd73f94253b09b6
+  version: 382325bbbb4d1c850eec1f3ec92a1a16f502d68b
   subpackages:
   - gogoproto
   - proto
@@ -65,7 +65,7 @@ imports:
 - name: github.com/gorilla/websocket
   version: 66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d
 - name: github.com/grpc-ecosystem/grpc-gateway
-  version: 20f268a412e5b342ebfb1a0eef7c3b7bd6c260ea
+  version: 01b57e6642262f092a9c2b7c38a54b63295ae549
   subpackages:
   - internal
   - runtime
@@ -107,7 +107,7 @@ imports:
 - name: github.com/nats-io/nuid
   version: 3024a71c3cbe30667286099921591e6fcc328230
 - name: github.com/opentracing/opentracing-go
-  version: 25a84ff92183e2f8ac018ba1db54f8a07b3c0e04
+  version: 659c90643e714681897ec2521c60567dd21da733
   subpackages:
   - ext
   - log
@@ -129,22 +129,23 @@ imports:
   - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
-  version: 55ae3d9d557340b5bc24cd8aa5f6fa2c2ab31352
-  subpackages:
-  - internal/util
-  - iostats
-  - nfs
-  - xfs
+  version: af7bedc223fba51343f25a6fa7aba84355d0357a
 - name: github.com/rcrowley/go-metrics
   version: 3113b8401b8a98917cde58f8bbd42a1b1c03b1fd
 - name: github.com/robfig/cron
   version: b41be1df696709bb6395fe435af20370037c0b4c
 - name: github.com/rs/cors
   version: 9a47f48565a795472d43519dd49aac781f3034fb
+- name: github.com/sendgrid/rest
+  version: 8f995deebcbbba440a60746115fdb5524e7cf3fc
+- name: github.com/sendgrid/sendgrid-go
+  version: 1e8aa9067d63e4b343391d8bff52ddfa4fcc521c
+  subpackages:
+  - helpers/mail
 - name: github.com/simplereach/timeutils
   version: 1a719258b86a08630289b86902ab16817ba641e9
 - name: github.com/spf13/afero
-  version: f4711e4db9e9a1d3887343acb72b2bbfc2f686f5
+  version: 588a75ec4f32903aa5e39a2619ba6a4631e28424
   subpackages:
   - mem
 - name: github.com/spf13/cast
@@ -172,14 +173,14 @@ imports:
 - name: github.com/vrischmann/go-metrics-influxdb
   version: 4457d7e0175cb32fae2bc835bbd3e36c4feffd59
 - name: golang.org/x/crypto
-  version: b7391e95e576cacdcdd422573063bc057239113d
+  version: a5d413f7728c81fb97d96a2b722368945f651e78
   subpackages:
   - bcrypt
   - blowfish
   - ed25519
   - ed25519/internal/edwards25519
 - name: golang.org/x/net
-  version: addf6b3196f61cd44ce5a76657913698c73479d0
+  version: 74de082e2cca95839e88aa0aeee5aadf6ce7710f
   subpackages:
   - context
   - http/httpguts
@@ -193,19 +194,20 @@ imports:
   subpackages:
   - unix
 - name: golang.org/x/text
-  version: fe223c5a2583471b2791ca99e716c65b4a76117e
+  version: e3703dcdd614d2d7488fff034c75c551ea25da95
   subpackages:
   - secure/bidirule
   - transform
   - unicode/bidi
   - unicode/norm
 - name: google.golang.org/genproto
-  version: e79c0c59cdb5e117ef82a6f885294df3d74065d5
+  version: d831d65fe17df2e52bcc4316d4a9f7a418701f43
   subpackages:
+  - googleapis/api/httpbody
   - googleapis/rpc/status
   - protobuf/field_mask
 - name: google.golang.org/grpc
-  version: ef9bac260455a9a77b29a082f5f7ee71b3d74dad
+  version: f1437f7cc5fa7525032e27aa5fdc15e288220c4e
   subpackages:
   - balancer
   - balancer/base

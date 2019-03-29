@@ -9,7 +9,10 @@ import (
 	"google.golang.org/grpc"
 )
 
+//RunGRPC starts main server & work queue
 func RunGRPC(port int) {
+	go startWorker()
+
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)

@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: emails
+spec:
+  ports:
+  - port: 443
+    name: https
+  selector:
+    run: emails
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: emails
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        version: v1
+        run: emails
+        app: emails
+        service: emails
+        tier: backend
+      annotations:
+        prometheus.io/scrape: "false"
+    spec:
+      containers:
+      - name: emails
+        image: asia.gcr.io/evntsrc-io/emails:latest
+        ports:
+        - containerPort: 443
+        env:
+        - name: SENDGRID_API_KEY
+          valueFrom:
+            secretKeyRef: 
+              name: emails
+              key: SendgridKey

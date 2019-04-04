@@ -27,9 +27,11 @@ type emailProcessor struct{}
 func (p *emailProcessor) Handle(job interface{}) {
 	msg := job.(*mail.SGMailV3)
 	client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
-	_, err := client.Send(msg)
+	resp, err := client.Send(msg)
 	if err != nil {
 		fmt.Printf("Failed to send: %v ~ %e", msg, err)
+	} else {
+		fmt.Printf("Sent email (%s)\n", resp.Headers["X-Message-Id"])
 	}
 }
 

@@ -16,6 +16,8 @@ func RunGRPC(port int) {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+	
+	tracing.InitGlobalTracer("StreamAuth")
 
 	grpcServer := grpc.NewServer(tracing.GRPCServerOptions()...)
 	pb.RegisterStreamAuthServiceServer(grpcServer, newServer())

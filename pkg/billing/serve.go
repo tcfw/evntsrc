@@ -17,6 +17,8 @@ func RunGRPC(port int) {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
+	tracing.InitGlobalTracer("Billing")
+
 	grpcServer := grpc.NewServer(tracing.GRPCServerOptions()...)
 	pb.RegisterBillingServiceServer(grpcServer, NewServer())
 

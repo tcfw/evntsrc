@@ -18,6 +18,8 @@ func Run(port int) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
+	tracing.InitGlobalTracer("GW")
+
 	go startMetrics()
 
 	runtime.HTTPError = CustomHTTPError

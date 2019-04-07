@@ -316,6 +316,9 @@ func RunGRPC(port int) {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+
+	tracing.InitGlobalTracer("Users")
+
 	grpcServer := grpc.NewServer(tracing.GRPCServerOptions()...)
 	protos.RegisterUserServiceServer(grpcServer, newServer())
 

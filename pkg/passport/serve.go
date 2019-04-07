@@ -373,6 +373,8 @@ func RunGRPC(port int, tlsdir string) {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
+	tracing.InitGlobalTracer("Passport")
+
 	tlsKeyDir = tlsdir
 
 	grpcServer := grpc.NewServer(tracing.GRPCServerOptions()...)

@@ -24,6 +24,8 @@ func RunGRPC(port int, natsEndpoint string) {
 		panic(err)
 	}
 
+	tracing.InitGlobalTracer("Bridge")
+
 	grpcServer := grpc.NewServer(tracing.GRPCServerOptions()...)
 	pb.RegisterBridgeServiceServer(grpcServer, newServer())
 

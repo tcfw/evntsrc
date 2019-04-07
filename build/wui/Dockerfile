@@ -15,4 +15,6 @@ FROM nginx:latest
 #Enable GZIP
 COPY build/wui/compression.conf /etc/nginx/conf.d/
 
+COPY build/wui/default.conf /etc/nginx/conf.d/
+
 COPY --from=builder /web/dist /usr/share/nginx/html

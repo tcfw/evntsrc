@@ -9,6 +9,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	metrics "github.com/rcrowley/go-metrics"
+	"github.com/tcfw/evntsrc/pkg/tracing"
 )
 
 var upgrader = websocket.Upgrader{
@@ -19,6 +20,8 @@ var upgrader = websocket.Upgrader{
 }
 
 func serveWs(w http.ResponseWriter, r *http.Request) {
+	span := tracing.GlobalTracer().StartSpan("serveWs")
+
 	var apiKey string
 	var apiSec string
 	useAuthHeader := false
@@ -63,6 +66,8 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 
 	m := metrics.GetOrRegisterCounter("wsConnections", nil)
 	m.Inc(1)
+
+	span.Finish()
 
 	go client.writePump()
 	go client.readPump()

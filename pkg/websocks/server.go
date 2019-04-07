@@ -7,10 +7,12 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/tcfw/evntsrc/pkg/tracing"
 )
 
 //startHTTPServer provides a HTTP server for / and websockets
 func startHTTPServer(port int) {
+	tracing.InitGlobalTracer("Websocks")
 	mux := mux.NewRouter()
 
 	mux.HandleFunc("/v1/", func(w http.ResponseWriter, r *http.Request) {

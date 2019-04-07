@@ -56,7 +56,6 @@ func ExtractOTHeadersFromContext(ctx context.Context) *metadata.MD {
 
 //InitGlobalTracer applies a jaeger based global tracer
 func InitGlobalTracer(name string) {
-
 	tracingEndpoint := viper.GetString("tracer")
 	if tracingEndpoint == "false" {
 		log.Println("!! Tracing is disabled !!")
@@ -134,4 +133,9 @@ func StartSpan(ctx context.Context, name string) ot.Span {
 //StartChildSpan is a wrapper method to start a subspan
 func StartChildSpan(childSpan ot.Span, name string) ot.Span {
 	return ot.StartSpan(name, ot.ChildOf(childSpan.Context()))
+}
+
+//GlobalTracer returns the global instance of the Jaeger tracer
+func GlobalTracer() ot.Tracer {
+	return ot.GlobalTracer()
 }

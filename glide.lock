@@ -1,5 +1,5 @@
 hash: 7debaaf616e47d89cf74efc85fd079298adcdf060fc7ac4061fdb930c567d7b5
-updated: 2019-04-06T21:20:58.560235+11:00
+updated: 2019-04-07T17:26:25.758091+10:00
 imports:
 - name: github.com/augustoroman/v8
   version: 41c28ac8c5566b20bb9f90aa624364389418edfe
@@ -230,7 +230,6 @@ imports:
 - name: google.golang.org/genproto
   version: 64821d5d210748c883cd2b809589555ae4654203
   subpackages:
-  - googleapis/api/httpbody
   - googleapis/rpc/status
   - protobuf/field_mask
 - name: google.golang.org/grpc
@@ -249,7 +248,6 @@ imports:
   - grpclog
   - internal
   - internal/backoff
-  - internal/balancerload
   - internal/binarylog
   - internal/channelz
   - internal/envconfig
@@ -288,6 +286,6 @@ testImports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: ffdc059bfe9ce6a4e144ba849dbedead332c6053
+  version: 34c6fa2dc70986bccbbffcc6130f6920a924b075
   subpackages:
   - assert

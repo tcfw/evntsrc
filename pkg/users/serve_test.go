@@ -18,7 +18,7 @@ import (
 func TestCanRunServer(t *testing.T) {
 	go RunGRPC(54765)
 
-	_, err := grpc.Dial("localhost:54765", grpc.WithInsecure())
+	_, err := grpc.Dial("localhost:54765", tracing.GRPCClientOptions()...)
 	assert.NoError(t, err)
 }
 

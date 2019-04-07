@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	pb "github.com/tcfw/evntsrc/pkg/streamauth/protos"
 	streams "github.com/tcfw/evntsrc/pkg/streams/protos"
+	"github.com/tcfw/evntsrc/pkg/tracing"
 	"github.com/tcfw/evntsrc/pkg/utils/db"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -219,7 +220,7 @@ func (s *server) Delete(ctx context.Context, request *pb.StreamKey) (*pb.Empty, 
 //validateOwnership contacts streams to verify stream ownership via jwt token
 func (s *server) validateOwnership(ctx context.Context, stream int32) error {
 	if s.streamConn == nil {
-		conn, err := grpc.DialContext(ctx, "streams:443", grpc.WithInsecure())
+		conn, err := grpc.DialContext(ctx, "streams:443", tracing.GRPCClientOptions()...)
 		if err != nil {
 			return err
 		}

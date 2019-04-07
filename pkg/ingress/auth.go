@@ -9,6 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 	streamauth "github.com/tcfw/evntsrc/pkg/streamauth/protos"
+	"github.com/tcfw/evntsrc/pkg/tracing"
 	"google.golang.org/grpc"
 )
 
@@ -30,7 +31,7 @@ func ValidateAuth(next http.Handler) http.Handler {
 			return
 		}
 
-		conn, err := grpc.Dial("streamauth:443", grpc.WithInsecure())
+		conn, err := grpc.Dial("streamauth:443", tracing.GRPCClientOptions()...)
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, "Failed to verify auth", http.StatusInternalServerError)

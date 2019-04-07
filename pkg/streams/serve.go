@@ -6,6 +6,7 @@ import (
 	"net"
 
 	pb "github.com/tcfw/evntsrc/pkg/streams/protos"
+	"github.com/tcfw/evntsrc/pkg/tracing"
 	"google.golang.org/grpc"
 )
 
@@ -16,7 +17,7 @@ func RunGRPC(port int) {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(tracing.GRPCServerOptions()...)
 	pb.RegisterStreamsServiceServer(grpcServer, NewServer())
 
 	log.Printf("Starting gRPC server (port %d)\n", port)

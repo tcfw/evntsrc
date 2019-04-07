@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/tcfw/evntsrc/pkg/tracing"
 	userSvc "github.com/tcfw/evntsrc/pkg/users/protos"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -40,7 +41,7 @@ func newUserClient(ctx context.Context) (userSvc.UserServiceClient, error) {
 		userEndpoint = "users:443"
 	}
 
-	opts := []grpc.DialOption{grpc.WithInsecure()}
+	opts := tracing.GRPCClientOptions()
 
 	opts = append(opts, grpc.WithPerRPCCredentials(&authReq))
 

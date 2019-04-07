@@ -9,7 +9,7 @@ import (
 	"github.com/go-http-utils/logger"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/rs/cors"
-	"google.golang.org/grpc"
+	"github.com/tcfw/evntsrc/pkg/tracing"
 )
 
 //Run starts the JSON gw
@@ -26,9 +26,7 @@ func Run(port int) error {
 	protobufMarshaler := runtime.WithMarshalerOption("application/protobuf", &runtime.ProtoMarshaller{})
 
 	mux := runtime.NewServeMux(protobufMarshaler)
-	opts := []grpc.DialOption{
-		grpc.WithInsecure(),
-	}
+	opts := tracing.GRPCClientOptions()
 
 	registerPassport(ctx, mux, opts)
 	registerUsers(ctx, mux, opts)

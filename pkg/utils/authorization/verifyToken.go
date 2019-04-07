@@ -7,6 +7,7 @@ import (
 
 	jwt "github.com/dgrijalva/jwt-go"
 	passportSvc "github.com/tcfw/evntsrc/pkg/passport/protos"
+	"github.com/tcfw/evntsrc/pkg/tracing"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
@@ -29,7 +30,7 @@ func ValidateAuthToken(ctx context.Context, token string) (bool, error) {
 		passportEndpoint = "passport:443"
 	}
 
-	conn, err := grpc.DialContext(ctx, passportEndpoint, grpc.WithInsecure())
+	conn, err := grpc.DialContext(ctx, passportEndpoint, tracing.GRPCClientOptions()...)
 	if err != nil {
 		return false, err
 	}

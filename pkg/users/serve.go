@@ -12,6 +12,7 @@ import (
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 
+	"github.com/tcfw/evntsrc/pkg/tracing"
 	protos "github.com/tcfw/evntsrc/pkg/users/protos"
 	utils "github.com/tcfw/evntsrc/pkg/utils/authorization"
 	"github.com/tcfw/evntsrc/pkg/utils/db"
@@ -315,7 +316,7 @@ func RunGRPC(port int) {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(tracing.GRPCServerOptions()...)
 	protos.RegisterUserServiceServer(grpcServer, newServer())
 
 	log.Printf("Starting gRPC server (port %v)", port)

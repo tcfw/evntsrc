@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	pb "github.com/tcfw/evntsrc/pkg/bridge/protos"
+	"github.com/tcfw/evntsrc/pkg/tracing"
 	"google.golang.org/grpc"
 )
 
@@ -23,7 +24,7 @@ func RunGRPC(port int, natsEndpoint string) {
 		panic(err)
 	}
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(tracing.GRPCServerOptions()...)
 	pb.RegisterBridgeServiceServer(grpcServer, newServer())
 
 	log.Println("Starting gRPC server...")

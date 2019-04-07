@@ -13,6 +13,7 @@ import (
 
 	jwt "github.com/dgrijalva/jwt-go"
 	pb "github.com/tcfw/evntsrc/pkg/passport/protos"
+	"github.com/tcfw/evntsrc/pkg/tracing"
 	userSvc "github.com/tcfw/evntsrc/pkg/users/protos"
 	utils "github.com/tcfw/evntsrc/pkg/utils/authorization"
 	rpcUtils "github.com/tcfw/evntsrc/pkg/utils/rpc"
@@ -70,7 +71,7 @@ func newUserClient(ctx context.Context) (userSvc.UserServiceClient, error) {
 		userEndpoint = "users:443"
 	}
 
-	opts := []grpc.DialOption{grpc.WithInsecure()}
+	opts := tracing.GRPCClientOptions()
 
 	opts = append(opts, grpc.WithPerRPCCredentials(&authReq))
 
@@ -374,7 +375,7 @@ func RunGRPC(port int, tlsdir string) {
 
 	tlsKeyDir = tlsdir
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(tracing.GRPCServerOptions()...)
 	pb.RegisterAuthSeviceServer(grpcServer, NewServer())
 
 	log.Println("Starting gRPC server")

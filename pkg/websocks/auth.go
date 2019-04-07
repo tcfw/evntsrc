@@ -4,12 +4,13 @@ import (
 	"context"
 
 	streamauth "github.com/tcfw/evntsrc/pkg/streamauth/protos"
+	"github.com/tcfw/evntsrc/pkg/tracing"
 	"google.golang.org/grpc"
 )
 
 func (c *Client) validateAuth(auth *AuthCommand) error {
 	//@TODO pass through passport instead
-	conn, err := grpc.Dial("streamauth:443", grpc.WithInsecure())
+	conn, err := grpc.Dial("streamauth:443", tracing.GRPCClientOptions()...)
 	if err != nil {
 		return err
 	}

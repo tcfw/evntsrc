@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/tcfw/evntsrc/pkg/tracing"
+
 	passport "github.com/tcfw/evntsrc/pkg/passport/protos"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
@@ -35,7 +37,7 @@ func authGuard(next http.Handler) http.Handler {
 				return
 			}
 
-			conn, err := grpc.Dial(passportEndpoint, grpc.WithInsecure())
+			conn, err := grpc.Dial(passportEndpoint, tracing.GRPCClientOptions()...)
 			if err != nil {
 				panic(err)
 			}

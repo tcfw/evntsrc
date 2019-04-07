@@ -31,6 +31,7 @@ type APIClient struct {
 	connectionID  string
 	AppID         string
 	AppVer        string
+	Debug         bool
 	acks          map[string]*ackCT
 	subscriptions map[string][]*subscription
 
@@ -65,6 +66,7 @@ func NewEvntSrcClient(auth string, streamID int32) (*APIClient, error) {
 		acks:          map[string]*ackCT{},
 		subscriptions: map[string][]*subscription{},
 		IgnoreSelf:    true,
+		Debug:         false,
 	}
 
 	go api.watchAcks()
@@ -178,6 +180,7 @@ func (api *APIClient) formatURL(apiType string, methodEndpoint string) string {
 //Staging switches to the staging env endpoints
 func (api *APIClient) Staging() {
 	api.Endpoint = stagingAPIEndpoint
+	api.Debug = true
 }
 
 func (api *APIClient) getSocket() *websocket.Conn {

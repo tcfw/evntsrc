@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
@@ -22,6 +23,19 @@ func (api *APIClient) openConn() error {
 	if api.auth != "" {
 		headers = &http.Header{}
 		headers.Add("Authorization", fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(api.auth))))
+	}
+
+	if api.Debug {
+		letterRunes := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+		n := 25
+
+		b := make([]rune, n)
+		for i := range b {
+			b[i] = letterRunes[rand.Intn(len(letterRunes))]
+		}
+
+		headers.Add("x-trace", string(b))
+		fmt.Printf("X-Trace: %s\n", string(b))
 	}
 
 	url := api.formatURL("realtime", strconv.Itoa(int(api.stream)))

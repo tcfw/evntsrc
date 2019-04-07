@@ -20,7 +20,10 @@ var upgrader = websocket.Upgrader{
 }
 
 func serveWs(w http.ResponseWriter, r *http.Request) {
-	span := tracing.GlobalTracer().StartSpan("serveWs")
+	span, ctx := tracing.StartSpan(r.Context(), "serveWs")
+	if v := r.Header.Get("x-trace"); v != "" {
+		span.SetTag("web-traceid", v)
+	}
 
 	var apiKey string
 	var apiSec string
@@ -50,7 +53,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	if useAuthHeader {
 		streamint, _ := strconv.ParseInt(r.URL.Path[len("/v1/"):], 10, 64)
 		fmt.Printf("Attempting to use auth (stream: %v)\n", streamint)
-		err := client.authFromHeader(apiKey, apiSec, int32(streamint))
+		err := client.authFromHeader(ctx, apiKey, apiSec, int32(streamint))
 		if err != nil {
 			fmt.Println("Attempting to use auth: failed. Closing connection")
 			conn.WriteControl(websocket.CloseMessage, []byte("Auth Failed"), time.Now().Add(5*time.Second))

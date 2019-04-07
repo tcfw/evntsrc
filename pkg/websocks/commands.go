@@ -1,6 +1,7 @@
 package websocks
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -145,7 +146,7 @@ func (c *Client) doAuth(command *InboundCommand, message []byte) {
 		return
 	}
 
-	if err := c.validateAuth(subcommand); err != nil {
+	if err := c.validateAuth(context.Background(), subcommand); err != nil {
 		c.sendStruct(&AckCommand{
 			Ref:     command.Ref,
 			Acktype: "Failed",

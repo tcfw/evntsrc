@@ -125,9 +125,9 @@ func GRPCServerOptions() []grpc.ServerOption {
 }
 
 //StartSpan starts a new span from a given context
-func StartSpan(ctx context.Context, name string) ot.Span {
-	span, _ := ot.StartSpanFromContext(ctx, name)
-	return span
+func StartSpan(ctx context.Context, name string) (ot.Span, context.Context) {
+	span, context := ot.StartSpanFromContext(ctx, name)
+	return span, context
 }
 
 //StartChildSpan is a wrapper method to start a subspan

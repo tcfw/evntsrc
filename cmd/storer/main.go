@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	_ "github.com/lib/pq"
+
 	cmd "github.com/tcfw/evntsrc/pkg/storer/cmd"
 )
 

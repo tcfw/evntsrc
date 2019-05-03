@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: storer
 spec:
-  replicas: 1
+  replicas: 2
   template:
     metadata:
       labels:
@@ -26,3 +26,5 @@ spec:
           value: "mongo-mongodb.default:27017"
         - name: NATS_HOST
           value: "nats.nats-io:4222"
+        - name: PGDB_HOST
+          value: "host=cockroach-cockroachdb port=26257 sslmode=disable dbname=event_store"

@@ -13,13 +13,15 @@ func NewStartCmd() *cobra.Command {
 		Short: "Start monitoring",
 		Run: func(cmd *cobra.Command, args []string) {
 			nats, _ := cmd.Flags().GetString("nats")
-			storer.StartMonitor(nats)
+			storer.Start(nats)
 		},
 	}
 
 	cmd.Flags().String("tracer", "jaeger-agent:5775", "endpoint of the jaeger-agent. Set to 'false' to disable tracing")
 	cmd.Flags().String("nats", "localhost:4222", "endpoint for NATS server")
+	cmd.Flags().Bool("migrate", false, "If migrations should run")
 	viper.BindPFlag("tracer", cmd.Flags().Lookup("tracer"))
+	viper.BindPFlag("migrate", cmd.Flags().Lookup("migrate"))
 
 	return cmd
 }

@@ -33,5 +33,6 @@ FROM ubuntu:latest
 
 WORKDIR /bin
 COPY --from=builder /go/src/github.com/tcfw/evntsrc/storer storer
+COPY ./pkg/storer/migrations ./migrations
 
 CMD [ "storer" ]

@@ -1,15 +1,15 @@
 <template>
-    <div class="settings-side-menu">
-        <div class="header">
-            Account Settings
-        </div>
-        <div class="links">
-            <router-link :to="{name: 'account'}">Account</router-link>
-            <router-link to="/settings/billing">Billing</router-link>
-            <router-link to="/settings/security">Security</router-link>
-            <router-link to="/settings/sessions">Sessions</router-link>
-        </div>
+  <div class="settings-side-menu">
+    <div class="header">
+      Account Settings
     </div>
+    <div class="links">
+      <router-link :to="{ name: 'account' }">Account</router-link>
+      <router-link to="/settings/billing">Billing</router-link>
+      <router-link to="/settings/security">Security</router-link>
+      <router-link to="/settings/sessions">Sessions</router-link>
+    </div>
+  </div>
 </template>
 <script>
 export default {

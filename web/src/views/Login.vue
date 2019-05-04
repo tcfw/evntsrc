@@ -1,57 +1,119 @@
 <template>
-	<el-row type="flex" justify="center" align="middle" :style='{height: "100vh"}'>
-		<el-col :md="10" :lg="7" :xs="24" :xlg="5">
-			<el-card :style='{padding: "25px"}' id="login-wrapper">
-				<div :style="{textAlign: 'center', marginBottom: '45px', marginTop: '5px'}">
-					<img src="../assets/logo_b.png" :style="{height: '25px'}" />
-				</div>
-				<el-form ref="loginForm" :model="loginForm" :rules="loginFormValidationRules" @submit.native.prevent.stop="login">
-					<div v-if="hasPriorKnowledge">
-						<el-row>
-							<el-col :span=5 :offset=5>
-								<Avatar :src="profileKnowledge.photo" size="large">{{profileKnowledge.name}}</Avatar>
-							</el-col>
-							<el-col :span=12 :offset=1>
-								<div id="welcome-back">Welcome Back</div>
-								<div id="profile-knowledge">
-									<i class="fab fa-google" v-if="profileKnowledge.provider == 'google'" :style='{marginRight: "5px"}'></i>
-									<i class="fab fa-facebook" v-if="profileKnowledge.provider == 'facebook'" :style='{marginRight: "5px"}'></i>
-									{{profileKnowledge.email}}
-								</div>
-								<div id="not-you" @click="clearKnowledge">Not you?</div>
-							</el-col>
-						</el-row>
-					</div>
-					<el-form-item prop="email" v-if="!hasPriorKnowledge">
-						<el-input type="text" v-model="loginForm.email" placeholder="Email" @keydown.enter.stop.prevent.native="login"/>
-					</el-form-item>
-					<el-form-item prop="password" v-if="!hasPriorKnowledge || profileKnowledge.provider=='storage'">
-						<el-input type="password" v-model="loginForm.password" placeholder="Password" @keydown.enter.stop.prevent.native="login" />
-					</el-form-item>
-					<el-form-item>
-						<el-button :loading="submitting" size="medium" ref="loginSubmitBtn" type="primary" @click="login()" id="login-btn">Log in</el-button>
-						<router-link to="/forgot" id="forgot-btn" v-if="!hasPriorKnowledge || profileKnowledge.provider=='storage'">Forgot your password?</router-link>
-					</el-form-item>
-				</el-form>
-				<div v-show="profileKnowledge.provider == 'storage' || !hasPriorKnowledge">
-					<div class="login-divider"></div>
-					<div id="social-btns">
-						<div class="gapi-wrapper" @click="googleClick">
-							<div id="gapi-signin2"></div>
-						</div>
+  <el-row
+    type="flex"
+    justify="center"
+    align="middle"
+    :style="{ height: '100vh' }"
+  >
+    <el-col :md="10" :lg="7" :xs="24" :xlg="5">
+      <el-card :style="{ padding: '25px' }" id="login-wrapper">
+        <div
+          :style="{
+            textAlign: 'center',
+            marginBottom: '45px',
+            marginTop: '5px'
+          }"
+        >
+          <img src="../assets/logo_b.png" :style="{ height: '25px' }" />
+        </div>
+        <el-form
+          ref="loginForm"
+          :model="loginForm"
+          :rules="loginFormValidationRules"
+          @submit.native.prevent.stop="login"
+        >
+          <div v-if="hasPriorKnowledge">
+            <el-row>
+              <el-col :span="5" :offset="5">
+                <Avatar :src="profileKnowledge.photo" size="large">{{
+                  profileKnowledge.name
+                }}</Avatar>
+              </el-col>
+              <el-col :span="12" :offset="1">
+                <div id="welcome-back">Welcome Back</div>
+                <div id="profile-knowledge">
+                  <i
+                    class="fab fa-google"
+                    v-if="profileKnowledge.provider == 'google'"
+                    :style="{ marginRight: '5px' }"
+                  ></i>
+                  <i
+                    class="fab fa-facebook"
+                    v-if="profileKnowledge.provider == 'facebook'"
+                    :style="{ marginRight: '5px' }"
+                  ></i>
+                  {{ profileKnowledge.email }}
+                </div>
+                <div id="not-you" @click="clearKnowledge">Not you?</div>
+              </el-col>
+            </el-row>
+          </div>
+          <el-form-item prop="email" v-if="!hasPriorKnowledge">
+            <el-input
+              type="text"
+              v-model="loginForm.email"
+              placeholder="Email"
+              @keydown.enter.stop.prevent.native="login"
+            />
+          </el-form-item>
+          <el-form-item
+            prop="password"
+            v-if="!hasPriorKnowledge || profileKnowledge.provider == 'storage'"
+          >
+            <el-input
+              type="password"
+              v-model="loginForm.password"
+              placeholder="Password"
+              @keydown.enter.stop.prevent.native="login"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-button
+              :loading="submitting"
+              size="medium"
+              ref="loginSubmitBtn"
+              type="primary"
+              @click="login()"
+              id="login-btn"
+              >Log in</el-button
+            >
+            <router-link
+              to="/forgot"
+              id="forgot-btn"
+              v-if="
+                !hasPriorKnowledge || profileKnowledge.provider == 'storage'
+              "
+              >Forgot your password?</router-link
+            >
+          </el-form-item>
+        </el-form>
+        <div
+          v-show="profileKnowledge.provider == 'storage' || !hasPriorKnowledge"
+        >
+          <div class="login-divider"></div>
+          <div id="social-btns">
+            <div class="gapi-wrapper" @click="googleClick">
+              <div id="gapi-signin2"></div>
+            </div>
 
-						<div id="create-btn"><router-link to="/signup">Create an account...</router-link></div>
-					</div>
-				</div>
-				<div v-if="loading">
-					<Spin size="large" fix>
-						<Icon type="load-c" size=18 :style='{animation: "ani-demo-spin 1s linear infinite"}'></Icon>
-						<div>Loading...</div>
-					</Spin>
-				</div>
-			</el-card>
-		</el-col>
-	</el-row>
+            <div id="create-btn">
+              <router-link to="/signup">Create an account...</router-link>
+            </div>
+          </div>
+        </div>
+        <div v-if="loading">
+          <Spin size="large" fix>
+            <Icon
+              type="load-c"
+              size="18"
+              :style="{ animation: 'ani-demo-spin 1s linear infinite' }"
+            ></Icon>
+            <div>Loading...</div>
+          </Spin>
+        </div>
+      </el-card>
+    </el-col>
+  </el-row>
 </template>
 <script>
 import passport from "@/protos/passport_pb.js";
@@ -146,7 +208,7 @@ export default {
       if (this.profileKnowledge.provider == "google") {
         gapi.auth2.getAuthInstance().disconnect();
       }
-      
+
       if (this.profileKnowledge.provider == "storage") {
         localStorage.removeItem("prokno");
         localStorage.removeItem("prokno-e");

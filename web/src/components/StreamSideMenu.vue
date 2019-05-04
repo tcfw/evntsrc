@@ -1,32 +1,53 @@
 <template>
-	<div class="stream-side-menu">
-		<div class="search-container">
-			<input name="search" type="text" placeholder="Search..." v-model="searchInput" @keyup.enter="load" @keyup.esc="clearSearch"/>
-			<i class="fas fa-search" @click="load"></i>
-			<i class="fas fa-times clear-search" v-if="isSearchResults" @click="clearSearch"></i>
-		</div>
-		<div class="stream-list" v-if="!loading">
-			<router-link :to="'/streams/'+stream.ID" v-for="stream in filteredStreams" :key="stream.ID" class="stream">
-				<div class="icon" :style="iconStyling(stream)">
-					<i v-if="'Icon' in stream && stream.Icon==''" :class="'fas fa-'+stream.Icon"></i>
-					<i v-else class="fas fa-bolt"></i>
-				</div>
-				<div class="info">
-					<div class="name">{{stream.Name}}</div>
-					<div class="cluster">{{stream.Cluster}}</div>
-				</div>
-				<router-link :to="'/streams/'+stream.ID+'/settings'"><i class="fas fa-cog config"></i></router-link>
-			</router-link>
-		</div>
-		<div class="searching-loader" v-if="loading">
-			<i class="fas fa-sync fa-spin"></i>
-		</div>
-		<div class="loading-error" v-if="error">
-			<i class="fas fa-exclamation-triangle" :style="{color: '#f56c6c'}"></i>
-			<p>{{error}}</p>
-			<el-button type="danger" size="mini" @click="retry">Retry</el-button>
-		</div>
-	</div>
+  <div class="stream-side-menu">
+    <div class="search-container">
+      <input
+        name="search"
+        type="text"
+        placeholder="Search..."
+        v-model="searchInput"
+        @keyup.enter="load"
+        @keyup.esc="clearSearch"
+      />
+      <i class="fas fa-search" @click="load"></i>
+      <i
+        class="fas fa-times clear-search"
+        v-if="isSearchResults"
+        @click="clearSearch"
+      ></i>
+    </div>
+    <div class="stream-list" v-if="!loading">
+      <router-link
+        :to="'/streams/' + stream.ID"
+        v-for="stream in filteredStreams"
+        :key="stream.ID"
+        class="stream"
+      >
+        <div class="icon" :style="iconStyling(stream)">
+          <i
+            v-if="'Icon' in stream && stream.Icon == ''"
+            :class="'fas fa-' + stream.Icon"
+          ></i>
+          <i v-else class="fas fa-bolt"></i>
+        </div>
+        <div class="info">
+          <div class="name">{{ stream.Name }}</div>
+          <div class="cluster">{{ stream.Cluster }}</div>
+        </div>
+        <router-link :to="'/streams/' + stream.ID + '/settings'"
+          ><i class="fas fa-cog config"></i
+        ></router-link>
+      </router-link>
+    </div>
+    <div class="searching-loader" v-if="loading">
+      <i class="fas fa-sync fa-spin"></i>
+    </div>
+    <div class="loading-error" v-if="error">
+      <i class="fas fa-exclamation-triangle" :style="{ color: '#f56c6c' }"></i>
+      <p>{{ error }}</p>
+      <el-button type="danger" size="mini" @click="retry">Retry</el-button>
+    </div>
+  </div>
 </template>
 <script>
 export default {

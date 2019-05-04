@@ -1,14 +1,27 @@
 <template>
-	<el-dialog :visible.sync="visible" ref="ccDialog" width="30%" title="Payment Method" :show-close="false">
-		<label style="margin-top: -25px; margin-bottom: 15px; display: block;">Credit or debit card</label>
-		<el-card>
-			<div id="stripeElement"></div>
-		</el-card>
-		<span slot="footer" class="dialog-footer">
-			<el-button @click="visible = false" size="small">Cancel</el-button>
-			<el-button type="primary" @click="submit" size="small" :loading="submitting">Attach card</el-button>
-		</span>
-	</el-dialog>	
+  <el-dialog
+    :visible.sync="visible"
+    ref="ccDialog"
+    width="30%"
+    title="Payment Method"
+    :show-close="false"
+  >
+    <label style="margin-top: -25px; margin-bottom: 15px; display: block;">Credit or debit card</label>
+    <el-card>
+      <div id="stripeElement"></div>
+    </el-card>
+    <span slot="footer" class="dialog-footer">
+      <el-button @click="visible = false" size="small">Cancel</el-button>
+      <el-button
+        type="primary"
+        @click="submit"
+        size="small"
+        :loading="submitting"
+        >
+          Attach card
+        </el-button>
+    </span>
+  </el-dialog>
 </template>
 <script>
 export default {
@@ -49,24 +62,31 @@ export default {
             cardToken: result.token.id,
             userId: this.$root.me.id
           };
-          axios.post(this.$config.API + "/billing/user/" + this.$root.me.id + "/method", updateRequest)
-          .then(() => {
-            this.stripeElement.clear();
-            this.visible = false;
-            this.submitting = false;
-            this.$message({
-              message: "Payment method updated.",
-              type: "success"
+          axios
+            .post(
+              this.$config.API +
+                "/billing/user/" +
+                this.$root.me.id +
+                "/method",
+              updateRequest
+            )
+            .then(() => {
+              this.stripeElement.clear();
+              this.visible = false;
+              this.submitting = false;
+              this.$message({
+                message: "Payment method updated.",
+                type: "success"
+              });
+              this.fetchInfo();
+            })
+            .catch(() => {
+              this.submitting = false;
+              this.$message({
+                message: "Failed to update payment method. Please try again",
+                type: "error"
+              });
             });
-            this.fetchInfo();
-          })
-          .catch(() => {
-            this.submitting = false;
-            this.$message({
-              message: "Failed to update payment method. Please try again",
-              type: "error"
-            });
-          });
         }
       });
     }

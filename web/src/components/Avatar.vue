@@ -1,9 +1,15 @@
 <template>
-	<span :class="classes">
-        <img :src="rSrc" v-if="src || rSrc">
-        <i :class="customIcon" v-else-if="icon || customIcon"></i>
-        <span ref="children" :class="[prefixCls + '-string']" :style="childrenStyle" v-else><slot></slot></span>
-    </span>
+  <span :class="classes">
+    <img :src="rSrc" v-if="src || rSrc" />
+    <i :class="customIcon" v-else-if="icon || customIcon"></i>
+    <span
+      ref="children"
+      :class="[prefixCls + '-string']"
+      :style="childrenStyle"
+      v-else
+      ><slot></slot
+    ></span>
+  </span>
 </template>
 <script>
 const prefixCls = "avatar";
@@ -97,11 +103,7 @@ export default {
       }
 
       if (email != undefined) {
-        return (
-          "https://www.gravatar.com/avatar/" +
-          md5(email) +
-          "?d=mp&s=90"
-        );
+        return "https://www.gravatar.com/avatar/" + md5(email) + "?d=mp&s=90";
       }
     }
   },

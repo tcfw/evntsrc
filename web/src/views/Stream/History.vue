@@ -1,24 +1,27 @@
 <template>
-	<div :style="{position: 'relative'}" :class="containerClass">
-		<div id="injector">
-			<small class="injector-header">&nbsp;</small>
-			<el-form :model="injector" label-width="120px">
-				<el-form-item label="Channel">
-					<el-input v-model="injector.channel"></el-input>
-				</el-form-item>
-				<el-form-item label="Event type">
-					<el-input v-model="injector.type"></el-input>
-				</el-form-item>
-				<el-form-item label="Data">
-					<el-input v-model="injector.data"></el-input>
-				</el-form-item>
-				<div :style="{textAlign: 'right'}">
-					<el-button type="primary" size="small">Inject</el-button>
-				</div>
-			</el-form>
-		</div>
-		<el-button id="inject-btn" type="info" @click="toggleInjector" size="small"><span v-show="!injectorOpen">Injector</span> <i class="fas fa-times" v-show="injectorOpen"></i></el-button>
-	</div>
+  <div :style="{ position: 'relative' }" :class="containerClass">
+    <div id="injector">
+      <small class="injector-header">&nbsp;</small>
+      <el-form :model="injector" label-width="120px">
+        <el-form-item label="Channel">
+          <el-input v-model="injector.channel"></el-input>
+        </el-form-item>
+        <el-form-item label="Event type">
+          <el-input v-model="injector.type"></el-input>
+        </el-form-item>
+        <el-form-item label="Data">
+          <el-input v-model="injector.data"></el-input>
+        </el-form-item>
+        <div :style="{ textAlign: 'right' }">
+          <el-button type="primary" size="small">Inject</el-button>
+        </div>
+      </el-form>
+    </div>
+    <el-button id="inject-btn" type="info" @click="toggleInjector" size="small"
+      ><span v-show="!injectorOpen">Injector</span>
+      <i class="fas fa-times" v-show="injectorOpen"></i
+    ></el-button>
+  </div>
 </template>
 <script>
 export default {

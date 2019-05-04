@@ -1,20 +1,24 @@
 <template>
-	<div class="side-menu">
-		<router-link to="/"><img src="@/assets/logo.png"/></router-link>
-		<div class="menu">
-			<router-link to="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</router-link>
-			<router-link to="/streams"><i class="fas fa-stream"></i> Streams</router-link>
-		</div>
-		<div class="info">
-			&copy; 2018 EvntSrc.io
-			<p>
-				<router-link to="/about">About</router-link> | 
-				<router-link to="/terms">Terms</router-link> |
-				<router-link to="/privacy">Privacy</router-link> | 
-				<router-link to="/help">Help</router-link>
-			</p>
-		</div>
-	</div>
+  <div class="side-menu">
+    <router-link to="/"><img src="@/assets/logo.png"/></router-link>
+    <div class="menu">
+      <router-link to="/dashboard"
+        ><i class="fas fa-tachometer-alt"></i> Dashboard</router-link
+      >
+      <router-link to="/streams"
+        ><i class="fas fa-stream"></i> Streams</router-link
+      >
+    </div>
+    <div class="info">
+      &copy; 2018 EvntSrc.io
+      <p>
+        <router-link to="/about">About</router-link> |
+        <router-link to="/terms">Terms</router-link> |
+        <router-link to="/privacy">Privacy</router-link> |
+        <router-link to="/help">Help</router-link>
+      </p>
+    </div>
+  </div>
 </template>
 <script>
 export default {};

@@ -43,6 +43,9 @@ func createUpdateTables(db *sql.DB) error {
 	}
 
 	migratedRows, err := db.Query("select file from event_store.migrations;")
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer migratedRows.Close()
 
 	migrations := map[string]bool{}

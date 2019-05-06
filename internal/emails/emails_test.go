@@ -64,7 +64,7 @@ func TestBasicAttachment(t *testing.T) {
 		Html:      "<b>This is a test</b>",
 		PlainText: "This is a test",
 		Attachments: []*pb.Attachment{
-			&pb.Attachment{
+			{
 				Filename: "test.txt",
 				Type: &pb.Attachment_Data{
 					Data: []byte("this is a test"),
@@ -104,7 +104,7 @@ func TestRemoteAttachment(t *testing.T) {
 		Html:      "<b>This is a test</b>",
 		PlainText: "This is a test",
 		Attachments: []*pb.Attachment{
-			&pb.Attachment{
+			{
 				Filename: "test.txt",
 				Type: &pb.Attachment_Uri{
 					Uri: "https://api.staging.evntsrc.io/",

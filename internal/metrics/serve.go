@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc"
 )
 
+//RunGRPC starts the grpc endpoint
 func RunGRPC(port int) {
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {

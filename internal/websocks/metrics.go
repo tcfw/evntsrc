@@ -12,7 +12,7 @@ var (
 
 	socketGauge = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "ws_conn",
-		Help: "Guage of current websocket connections",
+		Help: "Gauge of current websocket connections",
 	}, []string{"stream"})
 
 	bytePublishCounter = prometheus.NewCounterVec(prometheus.CounterOpts{

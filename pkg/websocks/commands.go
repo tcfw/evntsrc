@@ -133,6 +133,9 @@ func (c *Client) doPublish(command *InboundCommand, message []byte) {
 
 	eventJSONBytes, _ := json.Marshal(rEvent)
 	natsConn.Publish(channel, eventJSONBytes)
+
+	bytePublishCounter.WithLabelValues(fmt.Sprintf("%d", c.auth.Stream)).Add(float64(len(eventJSONBytes)))
+
 	c.sendStruct(&AckCommand{
 		Ref:     command.Ref,
 		Acktype: "OK",

@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+
 	"github.com/gorilla/websocket"
 	metrics "github.com/rcrowley/go-metrics"
 	"github.com/tcfw/evntsrc/pkg/tracing"
@@ -42,6 +44,9 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		useAuthHeader = true
 	}
 
+	streamint, _ := strconv.ParseInt(r.URL.Path[len("/v1/"):], 10, 64)
+	httpRequest.With(prometheus.Labels{"stream": fmt.Sprintf("%d", streamint)})
+
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
@@ -51,7 +56,6 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	client := NewClient(conn)
 
 	if useAuthHeader {
-		streamint, _ := strconv.ParseInt(r.URL.Path[len("/v1/"):], 10, 64)
 		fmt.Printf("Attempting to use auth (stream: %v)\n", streamint)
 		err := client.authFromHeader(ctx, apiKey, apiSec, int32(streamint))
 		if err != nil {

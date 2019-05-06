@@ -47,7 +47,9 @@ spec:
         service: websocks
         tier: backend
       annotations:
-        prometheus.io/scrape: "false"
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "80"
+        prometheus.io/path: "/metrics"
     spec:
       containers:
       - name: websocks

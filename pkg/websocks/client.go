@@ -73,6 +73,7 @@ func (c *Client) close() {
 	c.conn.Close()
 
 	if !c.closed {
+		socketGauge.WithLabelValues(fmt.Sprintf("%d", c.auth.Stream)).Dec()
 		go c.broadcastDisconnect()
 		m := metrics.GetOrRegisterCounter("wsConnections", nil)
 		m.Dec(1)
@@ -173,6 +174,9 @@ func (c *Client) Subscribe(channel string, cmd *InboundCommand) {
 				select {
 				case msg := <-ch:
 					c.send <- msg.Data
+
+					byteSubscribeCounter.WithLabelValues(fmt.Sprintf("%d", c.auth.Stream)).Add(float64(len(msg.Data)))
+
 				case <-unsub:
 					sub.Unsubscribe()
 					sub.Drain()
@@ -214,6 +218,8 @@ func (c *Client) readPump() {
 	defer func() {
 		c.close()
 	}()
+
+	socketGauge.WithLabelValues(fmt.Sprintf("%d", c.auth.Stream)).Inc()
 
 	go c.ConnSub()
 

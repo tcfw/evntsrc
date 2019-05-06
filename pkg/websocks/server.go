@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/tcfw/evntsrc/pkg/tracing"
@@ -23,7 +25,7 @@ func startHTTPServer(port int) {
 		serveWs(w, r)
 	})
 
-	mux.Use(metricsMiddleware)
+	mux.Handle("/metrics", promhttp.Handler())
 
 	addr := fmt.Sprintf(":%d", port)
 
@@ -39,7 +41,7 @@ func Run(webPort int, natsEndpoint string) {
 	connectNats(natsEndpoint)
 	defer natsConn.Close()
 
-	startMetrics()
+	registerMetrics()
 
 	startHTTPServer(webPort)
 }

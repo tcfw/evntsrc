@@ -5,21 +5,45 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
+	"net/http"
 	"os"
 	"runtime"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/viper"
+	"google.golang.org/grpc"
 
 	nats "github.com/nats-io/go-nats"
 	"github.com/tcfw/evntsrc/pkg/event"
+	"github.com/tcfw/evntsrc/pkg/tracing"
 	"github.com/tcfw/evntsrc/pkg/websocks"
 	"github.com/tcfw/go-queue"
 )
 
-var pgdb *sql.DB
+var (
+	pgdb *sql.DB
+
+	replayDurations = prometheus.NewHistogram(prometheus.HistogramOpts{
+		Name:    "storer_replay_request_duration_seconds",
+		Help:    "Histogram for the runtime of a replay function.",
+		Buckets: prometheus.LinearBuckets(0.01, 0.01, 10),
+	})
+
+	replayEventCount = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "storer_replay_event_count",
+		Help: "Counter for replay events to NATS",
+	}, []string{"stream"})
+
+	storeCount = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "storer_store_request_count",
+		Help: "Counter for store requests from NATS events",
+	}, []string{"stream"})
+)
 
 //Start inits required processes
-func Start(nats string) {
+func Start(nats string, port int) {
 	dbURL, ok := os.LookupEnv("PGDB_HOST")
 	if !ok {
 		log.Fatal("Failed to connect to DB")
@@ -41,7 +65,34 @@ func Start(nats string) {
 		return
 	}
 
+	go RegisterMetrics()
+	// go StartGRPC(port)
+
 	StartMonitor(nats)
+}
+
+//RegisterMetrics registers metrics with prometheus
+func RegisterMetrics() {
+	prometheus.MustRegister(replayDurations)
+	prometheus.MustRegister(storeCount)
+	prometheus.MustRegister(replayEventCount)
+
+	http.Handle("/metrics", promhttp.Handler())
+
+	log.Fatal(http.ListenAndServe(":80", nil))
+}
+
+//StartGRPC starts web http and grpc endpoint
+func StartGRPC(port int) {
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	grpcServer := grpc.NewServer(tracing.GRPCServerOptions()...)
+
+	log.Println("Starting gRPC server")
+	grpcServer.Serve(lis)
 }
 
 //StartMonitor subscripts to all user channels
@@ -100,6 +151,8 @@ func (ep *eventProcessor) Handle(job interface{}) {
 
 	tx.Commit()
 
+	storeCount.With(prometheus.Labels{"stream": fmt.Sprintf("%d", usrEvent.Stream)}).Inc()
+
 }
 
 func monitorUserStreams() {
@@ -127,6 +180,9 @@ func monitorUserStreams() {
 func monitorReplayRequests() {
 	log.Println("Watching for replay requests...")
 	natsConn.QueueSubscribe("replay.broadcast", "replayers", func(m *nats.Msg) {
+		timer := prometheus.NewTimer(replayDurations)
+		defer timer.ObserveDuration()
+
 		command := &websocks.ReplayCommand{}
 		json.Unmarshal(m.Data, command)
 
@@ -228,6 +284,7 @@ func doReplay(command *websocks.ReplayCommand, reply chan []byte, errCh chan err
 		} else {
 			natsConn.Publish(fmt.Sprintf("_USER.%d.%s", command.Stream, command.Subject), jsonBytes)
 		}
+		replayEventCount.With(prometheus.Labels{"stream": fmt.Sprintf("%d", command.Stream)}).Inc()
 	}
 }
 

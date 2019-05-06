@@ -1,35 +1,34 @@
 package websocks
 
 import (
-	"net/http"
-	"os"
-
-	"github.com/rcrowley/go-metrics"
-	influxdb "github.com/vrischmann/go-metrics-influxdb"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
-func metricsMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		m := metrics.GetOrRegisterCounter("httpRequests", metrics.DefaultRegistry)
-		m.Inc(1)
+var (
+	httpRequest = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "http_request_count",
+		Help: "Counter for any http requests",
+	}, []string{"stream"})
 
-		next.ServeHTTP(w, r)
-	})
-}
+	socketGauge = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "ws_conn",
+		Help: "Guage of current websocket connections",
+	}, []string{"stream"})
 
-func startMetrics() {
-	metricsEndpoint, ok := os.LookupEnv("METRICS")
-	if !ok {
-		metricsEndpoint = "http://metrics:8086"
-	}
+	bytePublishCounter = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "event_publish_byte_count",
+		Help: "Counter of stream event bytes published",
+	}, []string{"stream"})
 
-	tags := map[string]string{
-		"app": "websocks",
-	}
+	byteSubscribeCounter = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "event_subscribe_byte_count",
+		Help: "Counter of stream event bytes subscribed",
+	}, []string{"stream"})
+)
 
-	if hostname, err := os.Hostname(); err == nil {
-		tags["hostname"] = hostname
-	}
-
-	go influxdb.InfluxDBWithTags(metrics.DefaultRegistry, 10e9, metricsEndpoint, "evntsrc", "", "", tags)
+func registerMetrics() {
+	prometheus.MustRegister(httpRequest)
+	prometheus.MustRegister(socketGauge)
+	prometheus.MustRegister(bytePublishCounter)
+	prometheus.MustRegister(byteSubscribeCounter)
 }

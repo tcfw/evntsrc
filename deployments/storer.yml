@@ -1,9 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: storer
+  annotations:
+    prometheus.io/path: "/metrics"
+spec:
+  ports:
+  - port: 443
+    name: https
+  - port: 80
+    name: metrics
+  selector:
+    run: storer
+---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: storer
 spec:
-  replicas: 2
+  replicas: 5
   template:
     metadata:
       labels:
@@ -13,7 +28,9 @@ spec:
         service: storer
         tier: backend
       annotations:
-        prometheus.io/scrape: "false"
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "80"
     spec:
       containers:
       - name: storer

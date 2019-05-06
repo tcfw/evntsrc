@@ -23,7 +23,7 @@ RUN glide install --strip-vendor
 
 #Build
 COPY . .
-RUN go build -ldflags="-w -s" -o apigw ./cmd/apigw
+RUN go build -ldflags="-w -s" -o apigw ./pkg/apigw/main
 RUN strip --strip-unneeded apigw
 RUN upx apigw
 

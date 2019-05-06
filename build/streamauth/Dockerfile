@@ -23,7 +23,7 @@ RUN glide install --strip-vendor
 
 #Build
 COPY . .
-RUN go build -ldflags="-w -s" -o streamauth ./cmd/streamauth
+RUN go build -ldflags="-w -s" -o streamauth ./pkg/streamauth/main
 RUN strip --strip-unneeded streamauth
 RUN upx streamauth
 

@@ -23,7 +23,7 @@ RUN glide install --strip-vendor
 
 #Build
 COPY . .
-RUN go build -ldflags="-w -s" -o ingress ./cmd/ingress
+RUN go build -ldflags="-w -s" -o ingress ./pkg/ingress/main
 RUN strip --strip-unneeded ingress
 RUN upx ingress
 

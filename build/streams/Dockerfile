@@ -23,7 +23,7 @@ RUN glide install --strip-vendor
 
 #Build
 COPY . .
-RUN go build -ldflags="-w -s" -o streams ./cmd/streams
+RUN go build -ldflags="-w -s" -o streams ./pkg/streams/main
 RUN strip --strip-unneeded streams
 RUN upx streams
 

@@ -23,7 +23,7 @@ RUN glide install --strip-vendor
 
 #Build
 COPY . .
-RUN go build -ldflags="-w -s" -o stsmetrics ./cmd/stsmetrics
+RUN go build -ldflags="-w -s" -o stsmetrics ./pkg/stsmetrics/main
 RUN strip --strip-unneeded stsmetrics
 RUN upx stsmetrics
 

@@ -28,7 +28,7 @@ COPY --from=libv8 /v8/lib ./vendor/github.com/augustoroman/v8/libv8
 
 #Build
 COPY . .
-RUN go build -ldflags="-w -s" -o adapter ./cmd/adapter
+RUN go build -ldflags="-w -s" -o adapter ./pkg/adapter/main
 RUN strip --strip-unneeded adapter
 # RUN upx adapter - UPX has unexpected results with compressing
 

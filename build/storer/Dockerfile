@@ -23,7 +23,7 @@ RUN glide install --strip-vendor
 
 #Build
 COPY . .
-RUN go build -ldflags="-w -s" -o storer ./cmd/storer
+RUN go build -ldflags="-w -s" -o storer ./pkg/storer/main
 RUN strip --strip-unneeded storer
 RUN upx storer
 

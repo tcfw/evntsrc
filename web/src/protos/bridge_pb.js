@@ -11,8 +11,8 @@ var jspb = require('google-protobuf');
 var goog = jspb;
 var global = Function('return this')();
 
-var github_com_tcfw_evntsrc_pkg_event_protos_event_pb = require('./github.com/tcfw/evntsrc/pkg/event/protos/event_pb.js');
-goog.object.extend(proto, github_com_tcfw_evntsrc_pkg_event_protos_event_pb);
+var github_com_tcfw_evntsrc_internal_event_protos_event_pb = require('./github.com/tcfw/evntsrc/internal/event/protos/event_pb.js');
+goog.object.extend(proto, github_com_tcfw_evntsrc_internal_event_protos_event_pb);
 var google_protobuf_timestamp_pb = require('google-protobuf/google/protobuf/timestamp_pb.js');
 goog.object.extend(proto, google_protobuf_timestamp_pb);
 goog.exportSymbol('proto.evntsrc.bridge.GeneralResponse', null, global);
@@ -134,7 +134,7 @@ proto.evntsrc.bridge.PublishRequest.prototype.toObject = function(opt_includeIns
 proto.evntsrc.bridge.PublishRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
     stream: jspb.Message.getFieldWithDefault(msg, 1, 0),
-    event: (f = msg.getEvent()) && github_com_tcfw_evntsrc_pkg_event_protos_event_pb.Event.toObject(includeInstance, f)
+    event: (f = msg.getEvent()) && github_com_tcfw_evntsrc_internal_event_protos_event_pb.Event.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -176,8 +176,8 @@ proto.evntsrc.bridge.PublishRequest.deserializeBinaryFromReader = function(msg, 
       msg.setStream(value);
       break;
     case 2:
-      var value = new github_com_tcfw_evntsrc_pkg_event_protos_event_pb.Event;
-      reader.readMessage(value,github_com_tcfw_evntsrc_pkg_event_protos_event_pb.Event.deserializeBinaryFromReader);
+      var value = new github_com_tcfw_evntsrc_internal_event_protos_event_pb.Event;
+      reader.readMessage(value,github_com_tcfw_evntsrc_internal_event_protos_event_pb.Event.deserializeBinaryFromReader);
       msg.setEvent(value);
       break;
     default:
@@ -221,7 +221,7 @@ proto.evntsrc.bridge.PublishRequest.serializeBinaryToWriter = function(message, 
     writer.writeMessage(
       2,
       f,
-      github_com_tcfw_evntsrc_pkg_event_protos_event_pb.Event.serializeBinaryToWriter
+      github_com_tcfw_evntsrc_internal_event_protos_event_pb.Event.serializeBinaryToWriter
     );
   }
 };
@@ -248,7 +248,7 @@ proto.evntsrc.bridge.PublishRequest.prototype.setStream = function(value) {
  */
 proto.evntsrc.bridge.PublishRequest.prototype.getEvent = function() {
   return /** @type{?proto.evntsrc.event.Event} */ (
-    jspb.Message.getWrapperField(this, github_com_tcfw_evntsrc_pkg_event_protos_event_pb.Event, 2));
+    jspb.Message.getWrapperField(this, github_com_tcfw_evntsrc_internal_event_protos_event_pb.Event, 2));
 };
 
 

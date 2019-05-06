@@ -23,7 +23,7 @@ RUN glide install --strip-vendor
 
 #Build
 COPY . .
-RUN go build -ldflags="-w -s" -o emails ./pkg/emails/main
+RUN go build -ldflags="-w -s" -o emails ./internal/emails/main
 RUN strip --strip-unneeded emails
 RUN upx emails
 

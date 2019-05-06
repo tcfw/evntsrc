@@ -1,0 +1,55 @@
+syntax="proto3";
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+// import "google/api/annotations.proto";
+import "github.com/tcfw/evntsrc/internal/event/protos/event.proto";
+
+package evntsrc.adapter;
+
+// Enable custom Marshal method.
+option (gogoproto.marshaler_all) = true;
+// Enable custom Unmarshal method.
+option (gogoproto.unmarshaler_all) = true;
+// Enable custom Size method (Required by Marshal and Unmarshal).
+option (gogoproto.sizer_all) = true;
+// Enable registration with golang/protobuf for the grpc-gateway.
+option (gogoproto.goproto_registration) = true;
+// Enable generation of XXX_MessageName methods for grpc-go/status.
+option (gogoproto.messagename_all) = true;
+
+message Adapter {
+	string ID = 1;
+	string label = 2;
+
+	enum EngineType {
+		V8 = 0;
+		PYTHON = 1;
+		LUA = 2;
+	}
+
+	EngineType engine = 3;
+
+	bytes Code = 4;
+
+	oneof context {
+		int32 stream = 5;
+		string subject = 6;
+		string eventType = 7;
+	}
+
+	map<string, string> metadata = 8;
+}
+
+message ExecuteRequest {
+	Adapter adapter = 1;
+	evntsrc.event.Event event = 2; 
+}
+
+message ExecuteResponse {
+	evntsrc.event.Event event = 1;
+	repeated string log = 2;
+}
+
+service AdapterService {
+	rpc Execute(ExecuteRequest) returns (ExecuteResponse) {};
+}

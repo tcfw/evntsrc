@@ -13,8 +13,8 @@ var global = Function('return this')();
 
 var github_com_gogo_protobuf_gogoproto_gogo_pb = require('./github.com/gogo/protobuf/gogoproto/gogo_pb.js');
 goog.object.extend(proto, github_com_gogo_protobuf_gogoproto_gogo_pb);
-var github_com_tcfw_evntsrc_pkg_event_protos_event_pb = require('./github.com/tcfw/evntsrc/pkg/event/protos/event_pb.js');
-goog.object.extend(proto, github_com_tcfw_evntsrc_pkg_event_protos_event_pb);
+var github_com_tcfw_evntsrc_internal_event_protos_event_pb = require('./github.com/tcfw/evntsrc/internal/event/protos/event_pb.js');
+goog.object.extend(proto, github_com_tcfw_evntsrc_internal_event_protos_event_pb);
 goog.exportSymbol('proto.evntsrc.adapter.Adapter', null, global);
 goog.exportSymbol('proto.evntsrc.adapter.Adapter.EngineType', null, global);
 goog.exportSymbol('proto.evntsrc.adapter.ExecuteRequest', null, global);
@@ -543,7 +543,7 @@ proto.evntsrc.adapter.ExecuteRequest.prototype.toObject = function(opt_includeIn
 proto.evntsrc.adapter.ExecuteRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
     adapter: (f = msg.getAdapter()) && proto.evntsrc.adapter.Adapter.toObject(includeInstance, f),
-    event: (f = msg.getEvent()) && github_com_tcfw_evntsrc_pkg_event_protos_event_pb.Event.toObject(includeInstance, f)
+    event: (f = msg.getEvent()) && github_com_tcfw_evntsrc_internal_event_protos_event_pb.Event.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -586,8 +586,8 @@ proto.evntsrc.adapter.ExecuteRequest.deserializeBinaryFromReader = function(msg,
       msg.setAdapter(value);
       break;
     case 2:
-      var value = new github_com_tcfw_evntsrc_pkg_event_protos_event_pb.Event;
-      reader.readMessage(value,github_com_tcfw_evntsrc_pkg_event_protos_event_pb.Event.deserializeBinaryFromReader);
+      var value = new github_com_tcfw_evntsrc_internal_event_protos_event_pb.Event;
+      reader.readMessage(value,github_com_tcfw_evntsrc_internal_event_protos_event_pb.Event.deserializeBinaryFromReader);
       msg.setEvent(value);
       break;
     default:
@@ -632,7 +632,7 @@ proto.evntsrc.adapter.ExecuteRequest.serializeBinaryToWriter = function(message,
     writer.writeMessage(
       2,
       f,
-      github_com_tcfw_evntsrc_pkg_event_protos_event_pb.Event.serializeBinaryToWriter
+      github_com_tcfw_evntsrc_internal_event_protos_event_pb.Event.serializeBinaryToWriter
     );
   }
 };
@@ -677,7 +677,7 @@ proto.evntsrc.adapter.ExecuteRequest.prototype.hasAdapter = function() {
  */
 proto.evntsrc.adapter.ExecuteRequest.prototype.getEvent = function() {
   return /** @type{?proto.evntsrc.event.Event} */ (
-    jspb.Message.getWrapperField(this, github_com_tcfw_evntsrc_pkg_event_protos_event_pb.Event, 2));
+    jspb.Message.getWrapperField(this, github_com_tcfw_evntsrc_internal_event_protos_event_pb.Event, 2));
 };
 
 
@@ -741,7 +741,7 @@ proto.evntsrc.adapter.ExecuteResponse.prototype.toObject = function(opt_includeI
  */
 proto.evntsrc.adapter.ExecuteResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
-    event: (f = msg.getEvent()) && github_com_tcfw_evntsrc_pkg_event_protos_event_pb.Event.toObject(includeInstance, f),
+    event: (f = msg.getEvent()) && github_com_tcfw_evntsrc_internal_event_protos_event_pb.Event.toObject(includeInstance, f),
     logList: jspb.Message.getRepeatedField(msg, 2)
   };
 
@@ -780,8 +780,8 @@ proto.evntsrc.adapter.ExecuteResponse.deserializeBinaryFromReader = function(msg
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new github_com_tcfw_evntsrc_pkg_event_protos_event_pb.Event;
-      reader.readMessage(value,github_com_tcfw_evntsrc_pkg_event_protos_event_pb.Event.deserializeBinaryFromReader);
+      var value = new github_com_tcfw_evntsrc_internal_event_protos_event_pb.Event;
+      reader.readMessage(value,github_com_tcfw_evntsrc_internal_event_protos_event_pb.Event.deserializeBinaryFromReader);
       msg.setEvent(value);
       break;
     case 2:
@@ -822,7 +822,7 @@ proto.evntsrc.adapter.ExecuteResponse.serializeBinaryToWriter = function(message
     writer.writeMessage(
       1,
       f,
-      github_com_tcfw_evntsrc_pkg_event_protos_event_pb.Event.serializeBinaryToWriter
+      github_com_tcfw_evntsrc_internal_event_protos_event_pb.Event.serializeBinaryToWriter
     );
   }
   f = message.getLogList();
@@ -841,7 +841,7 @@ proto.evntsrc.adapter.ExecuteResponse.serializeBinaryToWriter = function(message
  */
 proto.evntsrc.adapter.ExecuteResponse.prototype.getEvent = function() {
   return /** @type{?proto.evntsrc.event.Event} */ (
-    jspb.Message.getWrapperField(this, github_com_tcfw_evntsrc_pkg_event_protos_event_pb.Event, 1));
+    jspb.Message.getWrapperField(this, github_com_tcfw_evntsrc_internal_event_protos_event_pb.Event, 1));
 };
 
 

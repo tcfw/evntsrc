@@ -23,7 +23,7 @@ RUN glide install --strip-vendor
 
 #Build
 COPY . .
-RUN go build -ldflags="-w -s" -o websocks ./pkg/websocks/main
+RUN go build -ldflags="-w -s" -o websocks ./internal/websocks/main
 RUN strip --strip-unneeded websocks
 RUN upx websocks
 

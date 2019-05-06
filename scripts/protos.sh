@@ -1,6 +1,6 @@
 #!/bin/bash
 
-files=`find ./pkg -type f -name "*.proto"`
+files=`find ./internal -type f -name "*.proto"`
 
 dir=""
 

@@ -23,7 +23,7 @@ RUN glide install --strip-vendor
 
 #Build
 COPY . .
-RUN go build -ldflags="-w -s" -o billing ./pkg/billing/main	
+RUN go build -ldflags="-w -s" -o billing ./internal/billing/main	
 RUN strip --strip-unneeded billing
 RUN upx billing
 

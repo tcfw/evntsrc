@@ -23,7 +23,7 @@ RUN glide install --strip-vendor
 
 #Build
 COPY . .
-RUN go build -ldflags="-w -s" -o storer ./pkg/storer/main
+RUN go build -ldflags="-w -s" -o storer ./internal/storer/main
 RUN strip --strip-unneeded storer
 RUN upx storer
 
@@ -33,6 +33,6 @@ FROM ubuntu:latest
 
 WORKDIR /bin
 COPY --from=builder /go/src/github.com/tcfw/evntsrc/storer storer
-COPY ./pkg/storer/migrations ./migrations
+COPY ./internal/storer/migrations ./migrations
 
 CMD [ "storer" ]

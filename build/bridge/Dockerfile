@@ -23,7 +23,7 @@ RUN glide install --strip-vendor
 
 #Build
 COPY . .
-RUN go build -ldflags="-w -s" -o bridge ./pkg/bridge/main
+RUN go build -ldflags="-w -s" -o bridge ./internal/bridge/main
 RUN strip --strip-unneeded bridge
 RUN upx bridge
 

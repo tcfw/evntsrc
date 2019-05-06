@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package evntsrc.bridge;
+
+import "github.com/tcfw/evntsrc/internal/event/protos/event.proto";
+import "google/protobuf/timestamp.proto";
+
+message PublishRequest {
+	int32 Stream = 1;
+	evntsrc.event.Event event = 2;
+}
+
+message SubscribeRequest {
+	int32 Stream = 1;
+	string Channel = 2;
+}
+
+message ReplayRequest {
+	int32 Stream = 1;
+	string Channel = 2;
+	google.protobuf.Timestamp startFrom = 3;
+}
+
+message GeneralResponse {}
+
+service BridgeService {
+	rpc Publish(PublishRequest) returns (GeneralResponse) {};
+	rpc Subscribe(SubscribeRequest) returns (stream evntsrc.event.Event) {};
+	rpc Replay(ReplayRequest) returns (GeneralResponse) {};
+	rpc RelayEvents(stream evntsrc.event.Event) returns  (stream evntsrc.event.Event) {};
+}

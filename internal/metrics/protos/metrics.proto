@@ -1,0 +1,55 @@
+syntax="proto3";
+
+package evntsrc.stsmetrics;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+
+// Enable custom Marshal method.
+option (gogoproto.marshaler_all) = true;
+// Enable custom Unmarshal method.
+option (gogoproto.unmarshaler_all) = true;
+// Enable custom Size method (Required by Marshal and Unmarshal).
+option (gogoproto.sizer_all) = true;
+// Enable registration with golang/protobuf for the grpc-gateway.
+option (gogoproto.goproto_registration) = true;
+// Enable generation of XXX_MessageName methods for grpc-go/status.
+option (gogoproto.messagename_all) = true;
+
+message MetricsCountRequest {
+	int32 stream = 1;
+
+	enum Interval {
+		min10 = 0;
+		min30 = 1;
+		hour = 2;
+		hour12 = 3;
+		day = 4;
+		week = 5;
+		month = 6;
+	}
+	Interval interval = 2;
+}
+
+message MetricCount {
+	int32 count = 1;
+
+	message Timestamp {
+		int64 seconds = 1;
+		int32 nanos = 2;
+	}
+
+	Timestamp timestamp = 2;
+}
+
+message MetricsCountResponse {
+	repeated MetricCount metrics = 1;
+}
+
+service MetricsService {
+	rpc MetricsCount (MetricsCountRequest) returns (MetricsCountResponse) {
+        option (google.api.http) = {
+            get: "/v1/stream/{stream}/metrics/{interval}/count"
+        };
+    };;
+}

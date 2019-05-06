@@ -62,6 +62,9 @@ adapter:
 emails:
 	docker build -f ./build/emails/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/emails:latest .
 
+metrics:
+	docker build -f ./build/metrics/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/metrics:latest .
+
 .PHONY: push
 push: 
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/storer:latest
@@ -78,6 +81,7 @@ push:
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/wui:latest
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/adapter:latest
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/emails:latest
+	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/metrics:latest
 
 
 protos:

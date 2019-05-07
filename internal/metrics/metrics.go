@@ -35,31 +35,39 @@ func (s *Server) MetricsCount(ctx context.Context, req *pb.MetricsCountRequest) 
 	api := promApi.NewAPI(promClient)
 
 	interval := time.Now()
+	resolution := 5 * time.Minute
+
 	switch req.Interval {
 	case pb.MetricsCountRequest_min10:
 		interval = interval.Add(-10 * time.Minute)
+		resolution = time.Second
 		break
 	case pb.MetricsCountRequest_min30:
 		interval = interval.Add(-30 * time.Minute)
+		resolution = 30 * time.Second
 		break
 	case pb.MetricsCountRequest_hour:
 		interval = interval.Add(-time.Hour)
+		resolution = 1 * time.Minute
 		break
 	case pb.MetricsCountRequest_hour12:
 		interval = interval.Add(-12 * time.Hour)
 		break
 	case pb.MetricsCountRequest_day:
 		interval = interval.Add(-24 * time.Hour)
+		resolution = 30 * time.Minute
 		break
 	case pb.MetricsCountRequest_week:
 		interval = interval.Add(-24 * 7 * time.Hour)
+		resolution = 4 * time.Hour
 		break
 	case pb.MetricsCountRequest_month:
 		interval = interval.Add(-24 * 31 * time.Hour)
+		resolution = 24 * time.Hour
 		break
 	}
 
-	modelVal, err := api.QueryRange(ctx, fmt.Sprintf(`sum(increase(storer_store_request_count{stream="%d"}[2m]))`, req.Stream), promApi.Range{Start: interval, End: time.Now(), Step: 1 * time.Minute})
+	modelVal, err := api.QueryRange(ctx, fmt.Sprintf(`sum(increase(storer_store_request_count{stream="%d"}[2m]))`, req.Stream), promApi.Range{Start: interval, End: time.Now(), Step: resolution})
 	if err != nil {
 		return nil, err
 	}

@@ -35,20 +35,17 @@ func (s *Server) MetricsCount(ctx context.Context, req *pb.MetricsCountRequest) 
 	api := promApi.NewAPI(promClient)
 
 	interval := time.Now()
-	resolution := 5 * time.Minute
+	resolution := 2 * time.Minute
 
 	switch req.Interval {
 	case pb.MetricsCountRequest_min10:
 		interval = interval.Add(-10 * time.Minute)
-		resolution = time.Second
 		break
 	case pb.MetricsCountRequest_min30:
 		interval = interval.Add(-30 * time.Minute)
-		resolution = 30 * time.Second
 		break
 	case pb.MetricsCountRequest_hour:
 		interval = interval.Add(-time.Hour)
-		resolution = 1 * time.Minute
 		break
 	case pb.MetricsCountRequest_hour12:
 		interval = interval.Add(-12 * time.Hour)

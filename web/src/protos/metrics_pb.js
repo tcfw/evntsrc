@@ -299,7 +299,7 @@ proto.evntsrc.stsmetrics.MetricCount.prototype.toObject = function(opt_includeIn
  */
 proto.evntsrc.stsmetrics.MetricCount.toObject = function(includeInstance, msg) {
   var f, obj = {
-    count: jspb.Message.getFieldWithDefault(msg, 1, 0),
+    count: +jspb.Message.getFieldWithDefault(msg, 1, 0.0),
     timestamp: (f = msg.getTimestamp()) && proto.evntsrc.stsmetrics.MetricCount.Timestamp.toObject(includeInstance, f)
   };
 
@@ -338,7 +338,7 @@ proto.evntsrc.stsmetrics.MetricCount.deserializeBinaryFromReader = function(msg,
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {number} */ (reader.readInt32());
+      var value = /** @type {number} */ (reader.readFloat());
       msg.setCount(value);
       break;
     case 2:
@@ -376,8 +376,8 @@ proto.evntsrc.stsmetrics.MetricCount.prototype.serializeBinary = function() {
 proto.evntsrc.stsmetrics.MetricCount.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = message.getCount();
-  if (f !== 0) {
-    writer.writeInt32(
+  if (f !== 0.0) {
+    writer.writeFloat(
       1,
       f
     );
@@ -546,17 +546,17 @@ proto.evntsrc.stsmetrics.MetricCount.Timestamp.prototype.setNanos = function(val
 
 
 /**
- * optional int32 count = 1;
+ * optional float count = 1;
  * @return {number}
  */
 proto.evntsrc.stsmetrics.MetricCount.prototype.getCount = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
+  return /** @type {number} */ (+jspb.Message.getFieldWithDefault(this, 1, 0.0));
 };
 
 
 /** @param {number} value */
 proto.evntsrc.stsmetrics.MetricCount.prototype.setCount = function(value) {
-  jspb.Message.setProto3IntField(this, 1, value);
+  jspb.Message.setProto3FloatField(this, 1, value);
 };
 
 

@@ -33,9 +33,6 @@ spec:
       containers:
       - name: metrics
         image: asia.gcr.io/evntsrc-io/metrics:latest
-        args:
-        - metrics
-        - start
         env:
         - name: PROM_HOST
           value: "prometheus-server:80"

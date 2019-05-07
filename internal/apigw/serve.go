@@ -20,8 +20,6 @@ func Run(port int) error {
 
 	tracing.InitGlobalTracer("APIGW")
 
-	go startMetrics()
-
 	runtime.HTTPError = CustomHTTPError
 
 	// defaultMarshaler := runtime.WithMarshalerOption(runtime.MIMEWildcard, &protoutil.JSONPb{OrigName: true})
@@ -35,9 +33,9 @@ func Run(port int) error {
 	registerStreams(ctx, mux, opts)
 	registerStreamAuth(ctx, mux, opts)
 	registerBilling(ctx, mux, opts)
+	registerMetrics(ctx, mux, opts)
 
 	handler := tracingWrapper(mux)
-	handler = metricsMiddleware(handler)
 	handler = authGuard(handler)
 	handler = logger.Handler(handler, os.Stdout, logger.CommonLoggerType)
 	handler = cors.AllowAll().Handler(handler)

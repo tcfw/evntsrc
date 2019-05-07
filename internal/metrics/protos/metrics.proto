@@ -32,7 +32,7 @@ message MetricsCountRequest {
 }
 
 message MetricCount {
-	int32 count = 1;
+	float count = 1;
 
 	message Timestamp {
 		int64 seconds = 1;

@@ -41,15 +41,17 @@ func (api *APIClient) openConn() error {
 	url := api.formatURL("realtime", strconv.Itoa(int(api.stream)))
 
 	conn, resp, err := websocket.DefaultDialer.Dial(url, *headers)
-	conn.SetCloseHandler(func(code int, text string) error {
-		fmt.Printf("CLOSED %v %v\n", code, text)
-		api.close <- true
-		return nil
-	})
 	if err != nil {
 		fmt.Printf("%v\n", resp)
 		return err
 	}
+	conn.SetCloseHandler(func(code int, text string) error {
+		fmt.Printf("CLOSED %v %v\n", code, text)
+		message := websocket.FormatCloseMessage(code, "")
+		conn.WriteControl(websocket.CloseMessage, message, time.Now().Add(writeWait))
+		api.close <- true
+		return nil
+	})
 
 	api.socket = conn
 

@@ -10,7 +10,7 @@ import (
 	"os/signal"
 	"time"
 
-	evntsrc "github.com/tcfw/evntsrc/external/go-evntsrc"
+	evntsrc "github.com/tcfw/evntsrc/pkg/go-evntsrc"
 )
 
 //Our simple test struct to record latency

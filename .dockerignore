@@ -3,3 +3,4 @@ deployments
 vendor
 web/node_modules
 .git
+scripts/

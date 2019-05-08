@@ -23,7 +23,7 @@ RUN glide install --strip-vendor
 
 #Build
 COPY . .
-RUN go build -ldflags="-w -s" -o users ./internal/users/main
+RUN go build -ldflags="-w -s" -o users ./cmd/users
 RUN strip --strip-unneeded users
 RUN upx users
 

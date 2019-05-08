@@ -23,7 +23,7 @@ RUN glide install --strip-vendor
 
 #Build
 COPY . .
-RUN go build -ldflags="-w -s" -o passport ./internal/passport/main
+RUN go build -ldflags="-w -s" -o passport ./cmd/passport
 RUN strip --strip-unneeded passport
 RUN upx passport
 

@@ -16,9 +16,9 @@ ifndef HAS_GLIDE
 endif
 	glide install --strip-vendor
 
-.DEFAULT_GOAL := all
+.DEFAULT_GOAL := changed
 .PHONY: all
-all: storer websocks stsmetrics streams passport users apigw bridge streamauth ingress billing wui adapter emails push
+all: storer websocks stsmetrics streams passport users apigw bridge streamauth ingress billing wui adapter emails metrics push
 
 storer:
 	docker build -f ./build/storer/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/storer:latest .
@@ -83,6 +83,11 @@ push:
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/emails:latest
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/metrics:latest
 
+.PHONY: changed
+changed:
+	@[ "${COMMIT}" ] || ( echo ">> COMMIT env variable is not set"; exit 1 )
+
+	@scripts/changed_services.sh ${COMMIT}..HEAD
 
 protos:
 	@scripts/protos.sh

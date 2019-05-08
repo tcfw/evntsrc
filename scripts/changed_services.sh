@@ -11,9 +11,9 @@ detect_changed_services() {
 	changed_services=()
 	for folder in $changed_folders
 	do
-		if [ "$folder" == 'utils' ] || [ "$folder" == 'tracing' ]; then
+		if [ "$folder" == 'utils' ] || [ "$folder" == 'tracing' ] || [ "$folder" == 'event' ]; then
 			echo "!! a common folder changed, building and publishing all microservices"
-			changed_services=`find ./internal -maxdepth 1 -type d -not -name 'utils' -not -name 'tracing' -not -name '.git' -not -path './internal' | sed 's|./internal/||'`
+			changed_services=`find ./internal -maxdepth 1 -type d -not -name 'utils' -not -name 'tracing' -not -name 'event' -not -name '.git' -not -path './internal' | sed 's|./internal/||'`
 			break
 		else
 			echo "Adding $folder to list of services to build"

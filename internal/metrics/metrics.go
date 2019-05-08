@@ -7,12 +7,16 @@ import (
 	"sync"
 	"time"
 
+	"google.golang.org/grpc/codes"
+
 	"github.com/prometheus/common/model"
+	"google.golang.org/grpc"
 
 	promApi "github.com/prometheus/client_golang/api/prometheus/v1"
 
 	promCli "github.com/prometheus/client_golang/api"
 	pb "github.com/tcfw/evntsrc/internal/metrics/protos"
+	streams "github.com/tcfw/evntsrc/internal/streams/protos"
 )
 
 //Server core struct
@@ -27,6 +31,12 @@ func NewServer() *Server {
 
 //MetricsCount fetches metrics relating to event count from timeseries services
 func (s *Server) MetricsCount(ctx context.Context, req *pb.MetricsCountRequest) (*pb.MetricsCountResponse, error) {
+
+	//TODO validate ownership / access
+	if err := s.canAccess(ctx, req.Stream); err != nil {
+		return nil, grpc.Errorf(codes.PermissionDenied, "Forbidden")
+	}
+
 	promClient, err := promCli.NewClient(promCli.Config{Address: os.Getenv("PROM_HOST"), RoundTripper: promCli.DefaultRoundTripper})
 	if err != nil {
 		return nil, err
@@ -35,7 +45,7 @@ func (s *Server) MetricsCount(ctx context.Context, req *pb.MetricsCountRequest) 
 	api := promApi.NewAPI(promClient)
 
 	interval := time.Now()
-	resolution := 2 * time.Minute
+	resolution := 30 * time.Second
 
 	switch req.Interval {
 	case pb.MetricsCountRequest_min10:
@@ -84,4 +94,19 @@ func (s *Server) MetricsCount(ctx context.Context, req *pb.MetricsCountRequest) 
 	}
 
 	return &pb.MetricsCountResponse{Metrics: vals}, nil
+}
+
+func (s *Server) canAccess(ctx context.Context, stream int32) error {
+	conn, err := grpc.Dial("streams:443")
+	if err != nil {
+		return err
+	}
+
+	streamsClient := streams.NewStreamsServiceClient(conn)
+
+	if _, err := streamsClient.Get(ctx, &streams.GetRequest{ID: stream}); err != nil {
+		return err
+	}
+
+	return nil
 }

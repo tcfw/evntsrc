@@ -97,7 +97,7 @@ func (s *Server) MetricsCount(ctx context.Context, req *pb.MetricsCountRequest) 
 }
 
 func (s *Server) canAccess(ctx context.Context, stream int32) error {
-	conn, err := grpc.Dial("streams:443")
+	conn, err := grpc.Dial("streams:443", grpc.WithInsecure())
 	if err != nil {
 		return err
 	}

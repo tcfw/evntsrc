@@ -7,16 +7,16 @@ import (
 	"sync"
 	"time"
 
-	"google.golang.org/grpc/codes"
-
 	"github.com/prometheus/common/model"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 
 	promApi "github.com/prometheus/client_golang/api/prometheus/v1"
 
 	promCli "github.com/prometheus/client_golang/api"
 	pb "github.com/tcfw/evntsrc/internal/metrics/protos"
 	streams "github.com/tcfw/evntsrc/internal/streams/protos"
+	"github.com/tcfw/evntsrc/internal/tracing"
 )
 
 //Server core struct
@@ -31,10 +31,8 @@ func NewServer() *Server {
 
 //MetricsCount fetches metrics relating to event count from timeseries services
 func (s *Server) MetricsCount(ctx context.Context, req *pb.MetricsCountRequest) (*pb.MetricsCountResponse, error) {
-
-	//TODO validate ownership / access
 	if err := s.canAccess(ctx, req.Stream); err != nil {
-		return nil, grpc.Errorf(codes.PermissionDenied, "Forbidden")
+		return nil, err
 	}
 
 	promClient, err := promCli.NewClient(promCli.Config{Address: os.Getenv("PROM_HOST"), RoundTripper: promCli.DefaultRoundTripper})
@@ -97,16 +95,17 @@ func (s *Server) MetricsCount(ctx context.Context, req *pb.MetricsCountRequest) 
 }
 
 func (s *Server) canAccess(ctx context.Context, stream int32) error {
-	conn, err := grpc.Dial("streams:443", grpc.WithInsecure())
+	md, _ := metadata.FromIncomingContext(ctx)
+	ctxOg := metadata.NewOutgoingContext(ctx, md)
+	opts := tracing.GRPCClientOptions()
+
+	conn, err := grpc.DialContext(ctxOg, "streams:443", opts...)
 	if err != nil {
 		return err
 	}
 
 	streamsClient := streams.NewStreamsServiceClient(conn)
 
-	if _, err := streamsClient.Get(ctx, &streams.GetRequest{ID: stream}); err != nil {
-		return err
-	}
-
-	return nil
+	_, err = streamsClient.Get(ctxOg, &streams.GetRequest{ID: stream})
+	return err
 }

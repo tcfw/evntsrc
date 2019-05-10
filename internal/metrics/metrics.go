@@ -72,6 +72,7 @@ func (s *Server) MetricsCount(ctx context.Context, req *pb.MetricsCountRequest) 
 		break
 	}
 
+	span, ctx := tracing.StartSpan(ctx, "Prometheus")
 	modelVal, err := api.QueryRange(ctx, fmt.Sprintf(`sum(increase(storer_store_request_count{stream="%d"}[2m]))`, req.Stream), promApi.Range{Start: interval, End: time.Now(), Step: resolution})
 	if err != nil {
 		return nil, err
@@ -79,6 +80,7 @@ func (s *Server) MetricsCount(ctx context.Context, req *pb.MetricsCountRequest) 
 
 	matrix := modelVal.(model.Matrix)
 	metrics := matrix[0]
+	span.Finish()
 
 	vals := []*pb.MetricCount{}
 

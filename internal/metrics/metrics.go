@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/opentracing/opentracing-go"
+
 	"github.com/prometheus/common/model"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -72,7 +74,7 @@ func (s *Server) MetricsCount(ctx context.Context, req *pb.MetricsCountRequest) 
 		break
 	}
 
-	span, ctx := tracing.StartSpan(ctx, "Prometheus")
+	span := tracing.StartChildSpan(opentracing.SpanFromContext(ctx), "Prometheus")
 	modelVal, err := api.QueryRange(ctx, fmt.Sprintf(`sum(increase(storer_store_request_count{stream="%d"}[2m]))`, req.Stream), promApi.Range{Start: interval, End: time.Now(), Step: resolution})
 	if err != nil {
 		return nil, err

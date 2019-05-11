@@ -14,8 +14,7 @@ import (
 
 //Run starts the JSON gw
 func Run(port int) error {
-	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	tracing.InitGlobalTracer("APIGW")
@@ -35,8 +34,8 @@ func Run(port int) error {
 	registerBilling(ctx, mux, opts)
 	registerMetrics(ctx, mux, opts)
 
-	handler := tracingWrapper(mux)
-	handler = authGuard(handler)
+	handler := authGuard(mux)
+	handler = tracingWrapper(handler)
 	handler = logger.Handler(handler, os.Stdout, logger.CommonLoggerType)
 	handler = cors.AllowAll().Handler(handler)
 

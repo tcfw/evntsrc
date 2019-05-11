@@ -17,7 +17,6 @@ func tracingWrapper(h http.Handler) http.Handler {
 		if err == nil || err == opentracing.ErrSpanContextNotFound {
 			serverSpan := opentracing.GlobalTracer().StartSpan(
 				"ServeHTTP",
-				// this is magical, it attaches the new span to the parent parentSpanContext, and creates an unparented one if empty.
 				ext.RPCServerOption(parentSpanContext),
 				grpcGatewayTag,
 			)

@@ -1,7 +1,6 @@
 package apigw
 
 import (
-	"context"
 	"net/http"
 	"strings"
 
@@ -27,9 +26,7 @@ func getAuthToken(r *http.Request) string {
 //@TODO secure against session fixation
 func authGuard(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		if !strings.HasPrefix(r.URL.String(), "/v1/auth") {
-
+		if shouldValidate(r) {
 			authToken := getAuthToken(r)
 
 			if authToken == "" {
@@ -37,7 +34,7 @@ func authGuard(next http.Handler) http.Handler {
 				return
 			}
 
-			conn, err := grpc.Dial(passportEndpoint, tracing.GRPCClientOptions()...)
+			conn, err := grpc.DialContext(r.Context(), passportEndpoint, tracing.GRPCClientOptions()...)
 			if err != nil {
 				panic(err)
 			}
@@ -51,10 +48,7 @@ func authGuard(next http.Handler) http.Handler {
 
 			svc := passport.NewAuthSeviceClient(conn)
 
-			ctx, cancel := context.WithCancel(r.Context())
-			defer cancel()
-
-			response, err := svc.VerifyToken(ctx, &passport.VerifyTokenRequest{Token: authToken})
+			response, err := svc.VerifyToken(r.Context(), &passport.VerifyTokenRequest{Token: authToken})
 			if err != nil {
 				panic(err)
 			}
@@ -67,4 +61,8 @@ func authGuard(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
+}
+
+func shouldValidate(r *http.Request) bool {
+	return !strings.HasPrefix(r.URL.String(), "/v1/auth")
 }

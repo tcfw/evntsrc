@@ -8,7 +8,6 @@ import (
 
 	passport "github.com/tcfw/evntsrc/internal/passport/protos"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/grpclog"
 )
 
 func getAuthToken(r *http.Request) string {
@@ -23,6 +22,10 @@ func getAuthToken(r *http.Request) string {
 	return cookie.Value
 }
 
+var (
+	passportConn *grpc.ClientConn
+)
+
 //@TODO secure against session fixation
 func authGuard(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -34,25 +37,25 @@ func authGuard(next http.Handler) http.Handler {
 				return
 			}
 
-			conn, err := grpc.DialContext(r.Context(), passportEndpoint, tracing.GRPCClientOptions()...)
-			if err != nil {
-				panic(err)
+			if passportConn == nil {
+				conn, err := grpc.Dial(passportEndpoint, tracing.GRPCClientOptions()...)
+				if err != nil {
+					panic(err)
+				}
+
+				passportConn = conn
 			}
 
 			go func() {
 				<-r.Context().Done()
-				if cerr := conn.Close(); cerr != nil {
-					grpclog.Printf("Failed to close conn to %s: %v", passportEndpoint, cerr)
-				}
 			}()
 
-			svc := passport.NewAuthSeviceClient(conn)
+			svc := passport.NewAuthSeviceClient(passportConn)
 
 			response, err := svc.VerifyToken(r.Context(), &passport.VerifyTokenRequest{Token: authToken})
 			if err != nil {
 				panic(err)
 			}
-			conn.Close()
 			if !response.Valid {
 				http.Error(w, "Forbidden. Invalid API Key provided", 403)
 				return

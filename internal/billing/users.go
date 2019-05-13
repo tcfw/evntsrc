@@ -10,45 +10,29 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-//ReqAuth TODO
-type ReqAuth struct {
-	Token string
+func withAuthContext(ctx context.Context) context.Context {
+	md, _ := metadata.FromIncomingContext(ctx)
+	return metadata.NewOutgoingContext(ctx, md)
 }
 
-//GetRequestMetadata TODO
-func (a *ReqAuth) GetRequestMetadata(context.Context, ...string) (map[string]string, error) {
-	return map[string]string{
-		"authorization": a.Token,
-	}, nil
-}
-
-//RequireTransportSecurity TODO
-func (a *ReqAuth) RequireTransportSecurity() bool {
-	return false
-}
+var (
+	userConn *grpc.ClientConn
+)
 
 func newUserClient(ctx context.Context) (userSvc.UserServiceClient, error) {
 
-	md, _ := metadata.FromIncomingContext(ctx)
-	authReq := ReqAuth{}
+	if userConn == nil {
+		userEndpoint, envExists := os.LookupEnv("USER_HOST")
+		if envExists != true {
+			userEndpoint = "users:443"
+		}
+		conn, err := grpc.Dial(userEndpoint, tracing.GRPCClientOptions()...)
+		if err != nil {
+			return nil, err
+		}
 
-	if auth := md.Get("authorization"); auth != nil {
-		authReq.Token = auth[0]
+		userConn = conn
 	}
 
-	userEndpoint, envExists := os.LookupEnv("USER_HOST")
-	if envExists != true {
-		userEndpoint = "users:443"
-	}
-
-	opts := tracing.GRPCClientOptions()
-
-	opts = append(opts, grpc.WithPerRPCCredentials(&authReq))
-
-	conn, err := grpc.DialContext(ctx, userEndpoint, opts...)
-	if err != nil {
-		return nil, err
-	}
-
-	return userSvc.NewUserServiceClient(conn), nil
+	return userSvc.NewUserServiceClient(userConn), nil
 }

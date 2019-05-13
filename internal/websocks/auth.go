@@ -8,15 +8,20 @@ import (
 	"google.golang.org/grpc"
 )
 
-func (c *Client) validateAuth(ctx context.Context, auth *AuthCommand) error {
-	//@TODO pass through passport instead
-	conn, err := grpc.Dial("streamauth:443", tracing.GRPCClientOptions()...)
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
+var (
+	streamAuthConn *grpc.ClientConn
+)
 
-	cli := streamauth.NewStreamAuthServiceClient(conn)
+func (c *Client) validateAuth(ctx context.Context, auth *AuthCommand) error {
+	if streamAuthConn == nil {
+		conn, err := grpc.Dial("streamauth:443", tracing.GRPCClientOptions()...)
+		if err != nil {
+			return err
+		}
+		streamAuthConn = conn
+	}
+
+	cli := streamauth.NewStreamAuthServiceClient(streamAuthConn)
 
 	sk, err := cli.ValidateKeySecret(ctx, &streamauth.KSRequest{Stream: auth.Stream, Key: auth.Key, Secret: auth.Secret})
 	c.authKey = sk

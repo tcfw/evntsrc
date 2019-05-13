@@ -39,48 +39,30 @@ func NewServer() *Server {
 	return s
 }
 
-//ReqAuth TODO
-type ReqAuth struct {
-	Token string
-}
-
-//GetRequestMetadata TODO
-func (a *ReqAuth) GetRequestMetadata(context.Context, ...string) (map[string]string, error) {
-	return map[string]string{
-		"authorization": a.Token,
-	}, nil
-}
-
-//RequireTransportSecurity TODO
-func (a *ReqAuth) RequireTransportSecurity() bool {
-	return false
-}
-
-func newUserClient(ctx context.Context) (userSvc.UserServiceClient, error) {
-
+func withAuthContext(ctx context.Context) context.Context {
 	md, _ := metadata.FromIncomingContext(ctx)
-	authReq := ReqAuth{}
+	return metadata.NewOutgoingContext(ctx, md)
+}
 
-	auth := md.Get("authorization")
-	if auth != nil {
-		authReq.Token = auth[0]
+var (
+	userConn *grpc.ClientConn
+)
+
+func newUserClient() (userSvc.UserServiceClient, error) {
+	if userConn == nil {
+		userEndpoint, envExists := os.LookupEnv("USER_HOST")
+		if envExists != true {
+			userEndpoint = "users:443"
+		}
+
+		conn, err := grpc.Dial(userEndpoint, tracing.GRPCClientOptions()...)
+		if err != nil {
+			return nil, err
+		}
+		userConn = conn
 	}
 
-	userEndpoint, envExists := os.LookupEnv("USER_HOST")
-	if envExists != true {
-		userEndpoint = "users:443"
-	}
-
-	opts := tracing.GRPCClientOptions()
-
-	opts = append(opts, grpc.WithPerRPCCredentials(&authReq))
-
-	conn, err := grpc.DialContext(ctx, userEndpoint, opts...)
-	if err != nil {
-		return nil, err
-	}
-
-	return userSvc.NewUserServiceClient(conn), nil
+	return userSvc.NewUserServiceClient(userConn), nil
 }
 
 func validateMFA(user *userSvc.User) (*pb.AuthResponse, error) {
@@ -135,12 +117,12 @@ func (s *Server) Authenticate(ctx context.Context, request *pb.AuthRequest) (*pb
 		}
 
 		//Validate user creds against the user service
-		users, err := newUserClient(ctx)
+		users, err := newUserClient()
 		if err != nil {
 			return nil, err
 		}
 
-		user, err := users.Find(ctx, &userSvc.UserRequest{Query: &userSvc.UserRequest_Email{Email: username}}, grpc.Header(&md))
+		user, err := users.Find(withAuthContext(ctx), &userSvc.UserRequest{Query: &userSvc.UserRequest_Email{Email: username}}, grpc.Header(&md))
 		if err != nil {
 			grpc.SendHeader(ctx, metadata.Pairs("Grpc-Metadata-X-RateLimit-Remaining", fmt.Sprintf("%d", remaining+1)))
 			events.BroadcastNonStreamingEvent(ctx, events.AuthenticateEvent{Event: &events.Event{Type: "io.evntsrc.passport.limite_increased"}, Err: fmt.Sprintf("limit increased"), IP: remoteIP.String(), User: username})
@@ -277,12 +259,12 @@ func (s *Server) SocialLogin(ctx context.Context, request *pb.SocialRequest) (*p
 		return &pb.AuthResponse{Success: false}, fmt.Errorf("failed to login using provided tokens: %s", err)
 	}
 
-	users, err := newUserClient(ctx)
+	users, err := newUserClient()
 	if err != nil {
 		return nil, err
 	}
 
-	user, err := users.Find(ctx, &userSvc.UserRequest{Query: &userSvc.UserRequest_Email{Email: info.Email}}, grpc.Header(&md))
+	user, err := users.Find(withAuthContext(ctx), &userSvc.UserRequest{Query: &userSvc.UserRequest_Email{Email: info.Email}}, grpc.Header(&md))
 	if err != nil {
 		incRateLimit(info.Email, remoteIP)
 		return nil, status.Errorf(codes.Unauthenticated, "incorrect username or passport")

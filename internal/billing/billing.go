@@ -12,7 +12,7 @@ import (
 	"github.com/stripe/stripe-go/product"
 	"github.com/stripe/stripe-go/sub"
 	pb "github.com/tcfw/evntsrc/internal/billing/protos"
-	"github.com/tcfw/evntsrc/internal/users/protos"
+	evntsrc_users "github.com/tcfw/evntsrc/internal/users/protos"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -87,7 +87,7 @@ func (s *Server) CreateCustomerFromUser(ctx context.Context, request *pb.CreateR
 		return nil, err
 	}
 
-	user, err := users.Find(ctx, &evntsrc_users.UserRequest{Query: &evntsrc_users.UserRequest_Id{Id: request.UserId}})
+	user, err := users.Find(withAuthContext(ctx), &evntsrc_users.UserRequest{Query: &evntsrc_users.UserRequest_Id{Id: request.UserId}})
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +125,7 @@ func (s *Server) AttachPaymentMethod(ctx context.Context, request *pb.CreateRequ
 		return nil, err
 	}
 
-	user, err := users.Find(ctx, &evntsrc_users.UserRequest{Query: &evntsrc_users.UserRequest_Id{Id: request.UserId}})
+	user, err := users.Find(withAuthContext(ctx), &evntsrc_users.UserRequest{Query: &evntsrc_users.UserRequest_Id{Id: request.UserId}})
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +154,7 @@ func (s *Server) GetUserInfo(ctx context.Context, request *pb.InfoRequest) (*pb.
 		return nil, err
 	}
 
-	user, err := users.Find(ctx, &evntsrc_users.UserRequest{Query: &evntsrc_users.UserRequest_Id{Id: request.UserId}})
+	user, err := users.Find(withAuthContext(ctx), &evntsrc_users.UserRequest{Query: &evntsrc_users.UserRequest_Id{Id: request.UserId}})
 	if err != nil {
 		return nil, err
 	}

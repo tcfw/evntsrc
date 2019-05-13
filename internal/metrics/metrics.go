@@ -98,18 +98,25 @@ func (s *Server) MetricsCount(ctx context.Context, req *pb.MetricsCountRequest) 
 	return &pb.MetricsCountResponse{Metrics: vals}, nil
 }
 
+var (
+	streamsConn *grpc.ClientConn
+)
+
 func (s *Server) canAccess(ctx context.Context, stream int32) error {
 	md, _ := metadata.FromIncomingContext(ctx)
 	ctxOg := metadata.NewOutgoingContext(ctx, md)
 	opts := tracing.GRPCClientOptions()
 
-	conn, err := grpc.DialContext(ctxOg, "streams:443", opts...)
-	if err != nil {
-		return err
+	if streamsConn == nil {
+		conn, err := grpc.Dial("streams:443", opts...)
+		if err != nil {
+			return err
+		}
+		streamsConn = conn
 	}
 
-	streamsClient := streams.NewStreamsServiceClient(conn)
+	streamsClient := streams.NewStreamsServiceClient(streamsConn)
 
-	_, err = streamsClient.Get(ctxOg, &streams.GetRequest{ID: stream})
+	_, err := streamsClient.Get(ctxOg, &streams.GetRequest{ID: stream})
 	return err
 }

@@ -35,7 +35,7 @@ detect_changed_services() {
 	do
 		echo ""
 		echo "-------------------Running packaging for $service---------------------"
-		# make $service
+		make $service
 	done
 }
 

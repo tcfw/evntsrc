@@ -21,12 +21,21 @@ detect_changed_services() {
 		fi
 	done
 
+	#update APIGW if any proto files change
+	proto_change_count=`git diff --name-only $COMMIT_RANGE | grep "\.proto$" | wc -l`
+	if [ $proto_change_count -gt 0 ]; then
+		changed_services+=("apigw")
+		echo "Added APIGW due to proto change"
+	fi
+
+	changed_services=( $(printf '%s\n' "${changed_services[@]}" | sort -u) )
+
 	# Iterate on each service and run the packaging script
 	for service in ${changed_services[@]}
 	do
 		echo ""
 		echo "-------------------Running packaging for $service---------------------"
-		make $service
+		# make $service
 	done
 }
 

@@ -86,8 +86,7 @@ push:
 .PHONY: changed
 changed:
 	@[ "${COMMIT}" ] || ( echo ">> COMMIT env variable is not set"; exit 1 )
-
-	@scripts/changed_services.sh ${COMMIT}..HEAD
+	@COMMIT_RANGE=${COMMIT}..HEAD scripts/changed_services.sh 
 
 protos:
 	@scripts/protos.sh

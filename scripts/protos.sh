@@ -12,7 +12,7 @@ do
 	protoc \
 		--gofast_out=Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,Mgoogle/api/annotations.proto=github.com/gogo/googleapis/google/api,plugins=grpc:$dir/ \
 		--grpc-gateway_out=Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,Mgoogle/api/annotations.proto=github.com/gogo/googleapis/google/api,logtostderr=true:$dir/ \
-		--js_out=import_style=commonjs,binary:web/src/protos \
+		--js_out=import_style=commonjs_strict,binary:web/src/protos \
 		--js_out=library=evntsrc,binary:web/src/protos \
 		$file \
 		-I $dir \
@@ -26,7 +26,7 @@ mkdir -p web/src/protos/google/api/;
 mkdir -p web/src/protos/github.com/gogo/protobuf/gogoproto/;
 # GOGO proto
 protoc \
-	--js_out=library=gogo_pb.js,binary:web/src/protos/github.com/gogo/protobuf/gogoproto/ \
+	--js_out=library=gogo_pb,binary:web/src/protos/github.com/gogo/protobuf/gogoproto/ \
 	-I $dir \
 	-I . \
 	-I $GOPATH/src \
@@ -35,7 +35,7 @@ protoc \
 
 # Google annotations
 protoc \
-	--js_out=library=annotations_pb.js,binary:web/src/protos/google/api/ \
+	--js_out=library=annotations_pb,binary:web/src/protos/google/api/ \
 	-I $dir \
 	-I . \
 	-I $GOPATH/src \

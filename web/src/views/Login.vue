@@ -116,7 +116,7 @@
   </el-row>
 </template>
 <script>
-import passport from "@/protos/passport_pb.js";
+import protos from "@/protos/passport_pb.js";
 import errorReader from "@/protos/error.js";
 import Avatar from "@/components/Avatar";
 
@@ -263,7 +263,7 @@ export default {
       this.$Message.error("Failed to login using Google");
     },
     socialLogin() {
-      var socialTokens = new passport.Tokens();
+      var socialTokens = new protos.evntsrc.passport.Tokens();
 
       switch (this.profileKnowledge.provider) {
         case "google":
@@ -276,7 +276,7 @@ export default {
           break;
       }
 
-      var socialRequest = new passport.SocialRequest();
+      var socialRequest = new protos.evntsrc.passport.SocialRequest();
       socialRequest.setProvider(this.profileKnowledge.provider);
       socialRequest.setIdptokens(socialTokens);
 
@@ -314,7 +314,7 @@ export default {
       localStorage.setItem("prokno-n", this.loginForm.email);
     },
     readinAuthResponse(response, setProfileKnowledge) {
-      var authResponse = passport.AuthResponse.deserializeBinary(response.data);
+      var authResponse = protos.evntsrc.passport.AuthResponse.deserializeBinary(response.data);
 
       if (!authResponse.getSuccess()) {
         this.$message.error({
@@ -360,11 +360,11 @@ export default {
           } else {
             this.submitting = true;
 
-            var userCreds = new passport.UserCreds();
+            var userCreds = new protos.evntsrc.passport.UserCreds();
             userCreds.setPassword(this.loginForm.password);
             userCreds.setUsername(this.loginForm.email);
 
-            var authRequest = new passport.AuthRequest();
+            var authRequest = new protos.evntsrc.passport.AuthRequest();
             authRequest.setUsercreds(userCreds);
 
             axios

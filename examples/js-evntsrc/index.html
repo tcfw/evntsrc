@@ -1,0 +1,14 @@
+<!-- Work in progress -->
+<html>
+	<head>
+		<title>JS Example</title>
+	</head>
+	<body>
+		<script>
+			var ws = new WebSocket("wss://realtime.staging.evntsrc.io/v1/")
+			ws.onopen = () => {
+				ws.send('{"cmd": "auth", "stream": 1, "key": "wJeWsZt9rLQxpd.9", "secret": "x2FDP6oMu8bqVTsQcncpFhLDid2y1yN1"}')
+			}
+		</script>
+	</body>
+</html>

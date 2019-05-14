@@ -31,8 +31,8 @@ func NewServer() *Server {
 	return &Server{}
 }
 
-//MetricsCount fetches metrics relating to event count from timeseries services
-func (s *Server) MetricsCount(ctx context.Context, req *pb.MetricsCountRequest) (*pb.MetricsCountResponse, error) {
+//MetricsEvents fetches metrics relating to event count from timeseries services
+func (s *Server) MetricsEvents(ctx context.Context, req *pb.MetricsEventsRequest) (*pb.MetricsEventsResponse, error) {
 	if err := s.canAccess(ctx, req.Stream); err != nil {
 		return nil, err
 	}
@@ -48,27 +48,27 @@ func (s *Server) MetricsCount(ctx context.Context, req *pb.MetricsCountRequest) 
 	resolution := 30 * time.Second
 
 	switch req.Interval {
-	case pb.MetricsCountRequest_min10:
+	case pb.MetricsEventsRequest_min10:
 		interval = interval.Add(-10 * time.Minute)
 		break
-	case pb.MetricsCountRequest_min30:
+	case pb.MetricsEventsRequest_min30:
 		interval = interval.Add(-30 * time.Minute)
 		break
-	case pb.MetricsCountRequest_hour:
+	case pb.MetricsEventsRequest_hour:
 		interval = interval.Add(-time.Hour)
 		break
-	case pb.MetricsCountRequest_hour12:
+	case pb.MetricsEventsRequest_hour12:
 		interval = interval.Add(-12 * time.Hour)
 		break
-	case pb.MetricsCountRequest_day:
+	case pb.MetricsEventsRequest_day:
 		interval = interval.Add(-24 * time.Hour)
 		resolution = 30 * time.Minute
 		break
-	case pb.MetricsCountRequest_week:
+	case pb.MetricsEventsRequest_week:
 		interval = interval.Add(-24 * 7 * time.Hour)
 		resolution = 4 * time.Hour
 		break
-	case pb.MetricsCountRequest_month:
+	case pb.MetricsEventsRequest_month:
 		interval = interval.Add(-24 * 31 * time.Hour)
 		resolution = 24 * time.Hour
 		break
@@ -95,7 +95,7 @@ func (s *Server) MetricsCount(ctx context.Context, req *pb.MetricsCountRequest) 
 		})
 	}
 
-	return &pb.MetricsCountResponse{Metrics: vals}, nil
+	return &pb.MetricsEventsResponse{Metrics: vals}, nil
 }
 
 var (

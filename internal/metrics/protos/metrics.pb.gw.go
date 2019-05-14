@@ -28,8 +28,8 @@ var _ status.Status
 var _ = runtime.String
 var _ = utilities.NewDoubleArray
 
-func request_MetricsService_MetricsCount_0(ctx context.Context, marshaler runtime.Marshaler, client MetricsServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq MetricsCountRequest
+func request_MetricsService_MetricsEvents_0(ctx context.Context, marshaler runtime.Marshaler, client MetricsServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq MetricsEventsRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -56,15 +56,15 @@ func request_MetricsService_MetricsCount_0(ctx context.Context, marshaler runtim
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "interval")
 	}
 
-	e, err = runtime.Enum(val, MetricsCountRequest_Interval_value)
+	e, err = runtime.Enum(val, MetricsEventsRequest_Interval_value)
 
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "interval", err)
 	}
 
-	protoReq.Interval = MetricsCountRequest_Interval(e)
+	protoReq.Interval = MetricsEventsRequest_Interval(e)
 
-	msg, err := client.MetricsCount(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.MetricsEvents(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
@@ -107,7 +107,7 @@ func RegisterMetricsServiceHandler(ctx context.Context, mux *runtime.ServeMux, c
 // "MetricsServiceClient" to call the correct interceptors.
 func RegisterMetricsServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client MetricsServiceClient) error {
 
-	mux.Handle("GET", pattern_MetricsService_MetricsCount_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_MetricsService_MetricsEvents_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -116,14 +116,14 @@ func RegisterMetricsServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_MetricsService_MetricsCount_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_MetricsService_MetricsEvents_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_MetricsService_MetricsCount_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_MetricsService_MetricsEvents_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -131,9 +131,9 @@ func RegisterMetricsServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 }
 
 var (
-	pattern_MetricsService_MetricsCount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"v1", "stream", "metrics", "interval", "count"}, ""))
+	pattern_MetricsService_MetricsEvents_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"v1", "stream", "metrics", "events", "interval"}, ""))
 )
 
 var (
-	forward_MetricsService_MetricsCount_0 = runtime.ForwardResponseMessage
+	forward_MetricsService_MetricsEvents_0 = runtime.ForwardResponseMessage
 )

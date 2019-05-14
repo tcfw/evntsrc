@@ -31,8 +31,22 @@ func NewServer() *Server {
 	return &Server{}
 }
 
-//MetricsEvents fetches metrics relating to event count from timeseries services
-func (s *Server) MetricsEvents(ctx context.Context, req *pb.MetricsEventsRequest) (*pb.MetricsEventsResponse, error) {
+//EventsCount fetches metrics relating to event count from timeseries services
+func (s *Server) EventsCount(ctx context.Context, req *pb.MetricsRequest) (*pb.MetricsResponse, error) {
+	return s.processByQuery(ctx, req, fmt.Sprintf(`sum(increase(storer_store_request_count{stream="%d"}[2m]))`, req.Stream))
+}
+
+//EventsSize fetches metrics relating to event byte size from timeseries services
+func (s *Server) EventsSize(ctx context.Context, req *pb.MetricsRequest) (*pb.MetricsResponse, error) {
+	return s.processByQuery(ctx, req, fmt.Sprintf(`sum(increase(event_subscribe_byte_count{stream="%d"}[2m])+increase(event_publish_byte_count{stream="%d"}[2m]))`, req.Stream, req.Stream))
+}
+
+//Connections fetches metrics relating to socket count from timeseries services
+func (s *Server) Connections(ctx context.Context, req *pb.MetricsRequest) (*pb.MetricsResponse, error) {
+	return s.processByQuery(ctx, req, fmt.Sprintf(`sum(ws_conn{stream="%d"})`, req.Stream))
+}
+
+func (s *Server) processByQuery(ctx context.Context, req *pb.MetricsRequest, query string) (*pb.MetricsResponse, error) {
 	if err := s.canAccess(ctx, req.Stream); err != nil {
 		return nil, err
 	}
@@ -44,38 +58,10 @@ func (s *Server) MetricsEvents(ctx context.Context, req *pb.MetricsEventsRequest
 
 	api := promApi.NewAPI(promClient)
 
-	interval := time.Now()
-	resolution := 30 * time.Second
-
-	switch req.Interval {
-	case pb.MetricsEventsRequest_min10:
-		interval = interval.Add(-10 * time.Minute)
-		break
-	case pb.MetricsEventsRequest_min30:
-		interval = interval.Add(-30 * time.Minute)
-		break
-	case pb.MetricsEventsRequest_hour:
-		interval = interval.Add(-time.Hour)
-		break
-	case pb.MetricsEventsRequest_hour12:
-		interval = interval.Add(-12 * time.Hour)
-		break
-	case pb.MetricsEventsRequest_day:
-		interval = interval.Add(-24 * time.Hour)
-		resolution = 30 * time.Minute
-		break
-	case pb.MetricsEventsRequest_week:
-		interval = interval.Add(-24 * 7 * time.Hour)
-		resolution = 4 * time.Hour
-		break
-	case pb.MetricsEventsRequest_month:
-		interval = interval.Add(-24 * 31 * time.Hour)
-		resolution = 24 * time.Hour
-		break
-	}
+	interval, resolution := apiInterval(&req.Interval)
 
 	span := tracing.StartChildSpan(opentracing.SpanFromContext(ctx), "Prometheus")
-	modelVal, err := api.QueryRange(ctx, fmt.Sprintf(`sum(increase(storer_store_request_count{stream="%d"}[2m]))`, req.Stream), promApi.Range{Start: interval, End: time.Now(), Step: resolution})
+	modelVal, err := api.QueryRange(ctx, query, promApi.Range{Start: interval, End: time.Now(), Step: resolution})
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +81,41 @@ func (s *Server) MetricsEvents(ctx context.Context, req *pb.MetricsEventsRequest
 		})
 	}
 
-	return &pb.MetricsEventsResponse{Metrics: vals}, nil
+	return &pb.MetricsResponse{Metrics: vals}, nil
+}
+
+func apiInterval(reqInterval *pb.Interval) (time.Time, time.Duration) {
+	interval := time.Now()
+	resolution := 30 * time.Second
+
+	switch *reqInterval {
+	case pb.Interval_min10:
+		interval = interval.Add(-10 * time.Minute)
+		break
+	case pb.Interval_min30:
+		interval = interval.Add(-30 * time.Minute)
+		break
+	case pb.Interval_hour:
+		interval = interval.Add(-time.Hour)
+		break
+	case pb.Interval_hour12:
+		interval = interval.Add(-12 * time.Hour)
+		break
+	case pb.Interval_day:
+		interval = interval.Add(-24 * time.Hour)
+		resolution = 30 * time.Minute
+		break
+	case pb.Interval_week:
+		interval = interval.Add(-24 * 7 * time.Hour)
+		resolution = 4 * time.Hour
+		break
+	case pb.Interval_month:
+		interval = interval.Add(-24 * 31 * time.Hour)
+		resolution = 24 * time.Hour
+		break
+	}
+
+	return interval, resolution
 }
 
 var (

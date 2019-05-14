@@ -8,9 +8,9 @@
 		metrics.proto
 
 	It has these top-level messages:
-		MetricsEventsRequest
 		MetricCount
-		MetricsEventsResponse
+		MetricsRequest
+		MetricsResponse
 */
 package evntsrc_stsmetrics
 
@@ -38,19 +38,19 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
-type MetricsEventsRequest_Interval int32
+type Interval int32
 
 const (
-	MetricsEventsRequest_min10  MetricsEventsRequest_Interval = 0
-	MetricsEventsRequest_min30  MetricsEventsRequest_Interval = 1
-	MetricsEventsRequest_hour   MetricsEventsRequest_Interval = 2
-	MetricsEventsRequest_hour12 MetricsEventsRequest_Interval = 3
-	MetricsEventsRequest_day    MetricsEventsRequest_Interval = 4
-	MetricsEventsRequest_week   MetricsEventsRequest_Interval = 5
-	MetricsEventsRequest_month  MetricsEventsRequest_Interval = 6
+	Interval_min10  Interval = 0
+	Interval_min30  Interval = 1
+	Interval_hour   Interval = 2
+	Interval_hour12 Interval = 3
+	Interval_day    Interval = 4
+	Interval_week   Interval = 5
+	Interval_month  Interval = 6
 )
 
-var MetricsEventsRequest_Interval_name = map[int32]string{
+var Interval_name = map[int32]string{
 	0: "min10",
 	1: "min30",
 	2: "hour",
@@ -59,7 +59,7 @@ var MetricsEventsRequest_Interval_name = map[int32]string{
 	5: "week",
 	6: "month",
 }
-var MetricsEventsRequest_Interval_value = map[string]int32{
+var Interval_value = map[string]int32{
 	"min10":  0,
 	"min30":  1,
 	"hour":   2,
@@ -69,40 +69,10 @@ var MetricsEventsRequest_Interval_value = map[string]int32{
 	"month":  6,
 }
 
-func (x MetricsEventsRequest_Interval) String() string {
-	return proto.EnumName(MetricsEventsRequest_Interval_name, int32(x))
+func (x Interval) String() string {
+	return proto.EnumName(Interval_name, int32(x))
 }
-func (MetricsEventsRequest_Interval) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptorMetrics, []int{0, 0}
-}
-
-type MetricsEventsRequest struct {
-	Stream   int32                         `protobuf:"varint,1,opt,name=stream,proto3" json:"stream,omitempty"`
-	Interval MetricsEventsRequest_Interval `protobuf:"varint,2,opt,name=interval,proto3,enum=evntsrc.stsmetrics.MetricsEventsRequest_Interval" json:"interval,omitempty"`
-}
-
-func (m *MetricsEventsRequest) Reset()                    { *m = MetricsEventsRequest{} }
-func (m *MetricsEventsRequest) String() string            { return proto.CompactTextString(m) }
-func (*MetricsEventsRequest) ProtoMessage()               {}
-func (*MetricsEventsRequest) Descriptor() ([]byte, []int) { return fileDescriptorMetrics, []int{0} }
-
-func (m *MetricsEventsRequest) GetStream() int32 {
-	if m != nil {
-		return m.Stream
-	}
-	return 0
-}
-
-func (m *MetricsEventsRequest) GetInterval() MetricsEventsRequest_Interval {
-	if m != nil {
-		return m.Interval
-	}
-	return MetricsEventsRequest_min10
-}
-
-func (*MetricsEventsRequest) XXX_MessageName() string {
-	return "evntsrc.stsmetrics.MetricsEventsRequest"
-}
+func (Interval) EnumDescriptor() ([]byte, []int) { return fileDescriptorMetrics, []int{0} }
 
 type MetricCount struct {
 	Count     float32                `protobuf:"fixed32,1,opt,name=count,proto3" json:"count,omitempty"`
@@ -112,7 +82,7 @@ type MetricCount struct {
 func (m *MetricCount) Reset()                    { *m = MetricCount{} }
 func (m *MetricCount) String() string            { return proto.CompactTextString(m) }
 func (*MetricCount) ProtoMessage()               {}
-func (*MetricCount) Descriptor() ([]byte, []int) { return fileDescriptorMetrics, []int{1} }
+func (*MetricCount) Descriptor() ([]byte, []int) { return fileDescriptorMetrics, []int{0} }
 
 func (m *MetricCount) GetCount() float32 {
 	if m != nil {
@@ -140,7 +110,7 @@ type MetricCount_Timestamp struct {
 func (m *MetricCount_Timestamp) Reset()                    { *m = MetricCount_Timestamp{} }
 func (m *MetricCount_Timestamp) String() string            { return proto.CompactTextString(m) }
 func (*MetricCount_Timestamp) ProtoMessage()               {}
-func (*MetricCount_Timestamp) Descriptor() ([]byte, []int) { return fileDescriptorMetrics, []int{1, 0} }
+func (*MetricCount_Timestamp) Descriptor() ([]byte, []int) { return fileDescriptorMetrics, []int{0, 0} }
 
 func (m *MetricCount_Timestamp) GetSeconds() int64 {
 	if m != nil {
@@ -160,31 +130,59 @@ func (*MetricCount_Timestamp) XXX_MessageName() string {
 	return "evntsrc.stsmetrics.MetricCount.Timestamp"
 }
 
-type MetricsEventsResponse struct {
+type MetricsRequest struct {
+	Stream   int32    `protobuf:"varint,1,opt,name=stream,proto3" json:"stream,omitempty"`
+	Interval Interval `protobuf:"varint,2,opt,name=interval,proto3,enum=evntsrc.stsmetrics.Interval" json:"interval,omitempty"`
+}
+
+func (m *MetricsRequest) Reset()                    { *m = MetricsRequest{} }
+func (m *MetricsRequest) String() string            { return proto.CompactTextString(m) }
+func (*MetricsRequest) ProtoMessage()               {}
+func (*MetricsRequest) Descriptor() ([]byte, []int) { return fileDescriptorMetrics, []int{1} }
+
+func (m *MetricsRequest) GetStream() int32 {
+	if m != nil {
+		return m.Stream
+	}
+	return 0
+}
+
+func (m *MetricsRequest) GetInterval() Interval {
+	if m != nil {
+		return m.Interval
+	}
+	return Interval_min10
+}
+
+func (*MetricsRequest) XXX_MessageName() string {
+	return "evntsrc.stsmetrics.MetricsRequest"
+}
+
+type MetricsResponse struct {
 	Metrics []*MetricCount `protobuf:"bytes,1,rep,name=metrics" json:"metrics,omitempty"`
 }
 
-func (m *MetricsEventsResponse) Reset()                    { *m = MetricsEventsResponse{} }
-func (m *MetricsEventsResponse) String() string            { return proto.CompactTextString(m) }
-func (*MetricsEventsResponse) ProtoMessage()               {}
-func (*MetricsEventsResponse) Descriptor() ([]byte, []int) { return fileDescriptorMetrics, []int{2} }
+func (m *MetricsResponse) Reset()                    { *m = MetricsResponse{} }
+func (m *MetricsResponse) String() string            { return proto.CompactTextString(m) }
+func (*MetricsResponse) ProtoMessage()               {}
+func (*MetricsResponse) Descriptor() ([]byte, []int) { return fileDescriptorMetrics, []int{2} }
 
-func (m *MetricsEventsResponse) GetMetrics() []*MetricCount {
+func (m *MetricsResponse) GetMetrics() []*MetricCount {
 	if m != nil {
 		return m.Metrics
 	}
 	return nil
 }
 
-func (*MetricsEventsResponse) XXX_MessageName() string {
-	return "evntsrc.stsmetrics.MetricsEventsResponse"
+func (*MetricsResponse) XXX_MessageName() string {
+	return "evntsrc.stsmetrics.MetricsResponse"
 }
 func init() {
-	proto.RegisterType((*MetricsEventsRequest)(nil), "evntsrc.stsmetrics.MetricsEventsRequest")
 	proto.RegisterType((*MetricCount)(nil), "evntsrc.stsmetrics.MetricCount")
 	proto.RegisterType((*MetricCount_Timestamp)(nil), "evntsrc.stsmetrics.MetricCount.Timestamp")
-	proto.RegisterType((*MetricsEventsResponse)(nil), "evntsrc.stsmetrics.MetricsEventsResponse")
-	proto.RegisterEnum("evntsrc.stsmetrics.MetricsEventsRequest_Interval", MetricsEventsRequest_Interval_name, MetricsEventsRequest_Interval_value)
+	proto.RegisterType((*MetricsRequest)(nil), "evntsrc.stsmetrics.MetricsRequest")
+	proto.RegisterType((*MetricsResponse)(nil), "evntsrc.stsmetrics.MetricsResponse")
+	proto.RegisterEnum("evntsrc.stsmetrics.Interval", Interval_name, Interval_value)
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -198,7 +196,9 @@ const _ = grpc.SupportPackageIsVersion4
 // Client API for MetricsService service
 
 type MetricsServiceClient interface {
-	MetricsEvents(ctx context.Context, in *MetricsEventsRequest, opts ...grpc.CallOption) (*MetricsEventsResponse, error)
+	EventsCount(ctx context.Context, in *MetricsRequest, opts ...grpc.CallOption) (*MetricsResponse, error)
+	EventsSize(ctx context.Context, in *MetricsRequest, opts ...grpc.CallOption) (*MetricsResponse, error)
+	Connections(ctx context.Context, in *MetricsRequest, opts ...grpc.CallOption) (*MetricsResponse, error)
 }
 
 type metricsServiceClient struct {
@@ -209,9 +209,27 @@ func NewMetricsServiceClient(cc *grpc.ClientConn) MetricsServiceClient {
 	return &metricsServiceClient{cc}
 }
 
-func (c *metricsServiceClient) MetricsEvents(ctx context.Context, in *MetricsEventsRequest, opts ...grpc.CallOption) (*MetricsEventsResponse, error) {
-	out := new(MetricsEventsResponse)
-	err := grpc.Invoke(ctx, "/evntsrc.stsmetrics.MetricsService/MetricsEvents", in, out, c.cc, opts...)
+func (c *metricsServiceClient) EventsCount(ctx context.Context, in *MetricsRequest, opts ...grpc.CallOption) (*MetricsResponse, error) {
+	out := new(MetricsResponse)
+	err := grpc.Invoke(ctx, "/evntsrc.stsmetrics.MetricsService/EventsCount", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *metricsServiceClient) EventsSize(ctx context.Context, in *MetricsRequest, opts ...grpc.CallOption) (*MetricsResponse, error) {
+	out := new(MetricsResponse)
+	err := grpc.Invoke(ctx, "/evntsrc.stsmetrics.MetricsService/EventsSize", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *metricsServiceClient) Connections(ctx context.Context, in *MetricsRequest, opts ...grpc.CallOption) (*MetricsResponse, error) {
+	out := new(MetricsResponse)
+	err := grpc.Invoke(ctx, "/evntsrc.stsmetrics.MetricsService/Connections", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -221,27 +239,65 @@ func (c *metricsServiceClient) MetricsEvents(ctx context.Context, in *MetricsEve
 // Server API for MetricsService service
 
 type MetricsServiceServer interface {
-	MetricsEvents(context.Context, *MetricsEventsRequest) (*MetricsEventsResponse, error)
+	EventsCount(context.Context, *MetricsRequest) (*MetricsResponse, error)
+	EventsSize(context.Context, *MetricsRequest) (*MetricsResponse, error)
+	Connections(context.Context, *MetricsRequest) (*MetricsResponse, error)
 }
 
 func RegisterMetricsServiceServer(s *grpc.Server, srv MetricsServiceServer) {
 	s.RegisterService(&_MetricsService_serviceDesc, srv)
 }
 
-func _MetricsService_MetricsEvents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MetricsEventsRequest)
+func _MetricsService_EventsCount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MetricsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MetricsServiceServer).MetricsEvents(ctx, in)
+		return srv.(MetricsServiceServer).EventsCount(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/evntsrc.stsmetrics.MetricsService/MetricsEvents",
+		FullMethod: "/evntsrc.stsmetrics.MetricsService/EventsCount",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MetricsServiceServer).MetricsEvents(ctx, req.(*MetricsEventsRequest))
+		return srv.(MetricsServiceServer).EventsCount(ctx, req.(*MetricsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MetricsService_EventsSize_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MetricsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetricsServiceServer).EventsSize(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/evntsrc.stsmetrics.MetricsService/EventsSize",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetricsServiceServer).EventsSize(ctx, req.(*MetricsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MetricsService_Connections_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MetricsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetricsServiceServer).Connections(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/evntsrc.stsmetrics.MetricsService/Connections",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetricsServiceServer).Connections(ctx, req.(*MetricsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -251,40 +307,20 @@ var _MetricsService_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*MetricsServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "MetricsEvents",
-			Handler:    _MetricsService_MetricsEvents_Handler,
+			MethodName: "EventsCount",
+			Handler:    _MetricsService_EventsCount_Handler,
+		},
+		{
+			MethodName: "EventsSize",
+			Handler:    _MetricsService_EventsSize_Handler,
+		},
+		{
+			MethodName: "Connections",
+			Handler:    _MetricsService_Connections_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "metrics.proto",
-}
-
-func (m *MetricsEventsRequest) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalTo(dAtA)
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *MetricsEventsRequest) MarshalTo(dAtA []byte) (int, error) {
-	var i int
-	_ = i
-	var l int
-	_ = l
-	if m.Stream != 0 {
-		dAtA[i] = 0x8
-		i++
-		i = encodeVarintMetrics(dAtA, i, uint64(m.Stream))
-	}
-	if m.Interval != 0 {
-		dAtA[i] = 0x10
-		i++
-		i = encodeVarintMetrics(dAtA, i, uint64(m.Interval))
-	}
-	return i, nil
 }
 
 func (m *MetricCount) Marshal() (dAtA []byte, err error) {
@@ -349,7 +385,7 @@ func (m *MetricCount_Timestamp) MarshalTo(dAtA []byte) (int, error) {
 	return i, nil
 }
 
-func (m *MetricsEventsResponse) Marshal() (dAtA []byte, err error) {
+func (m *MetricsRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalTo(dAtA)
@@ -359,7 +395,35 @@ func (m *MetricsEventsResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MetricsEventsResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *MetricsRequest) MarshalTo(dAtA []byte) (int, error) {
+	var i int
+	_ = i
+	var l int
+	_ = l
+	if m.Stream != 0 {
+		dAtA[i] = 0x8
+		i++
+		i = encodeVarintMetrics(dAtA, i, uint64(m.Stream))
+	}
+	if m.Interval != 0 {
+		dAtA[i] = 0x10
+		i++
+		i = encodeVarintMetrics(dAtA, i, uint64(m.Interval))
+	}
+	return i, nil
+}
+
+func (m *MetricsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalTo(dAtA)
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MetricsResponse) MarshalTo(dAtA []byte) (int, error) {
 	var i int
 	_ = i
 	var l int
@@ -388,18 +452,6 @@ func encodeVarintMetrics(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return offset + 1
 }
-func (m *MetricsEventsRequest) Size() (n int) {
-	var l int
-	_ = l
-	if m.Stream != 0 {
-		n += 1 + sovMetrics(uint64(m.Stream))
-	}
-	if m.Interval != 0 {
-		n += 1 + sovMetrics(uint64(m.Interval))
-	}
-	return n
-}
-
 func (m *MetricCount) Size() (n int) {
 	var l int
 	_ = l
@@ -425,7 +477,19 @@ func (m *MetricCount_Timestamp) Size() (n int) {
 	return n
 }
 
-func (m *MetricsEventsResponse) Size() (n int) {
+func (m *MetricsRequest) Size() (n int) {
+	var l int
+	_ = l
+	if m.Stream != 0 {
+		n += 1 + sovMetrics(uint64(m.Stream))
+	}
+	if m.Interval != 0 {
+		n += 1 + sovMetrics(uint64(m.Interval))
+	}
+	return n
+}
+
+func (m *MetricsResponse) Size() (n int) {
 	var l int
 	_ = l
 	if len(m.Metrics) > 0 {
@@ -449,94 +513,6 @@ func sovMetrics(x uint64) (n int) {
 }
 func sozMetrics(x uint64) (n int) {
 	return sovMetrics(uint64((x << 1) ^ uint64((int64(x) >> 63))))
-}
-func (m *MetricsEventsRequest) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowMetrics
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= (uint64(b) & 0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: MetricsEventsRequest: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MetricsEventsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Stream", wireType)
-			}
-			m.Stream = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMetrics
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Stream |= (int32(b) & 0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 2:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Interval", wireType)
-			}
-			m.Interval = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowMetrics
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Interval |= (MetricsEventsRequest_Interval(b) & 0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		default:
-			iNdEx = preIndex
-			skippy, err := skipMetrics(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthMetrics
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
 }
 func (m *MetricCount) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
@@ -720,7 +696,7 @@ func (m *MetricCount_Timestamp) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MetricsEventsResponse) Unmarshal(dAtA []byte) error {
+func (m *MetricsRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -743,10 +719,98 @@ func (m *MetricsEventsResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MetricsEventsResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: MetricsRequest: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MetricsEventsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MetricsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Stream", wireType)
+			}
+			m.Stream = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMetrics
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Stream |= (int32(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Interval", wireType)
+			}
+			m.Interval = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowMetrics
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Interval |= (Interval(b) & 0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipMetrics(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthMetrics
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MetricsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowMetrics
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= (uint64(b) & 0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MetricsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MetricsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -909,34 +973,37 @@ var (
 func init() { proto.RegisterFile("metrics.proto", fileDescriptorMetrics) }
 
 var fileDescriptorMetrics = []byte{
-	// 453 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x52, 0x4d, 0x6e, 0xd3, 0x40,
-	0x14, 0xee, 0x24, 0x75, 0x7e, 0x5e, 0xd4, 0xca, 0x1a, 0x15, 0x64, 0x45, 0xc8, 0x44, 0x5e, 0xa5,
-	0x8b, 0x7a, 0x1a, 0x57, 0x2c, 0x10, 0x3b, 0x10, 0x42, 0x2c, 0xba, 0x19, 0x7a, 0x01, 0xc7, 0x7d,
-	0x38, 0x16, 0xf5, 0x4c, 0xf0, 0x8c, 0x8d, 0x50, 0xd5, 0x0d, 0x57, 0x60, 0x83, 0xc4, 0x09, 0xd8,
-	0x70, 0x06, 0x96, 0x5d, 0x22, 0xf5, 0x02, 0x28, 0xe1, 0x20, 0x28, 0x33, 0xe3, 0x22, 0xfe, 0x44,
-	0x56, 0x7e, 0xdf, 0xcc, 0xfb, 0x7e, 0x9e, 0xe7, 0xc1, 0x5e, 0x89, 0xba, 0x2a, 0x32, 0x15, 0x2f,
-	0x2b, 0xa9, 0x25, 0xa5, 0xd8, 0x08, 0xad, 0xaa, 0x2c, 0x56, 0x5a, 0xb9, 0x9b, 0xf1, 0x51, 0x5e,
-	0xe8, 0x45, 0x3d, 0x8f, 0x33, 0x59, 0xb2, 0x5c, 0xe6, 0x92, 0x99, 0xd6, 0x79, 0xfd, 0xd2, 0x20,
-	0x03, 0x4c, 0x65, 0x25, 0xc6, 0xf7, 0x72, 0x29, 0xf3, 0x0b, 0x64, 0xe9, 0xb2, 0x60, 0xa9, 0x10,
-	0x52, 0xa7, 0xba, 0x90, 0xc2, 0x19, 0x44, 0x37, 0x04, 0x0e, 0x4e, 0xad, 0xf0, 0xd3, 0x06, 0x85,
-	0x56, 0x1c, 0x5f, 0xd7, 0xa8, 0x34, 0xbd, 0x0b, 0x3d, 0xa5, 0x2b, 0x4c, 0xcb, 0x80, 0x4c, 0xc8,
-	0xd4, 0xe3, 0x0e, 0xd1, 0x53, 0x18, 0x14, 0x42, 0x63, 0xd5, 0xa4, 0x17, 0x41, 0x67, 0x42, 0xa6,
-	0xfb, 0xc9, 0x2c, 0xfe, 0x33, 0x64, 0xfc, 0x37, 0xcd, 0xf8, 0xb9, 0x23, 0xf2, 0x5b, 0x89, 0xe8,
-	0x0c, 0x06, 0xed, 0x29, 0x1d, 0x82, 0x57, 0x16, 0x62, 0x76, 0xec, 0xef, 0xb8, 0xf2, 0xe4, 0xd8,
-	0x27, 0x74, 0x00, 0xbb, 0x0b, 0x59, 0x57, 0x7e, 0x87, 0x02, 0xf4, 0x36, 0xd5, 0x2c, 0xf1, 0xbb,
-	0xb4, 0x0f, 0xdd, 0xf3, 0xf4, 0xad, 0xbf, 0xbb, 0xb9, 0x7e, 0x83, 0xf8, 0xca, 0xf7, 0x0c, 0x47,
-	0x0a, 0xbd, 0xf0, 0x7b, 0xd1, 0x27, 0x02, 0x23, 0x9b, 0xe0, 0x89, 0xac, 0x85, 0xa6, 0x07, 0xe0,
-	0x65, 0x9b, 0xc2, 0xcc, 0xd2, 0xe1, 0x16, 0xd0, 0x67, 0x30, 0xd4, 0x45, 0x89, 0x4a, 0xa7, 0xe5,
-	0xd2, 0xcc, 0x32, 0x4a, 0x0e, 0xff, 0x3d, 0x8b, 0x51, 0x8a, 0xcf, 0x5a, 0x02, 0xff, 0xc9, 0x1d,
-	0x3f, 0x82, 0xe1, 0xed, 0x39, 0x0d, 0xa0, 0xaf, 0x30, 0x93, 0xe2, 0x5c, 0x19, 0xb7, 0x2e, 0x6f,
-	0xe1, 0x26, 0x85, 0x48, 0x85, 0x54, 0xc6, 0xcb, 0xe3, 0x16, 0x44, 0x1c, 0xee, 0xfc, 0xf6, 0xb3,
-	0xd4, 0x52, 0x0a, 0x85, 0xf4, 0x21, 0xf4, 0x5d, 0x82, 0x80, 0x4c, 0xba, 0xd3, 0x51, 0x72, 0xff,
-	0x3f, 0xe1, 0x78, 0xdb, 0x9f, 0x7c, 0x26, 0xb0, 0xef, 0x44, 0x5f, 0x60, 0xd5, 0x14, 0x19, 0xd2,
-	0x8f, 0x04, 0xf6, 0x7e, 0xf1, 0xa1, 0xd3, 0x6d, 0xdf, 0x6d, 0x7c, 0xb8, 0x45, 0xa7, 0x0d, 0x1d,
-	0x3d, 0x78, 0x77, 0xf3, 0xfd, 0x7d, 0x87, 0xd1, 0x23, 0xd6, 0xcc, 0x98, 0x5d, 0x19, 0x76, 0x69,
-	0xbf, 0x57, 0xcc, 0x51, 0x19, 0x1a, 0x0e, 0xbb, 0x6c, 0xb7, 0xe0, 0xea, 0x71, 0x70, 0xbd, 0x0a,
-	0xc9, 0xd7, 0x55, 0x48, 0xbe, 0xad, 0x42, 0xf2, 0x61, 0x1d, 0xee, 0x7c, 0x59, 0x87, 0xe4, 0x7a,
-	0x1d, 0x92, 0x79, 0xcf, 0xec, 0xe9, 0xc9, 0x8f, 0x00, 0x00, 0x00, 0xff, 0xff, 0xd8, 0x55, 0xd8,
-	0x52, 0x19, 0x03, 0x00, 0x00,
+	// 502 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x93, 0xcf, 0x6e, 0xd3, 0x40,
+	0x10, 0xc6, 0xbb, 0x49, 0x9d, 0x3f, 0x63, 0x51, 0xac, 0x15, 0x42, 0x56, 0x54, 0x99, 0xc8, 0x5c,
+	0x02, 0xa2, 0xde, 0xc4, 0x05, 0x04, 0xe2, 0x46, 0x85, 0x10, 0x12, 0x5c, 0xdc, 0xbe, 0x80, 0xe3,
+	0x0e, 0x8e, 0x45, 0xbd, 0x1b, 0xbc, 0x6b, 0x23, 0xa8, 0x7a, 0xe1, 0x0c, 0x27, 0x2e, 0xbc, 0x02,
+	0x4f, 0x01, 0xc7, 0x1e, 0x91, 0x78, 0x01, 0x94, 0xf0, 0x20, 0xc8, 0x6b, 0x3b, 0x44, 0x02, 0xd2,
+	0x4b, 0x4f, 0x99, 0x2f, 0x3b, 0x33, 0xdf, 0x6f, 0x3f, 0xdb, 0x70, 0x25, 0x45, 0x95, 0x25, 0x91,
+	0xf4, 0xe6, 0x99, 0x50, 0x82, 0x52, 0x2c, 0xb8, 0x92, 0x59, 0xe4, 0x49, 0x25, 0xeb, 0x93, 0xc1,
+	0x5e, 0x9c, 0xa8, 0x59, 0x3e, 0xf5, 0x22, 0x91, 0xb2, 0x58, 0xc4, 0x82, 0xe9, 0xd6, 0x69, 0xfe,
+	0x52, 0x2b, 0x2d, 0x74, 0x55, 0xad, 0x18, 0xec, 0xc6, 0x42, 0xc4, 0x27, 0xc8, 0xc2, 0x79, 0xc2,
+	0x42, 0xce, 0x85, 0x0a, 0x55, 0x22, 0x78, 0x6d, 0xe0, 0x7e, 0x21, 0x60, 0xbe, 0xd0, 0x8b, 0x0f,
+	0x44, 0xce, 0x15, 0xbd, 0x06, 0x46, 0x54, 0x16, 0x36, 0x19, 0x92, 0x51, 0x2b, 0xa8, 0x04, 0x7d,
+	0x0a, 0x7d, 0x95, 0xa4, 0x28, 0x55, 0x98, 0xce, 0xed, 0xd6, 0x90, 0x8c, 0x4c, 0xff, 0x96, 0xf7,
+	0x37, 0x9a, 0xb7, 0xb6, 0xc9, 0x3b, 0x6a, 0x06, 0x82, 0x3f, 0xb3, 0x83, 0x47, 0xd0, 0x5f, 0xfd,
+	0x4f, 0x6d, 0xe8, 0x4a, 0x8c, 0x04, 0x3f, 0x96, 0xda, 0xad, 0x1d, 0x34, 0xb2, 0xa4, 0xe0, 0x21,
+	0x17, 0x52, 0x7b, 0x19, 0x41, 0x25, 0xdc, 0x29, 0xec, 0x54, 0x06, 0x32, 0xc0, 0xd7, 0x39, 0x4a,
+	0x45, 0xaf, 0x43, 0x47, 0xaa, 0x0c, 0xc3, 0x54, 0x2f, 0x30, 0x82, 0x5a, 0xd1, 0x07, 0xd0, 0x4b,
+	0xb8, 0xc2, 0xac, 0x08, 0x4f, 0xf4, 0x8a, 0x1d, 0x7f, 0xf7, 0x5f, 0xb8, 0xcf, 0xea, 0x9e, 0x60,
+	0xd5, 0xed, 0x3e, 0x87, 0xab, 0x2b, 0x0f, 0x39, 0x17, 0x5c, 0x22, 0x7d, 0x08, 0xdd, 0x7a, 0xc0,
+	0x26, 0xc3, 0xf6, 0xc8, 0xf4, 0x6f, 0x5c, 0x70, 0xf5, 0xa0, 0xe9, 0xbf, 0x7d, 0x04, 0xbd, 0xc6,
+	0x83, 0xf6, 0xc1, 0x48, 0x13, 0x3e, 0x19, 0x5b, 0x5b, 0x75, 0xb9, 0x3f, 0xb6, 0x08, 0xed, 0xc1,
+	0xf6, 0x4c, 0xe4, 0x99, 0xd5, 0xa2, 0x00, 0x9d, 0xb2, 0x9a, 0xf8, 0x56, 0x9b, 0x76, 0xa1, 0x7d,
+	0x1c, 0xbe, 0xb5, 0xb6, 0xcb, 0xe3, 0x37, 0x88, 0xaf, 0x2c, 0x43, 0xcf, 0x08, 0xae, 0x66, 0x56,
+	0xc7, 0xff, 0xda, 0x5e, 0x05, 0x71, 0x88, 0x59, 0x91, 0x44, 0x48, 0x3f, 0x12, 0x30, 0x9f, 0x14,
+	0xc8, 0x95, 0xac, 0x1e, 0xa3, 0xfb, 0x7f, 0xc4, 0x26, 0xbc, 0xc1, 0xcd, 0x8d, 0x3d, 0xd5, 0xe5,
+	0xdd, 0x7b, 0xef, 0x7f, 0xfc, 0xfa, 0xd4, 0x62, 0x74, 0x8f, 0x15, 0x13, 0x56, 0xa5, 0xcb, 0x4e,
+	0xab, 0xdf, 0x33, 0x56, 0x0f, 0x31, 0xd4, 0xce, 0xec, 0xb4, 0x49, 0xf1, 0xac, 0xe4, 0x81, 0x8a,
+	0xe7, 0x30, 0x79, 0x87, 0x97, 0x87, 0x73, 0x5f, 0xe3, 0x8c, 0xa9, 0xb7, 0x09, 0x47, 0x2a, 0x91,
+	0x85, 0x31, 0xae, 0xf3, 0x7c, 0x20, 0x60, 0x1e, 0x08, 0xce, 0x31, 0xd2, 0x2f, 0xff, 0xe5, 0x01,
+	0xdd, 0xd5, 0x40, 0x1e, 0xbd, 0xb3, 0x09, 0x28, 0x12, 0x9c, 0xaf, 0xc7, 0xf3, 0xd8, 0x3e, 0x5f,
+	0x38, 0xe4, 0xfb, 0xc2, 0x21, 0x3f, 0x17, 0x0e, 0xf9, 0xbc, 0x74, 0xb6, 0xbe, 0x2d, 0x1d, 0x72,
+	0xbe, 0x74, 0xc8, 0xb4, 0xa3, 0x3f, 0xcb, 0xfd, 0xdf, 0x01, 0x00, 0x00, 0xff, 0xff, 0x36, 0xe6,
+	0xa4, 0x50, 0x08, 0x04, 0x00, 0x00,
 }

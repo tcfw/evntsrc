@@ -16,19 +16,14 @@ option (gogoproto.goproto_registration) = true;
 // Enable generation of XXX_MessageName methods for grpc-go/status.
 option (gogoproto.messagename_all) = true;
 
-message MetricsEventsRequest {
-	int32 stream = 1;
-
-	enum Interval {
-		min10 = 0;
-		min30 = 1;
-		hour = 2;
-		hour12 = 3;
-		day = 4;
-		week = 5;
-		month = 6;
-	}
-	Interval interval = 2;
+enum Interval {
+	min10 = 0;
+	min30 = 1;
+	hour = 2;
+	hour12 = 3;
+	day = 4;
+	week = 5;
+	month = 6;
 }
 
 message MetricCount {
@@ -42,14 +37,32 @@ message MetricCount {
 	Timestamp timestamp = 2;
 }
 
-message MetricsEventsResponse {
+message MetricsRequest {
+	int32 stream = 1;
+	Interval interval = 2;
+}
+
+
+message MetricsResponse {
 	repeated MetricCount metrics = 1;
 }
 
 service MetricsService {
-	rpc MetricsEvents (MetricsEventsRequest) returns (MetricsEventsResponse) {
+	rpc EventsCount (MetricsRequest) returns (MetricsResponse) {
         option (google.api.http) = {
             get: "/v1/stream/{stream}/metrics/events/{interval}"
         };
-    };;
+	}
+	
+	rpc EventsSize (MetricsRequest) returns (MetricsResponse) {
+		option (google.api.http) = {
+			get: "/v1/stream/{stream}/metrics/storage/{interval}"
+		};
+	}
+
+	rpc Connections (MetricsRequest) returns (MetricsResponse) {
+		option (google.api.http) = {
+			get: "/v1/stream/{stream}/metrics/conns/{interval}"
+		};
+	}
 }

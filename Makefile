@@ -18,7 +18,7 @@ endif
 
 .DEFAULT_GOAL := changed
 .PHONY: all
-all: storer websocks stsmetrics streams passport users apigw bridge streamauth ingress billing wui adapter emails metrics push
+all: storer websocks stsmetrics streams passport users apigw bridge streamauth ingress billing wui adapter emails metrics push interconnect
 
 storer:
 	docker build -f ./build/storer/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/storer:latest .
@@ -65,6 +65,9 @@ emails:
 metrics:
 	docker build -f ./build/metrics/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/metrics:latest .
 
+interconnect:
+	docker build -f ./build/interconnect/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/interconnect:latest .
+
 .PHONY: push
 push: 
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/storer:latest
@@ -82,6 +85,7 @@ push:
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/adapter:latest
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/emails:latest
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/metrics:latest
+	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/interconnect:latest
 
 .PHONY: changed
 changed:

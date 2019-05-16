@@ -9,7 +9,6 @@ import (
 	nats "github.com/nats-io/go-nats"
 	pb "github.com/tcfw/evntsrc/internal/bridge/protos"
 	pbEvents "github.com/tcfw/evntsrc/internal/event/protos"
-	"google.golang.org/grpc/metadata"
 )
 
 type server struct {
@@ -43,7 +42,7 @@ func (s *server) Subscribe(request *pb.SubscribeRequest, stream pb.BridgeService
 		return err
 	}
 
-	ch := make(chan *nats.Msg, 64)
+	ch := make(chan *nats.Msg)
 	if _, err = natsConn.ChanSubscribe(fmt.Sprintf("_USER.%d.%s", request.Stream, request.Channel), ch); err != nil {
 		return err
 	}
@@ -62,9 +61,10 @@ func (s *server) Subscribe(request *pb.SubscribeRequest, stream pb.BridgeService
 }
 
 //Relay opens up a bi-directional stream
+/*
 func (s *server) RelayEvents(stream pb.BridgeService_RelayEventsServer) error {
 	close := make(chan bool, 1)
-	in := make(chan *pbEvents.Event, 50)
+	in := make(chan *pbEvents.Event)
 	var wg sync.WaitGroup
 	wg.Add(3)
 
@@ -122,7 +122,6 @@ func (s *server) RelayEvents(stream pb.BridgeService_RelayEventsServer) error {
 		for {
 			select {
 			case msg := <-writes:
-				fmt.Printf("Relaying event: %s\n", string(msg.Data))
 				event := &pbEvents.Event{}
 				err := json.Unmarshal(msg.Data, event)
 				if err != nil {
@@ -142,11 +141,7 @@ func (s *server) RelayEvents(stream pb.BridgeService_RelayEventsServer) error {
 
 	return nil
 }
-
-func (s *server) Replay(ctx context.Context, request *pb.ReplayRequest) (*pb.GeneralResponse, error) {
-	return nil, nil
-}
-
+*/
 // @TODO move to grpc interceptor
 func (s *server) ValidateAuth(request interface{}) error {
 	return nil

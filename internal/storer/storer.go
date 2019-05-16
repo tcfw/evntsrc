@@ -116,6 +116,10 @@ func (ep *eventProcessor) Handle(job interface{}) {
 		return
 	}
 
+	if _, ok := usrEvent.Metadata["forwarded"]; ok {
+		return
+	}
+
 	if isNonPersistent, ok := usrEvent.Metadata["non-persistent"]; ok && isNonPersistent == "true" {
 		return
 	}

@@ -1,0 +1,26 @@
+syntax="proto3";
+
+package evntsrc.interconnect;
+
+import "github.com/tcfw/evntsrc/internal/event/protos/event.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+// Enable custom Marshal method.
+option (gogoproto.marshaler_all) = true;
+// Enable custom Unmarshal method.
+option (gogoproto.unmarshaler_all) = true;
+// Enable custom Size method (Required by Marshal and Unmarshal).
+option (gogoproto.sizer_all) = true;
+// Enable registration with golang/protobuf for the grpc-gateway.
+option (gogoproto.goproto_registration) = true;
+// Enable generation of XXX_MessageName methods for grpc-go/status.
+option (gogoproto.messagename_all) = true;
+
+message ForwardingRequest {
+	evntsrc.event.Event event = 1;
+	map<string,bytes> metadata = 2;
+}
+
+service InterconnectService {
+	rpc Relay(stream ForwardingRequest) returns (stream ForwardingRequest);
+}

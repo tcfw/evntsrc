@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: interconnect
+spec:
+  ports:
+  - port: 443
+    name: https
+  selector:
+    run: interconnect
+  type: NodePort
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: interconnect
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        version: v1
+        run: interconnect
+        app: interconnect
+        service: interconnect
+        tier: links
+      annotations:
+        prometheus.io/scrape: "false"
+    spec:
+      containers:
+      - name: interconnect
+        image: asia.gcr.io/evntsrc-io/interconnect:latest
+        command: ["interconnect"]
+        args: [
+          "serve",
+          "--region", "staging-1",
+          "-c", "/ssl/tls.crt",
+          "-k", "/ssl/tls.key",
+          "--nats", "nats.nats-io:4222"
+        ]
+        ports:
+        - containerPort: 443
+        volumeMounts:
+        - name: tls
+          mountPath: "/ssl/"
+          readOnly: true
+      volumes:
+      - name: tls
+        secret:
+          secretName: interconnect-tls

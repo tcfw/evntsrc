@@ -10,16 +10,16 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/gogo/protobuf/proto"
+	nats "github.com/nats-io/go-nats"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/viper"
-	"google.golang.org/grpc"
-
-	nats "github.com/nats-io/go-nats"
 	"github.com/tcfw/evntsrc/internal/event"
 	"github.com/tcfw/evntsrc/internal/tracing"
 	"github.com/tcfw/evntsrc/internal/websocks"
 	"github.com/tcfw/go-queue"
+	"google.golang.org/grpc"
 )
 
 var (
@@ -170,7 +170,7 @@ func monitorUserStreams() {
 
 	natsConn.QueueSubscribe("_USER.>", "storers", func(m *nats.Msg) {
 		event := &event.Event{}
-		err := json.Unmarshal(m.Data, event)
+		err := proto.Unmarshal(m.Data, event)
 		if err != nil {
 			log.Printf("%s\n", err.Error())
 			return
@@ -278,7 +278,7 @@ func doReplay(command *websocks.ReplayCommand, reply chan []byte, errCh chan err
 
 		event.Metadata["replay"] = "true"
 
-		jsonBytes, err := json.Marshal(event)
+		jsonBytes, err := proto.Marshal(event.ToProtobuf())
 		if err != nil {
 			errCh <- fmt.Errorf("sqld md: %s", err.Error())
 			return

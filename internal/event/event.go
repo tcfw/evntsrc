@@ -7,6 +7,8 @@ import (
 	"github.com/globalsign/mgo"
 	"github.com/google/uuid"
 	"github.com/tcfw/evntsrc/internal/utils/db"
+
+	pbEvent "github.com/tcfw/evntsrc/internal/event/protos"
 )
 
 //Event is the main event structure for all events throughout the system
@@ -70,4 +72,28 @@ func (e *Event) Store() error {
 	}
 
 	return nil
+}
+
+//ToProtobuf converts structed event to protobuf event
+func (e *Event) ToProtobuf() *pbEvent.Event {
+	ev := &pbEvent.Event{}
+	ev.ID = e.ID
+	ev.ID = e.ID
+	ev.Stream = e.Stream
+	if !e.Time.IsZero() {
+		ev.Time = &e.Time.Time
+	}
+	ev.Type = e.Type
+	ev.TypeVersion = e.TypeVersion
+	ev.CEVersion = e.CEVersion
+	ev.Source = e.Source
+	ev.Subject = e.Subject
+	if !e.Acknowledged.IsZero() {
+		ev.Acknowledged = &e.Acknowledged.Time
+	}
+	ev.Metadata = e.Metadata
+	ev.ContentType = e.ContentType
+	ev.Data = e.Data
+
+	return ev
 }

@@ -1,7 +1,6 @@
 package ingress
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -9,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tcfw/evntsrc/internal/event"
-
+	"github.com/gogo/protobuf/proto"
 	"github.com/gorilla/mux"
+	"github.com/tcfw/evntsrc/internal/event"
 )
 
 //HandlePub publishes events to NATS
@@ -87,7 +86,7 @@ func HandlePub(w http.ResponseWriter, r *http.Request) {
 		break
 	}
 
-	eventJSONBytes, _ := json.Marshal(pubEvent)
+	eventJSONBytes, _ := proto.Marshal(pubEvent)
 	channel := fmt.Sprintf("_USER.%d.%s", pubEvent.Stream, pubEvent.Subject)
 
 	natsConn.Publish(channel, eventJSONBytes)

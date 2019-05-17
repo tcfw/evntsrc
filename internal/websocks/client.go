@@ -8,6 +8,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gogo/protobuf/proto"
+	pbEvent "github.com/tcfw/evntsrc/internal/event/protos"
+
 	"github.com/gorilla/websocket"
 	nats "github.com/nats-io/go-nats"
 	metrics "github.com/rcrowley/go-metrics"
@@ -173,7 +176,11 @@ func (c *Client) Subscribe(channel string, cmd *InboundCommand) {
 			for {
 				select {
 				case msg := <-ch:
-					c.send <- msg.Data
+					ev := &pbEvent.Event{}
+					proto.Unmarshal(msg.Data, ev)
+					jsonEv, _ := json.Marshal(ev)
+
+					c.send <- jsonEv
 
 					byteSubscribeCounter.WithLabelValues(fmt.Sprintf("%d", c.auth.Stream)).Add(float64(len(msg.Data)))
 

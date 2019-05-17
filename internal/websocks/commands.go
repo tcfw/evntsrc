@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gogo/protobuf/proto"
 	"github.com/tcfw/evntsrc/internal/event"
 )
 
@@ -131,7 +132,7 @@ func (c *Client) doPublish(command *InboundCommand, message []byte) {
 	rEvent.Metadata["relative_seq"] = fmt.Sprintf("%s-%d", c.connectionID, c.seq[channel])
 	c.seqLock.Unlock()
 
-	eventJSONBytes, _ := json.Marshal(rEvent)
+	eventJSONBytes, _ := proto.Marshal(rEvent.ToProtobuf())
 	natsConn.Publish(channel, eventJSONBytes)
 
 	bytePublishCounter.WithLabelValues(fmt.Sprintf("%d", c.auth.Stream)).Add(float64(len(eventJSONBytes)))

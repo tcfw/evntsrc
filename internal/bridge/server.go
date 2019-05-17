@@ -2,9 +2,10 @@ package bridge
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"sync"
+
+	"github.com/gogo/protobuf/proto"
 
 	nats "github.com/nats-io/go-nats"
 	pb "github.com/tcfw/evntsrc/internal/bridge/protos"
@@ -26,7 +27,7 @@ func (s *server) Publish(ctx context.Context, request *pb.PublishRequest) (*pb.G
 	}
 
 	channel := fmt.Sprintf("_USER.%d.%s", request.Event.Stream, request.Event.Subject)
-	bytes, err := json.Marshal(request.Event)
+	bytes, err := proto.Marshal(request.Event)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +52,7 @@ func (s *server) Subscribe(request *pb.SubscribeRequest, stream pb.BridgeService
 		select {
 		case msg := <-ch:
 			event := &pbEvents.Event{}
-			json.Unmarshal(msg.Data, event)
+			proto.Unmarshal(msg.Data, event)
 			err := stream.Send(event)
 			if err != nil {
 				return err
@@ -60,88 +61,6 @@ func (s *server) Subscribe(request *pb.SubscribeRequest, stream pb.BridgeService
 	}
 }
 
-//Relay opens up a bi-directional stream
-/*
-func (s *server) RelayEvents(stream pb.BridgeService_RelayEventsServer) error {
-	close := make(chan bool, 1)
-	in := make(chan *pbEvents.Event)
-	var wg sync.WaitGroup
-	wg.Add(3)
-
-	fmt.Println("Opened relay")
-
-	//Read pipe
-	go func() {
-		for {
-			event, err := stream.Recv()
-			if err != nil {
-				close <- true
-				wg.Done()
-				return
-			}
-			in <- event
-		}
-	}()
-
-	//Forward pipe
-	go func() {
-		for {
-			select {
-			case event := <-in:
-				channel := fmt.Sprintf("_USER.%d.%s", event.Stream, event.Subject)
-				eventBytes, err := json.Marshal(event)
-				if err != nil {
-					fmt.Printf("failed to forward event: %s\n", err.Error())
-				} else {
-					natsConn.Publish(channel, eventBytes)
-				}
-			case <-close:
-				close <- true
-				wg.Done()
-				return
-			}
-		}
-	}()
-
-	//Write pipe
-	go func() {
-		qid := ""
-
-		ctx := stream.Context()
-		md, ok := metadata.FromIncomingContext(ctx)
-		if ok {
-			if rQid, ok := md["qid"]; ok {
-				qid = rQid[0]
-			}
-		}
-
-		fmt.Println("QID: " + qid)
-
-		writes := make(chan *nats.Msg, 50)
-		natsConn.ChanQueueSubscribe("_USER.>", "relays-"+qid, writes)
-		for {
-			select {
-			case msg := <-writes:
-				event := &pbEvents.Event{}
-				err := json.Unmarshal(msg.Data, event)
-				if err != nil {
-					fmt.Printf("Failed to relay event: %s\n", err.Error())
-				} else {
-					stream.Send(event)
-				}
-			case <-close:
-				close <- true
-				wg.Done()
-				return
-			}
-		}
-	}()
-
-	wg.Wait()
-
-	return nil
-}
-*/
 // @TODO move to grpc interceptor
 func (s *server) ValidateAuth(request interface{}) error {
 	return nil

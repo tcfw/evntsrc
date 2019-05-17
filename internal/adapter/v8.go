@@ -1,13 +1,14 @@
 package adapter
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
-	"github.com/augustoroman/v8"
-	"github.com/tcfw/evntsrc/internal/adapter/protos"
-	"github.com/tcfw/evntsrc/internal/event/protos"
+	"github.com/gogo/protobuf/proto"
+
+	v8 "github.com/augustoroman/v8"
+	evntsrc_adapter "github.com/tcfw/evntsrc/internal/adapter/protos"
+	evntsrc_event "github.com/tcfw/evntsrc/internal/event/protos"
 )
 
 //RunV8Adapter takes in an adapter and executes the code in a V8 VM
@@ -79,7 +80,7 @@ func RunV8Adapter(s *Server, adapter *evntsrc_adapter.Adapter, srcEvent *evntsrc
 	}
 
 	adaptedEvent := &evntsrc_event.Event{}
-	err = json.Unmarshal(retEventBytes, adaptedEvent)
+	err = proto.Unmarshal(retEventBytes, adaptedEvent)
 	if err != nil {
 		return nil, log, nil
 	}

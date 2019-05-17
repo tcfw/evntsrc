@@ -1,8 +1,9 @@
 package interconnect
 
 import (
-	"encoding/json"
 	"fmt"
+
+	"github.com/gogo/protobuf/proto"
 
 	nats "github.com/nats-io/go-nats"
 	"github.com/spf13/viper"
@@ -33,7 +34,7 @@ func (s *relay) WritePipe(relayOut chan *event.Event) (chan struct{}, error) {
 				return
 			case msg := <-natsIn:
 				ev := &event.Event{}
-				err := json.Unmarshal(msg.Data, ev)
+				err := proto.Unmarshal(msg.Data, ev)
 				if err != nil {
 					fmt.Printf("Failed to relay event: %s\n", err.Error())
 				}
@@ -66,7 +67,7 @@ func (s *relay) publishedForwarded(forwardedEventReq *pb.ForwardingRequest) erro
 	}
 
 	channel := fmt.Sprintf("_USER.%d.%s", forwardedEventReq.Event.Stream, forwardedEventReq.Event.Subject)
-	eventBytes, err := json.Marshal(forwardedEventReq.Event)
+	eventBytes, err := proto.Marshal(forwardedEventReq.Event)
 	if err != nil {
 		fmt.Printf("failed to forward event: %s\n", err.Error())
 	}

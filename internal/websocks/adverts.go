@@ -1,11 +1,11 @@
 package websocks
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"time"
 
+	"github.com/gogo/protobuf/proto"
 	"github.com/tcfw/evntsrc/internal/event"
 )
 
@@ -31,8 +31,7 @@ func (c *Client) publishBroadcast(eventType string, data []byte) {
 
 	channel := fmt.Sprintf("_STREAM.%d.%s", c.authKey.Stream, rEvent.Subject)
 
-	eventJSONBytes, _ := json.Marshal(rEvent)
-
+	eventJSONBytes, _ := proto.Marshal(rEvent.ToProtobuf())
 	natsConn.Publish(channel, eventJSONBytes)
 }
 

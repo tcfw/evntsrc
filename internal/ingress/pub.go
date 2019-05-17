@@ -86,7 +86,7 @@ func HandlePub(w http.ResponseWriter, r *http.Request) {
 		break
 	}
 
-	eventJSONBytes, _ := proto.Marshal(pubEvent)
+	eventJSONBytes, _ := proto.Marshal(pubEvent.ToProtobuf())
 	channel := fmt.Sprintf("_USER.%d.%s", pubEvent.Stream, pubEvent.Subject)
 
 	natsConn.Publish(channel, eventJSONBytes)

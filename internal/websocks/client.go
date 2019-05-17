@@ -132,7 +132,10 @@ func (c *Client) ConnSub() error {
 	for {
 		select {
 		case msg := <-ch:
-			c.send <- msg.Data
+			ev := &pbEvent.Event{}
+			proto.Unmarshal(msg.Data, ev)
+			jsonBytes, _ := json.Marshal(ev)
+			c.send <- jsonBytes
 		case <-c.closeConnSub:
 			sub.Unsubscribe()
 			sub.Drain()

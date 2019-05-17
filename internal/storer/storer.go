@@ -15,7 +15,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/viper"
-	"github.com/tcfw/evntsrc/internal/event"
+	pbEvent "github.com/tcfw/evntsrc/internal/event/protos"
 	"github.com/tcfw/evntsrc/internal/tracing"
 	"github.com/tcfw/evntsrc/internal/websocks"
 	"github.com/tcfw/go-queue"
@@ -110,7 +110,7 @@ func StartMonitor(nats string) {
 type eventProcessor struct{}
 
 func (ep *eventProcessor) Handle(job interface{}) {
-	usrEvent := job.(*event.Event)
+	usrEvent := job.(*pbEvent.Event)
 
 	if isReplay, ok := usrEvent.Metadata["replay"]; ok && isReplay == "true" {
 		return
@@ -138,13 +138,13 @@ func (ep *eventProcessor) Handle(job interface{}) {
 		`INSERT INTO event_store.events VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
 		usrEvent.ID,
 		usrEvent.Stream,
-		usrEvent.Time.Time,
+		usrEvent.Time,
 		usrEvent.Type,
 		usrEvent.TypeVersion,
 		usrEvent.CEVersion,
 		usrEvent.Source,
 		usrEvent.Subject,
-		usrEvent.Acknowledged.Time,
+		usrEvent.Acknowledged,
 		string(metadataJSON),
 		usrEvent.ContentType,
 		usrEvent.Data,
@@ -169,7 +169,7 @@ func monitorUserStreams() {
 	dispatcher.Run()
 
 	natsConn.QueueSubscribe("_USER.>", "storers", func(m *nats.Msg) {
-		event := &event.Event{}
+		event := &pbEvent.Event{}
 		err := proto.Unmarshal(m.Data, event)
 		if err != nil {
 			log.Printf("%s\n", err.Error())
@@ -240,20 +240,20 @@ func doReplay(command *websocks.ReplayCommand, reply chan []byte, errCh chan err
 	reply <- []byte("OK")
 
 	for rD.Next() {
-		event := &event.Event{
+		event := &pbEvent.Event{
 			Metadata: map[string]string{},
 		}
 		var mdString []byte
 
 		err := rD.Scan(&event.ID,
 			&event.Stream,
-			&event.Time.Time,
+			&event.Time,
 			&event.Type,
 			&event.TypeVersion,
 			&event.CEVersion,
 			&event.Source,
 			&event.Subject,
-			&event.Acknowledged.Time,
+			&event.Acknowledged,
 			&mdString,
 			&event.ContentType,
 			&event.Data,
@@ -278,15 +278,25 @@ func doReplay(command *websocks.ReplayCommand, reply chan []byte, errCh chan err
 
 		event.Metadata["replay"] = "true"
 
-		jsonBytes, err := proto.Marshal(event.ToProtobuf())
+		bytes, err := proto.Marshal(event)
 		if err != nil {
-			errCh <- fmt.Errorf("sqld md: %s", err.Error())
+			errCh <- fmt.Errorf("failed replay proto marshal: %s", err.Error())
 			return
 		}
 		if command.JustMe {
-			natsConn.Publish(fmt.Sprintf("_CONN.%s", command.Dest), jsonBytes)
+			dest := fmt.Sprintf("_CONN.%s", command.Dest)
+			err = natsConn.Publish(dest, bytes)
+			if err != nil {
+				errCh <- fmt.Errorf("natspub: %s", err.Error())
+				return
+			}
 		} else {
-			natsConn.Publish(fmt.Sprintf("_USER.%d.%s", command.Stream, command.Subject), jsonBytes)
+			dest := fmt.Sprintf("_USER.%d.%s", command.Stream, command.Subject)
+			err = natsConn.Publish(dest, bytes)
+			if err != nil {
+				errCh <- fmt.Errorf("natspub: %s", err.Error())
+				return
+			}
 		}
 		replayEventCount.With(prometheus.Labels{"stream": fmt.Sprintf("%d", command.Stream)}).Inc()
 	}

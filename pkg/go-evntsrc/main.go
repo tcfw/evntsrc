@@ -22,18 +22,19 @@ const (
 
 //APIClient the basic struct for the api
 type APIClient struct {
-	auth          string
-	stream        int32
-	token         string
-	Endpoint      string
-	httpClient    *http.Client
-	socket        *websocket.Conn
-	connectionID  string
-	AppID         string
-	AppVer        string
-	Debug         bool
-	acks          map[string]*ackCT
-	subscriptions map[string][]*subscription
+	auth                       string
+	stream                     int32
+	token                      string
+	Endpoint                   string
+	httpClient                 *http.Client
+	socket                     *websocket.Conn
+	connectionID               string
+	AppID                      string
+	AppVer                     string
+	Debug                      bool
+	WaitForPublishConfirmation bool
+	acks                       map[string]*ackCT
+	subscriptions              map[string][]*subscription
 
 	ReadPipe   chan []byte
 	writePipe  chan *websocks.PublishCommand
@@ -43,6 +44,7 @@ type APIClient struct {
 	Errors     chan error
 	AcksCh     chan *websocks.AckCommand
 	ackL       sync.RWMutex
+	ackC       *sync.Cond
 
 	//Ignore events we published
 	IgnoreSelf bool
@@ -51,23 +53,26 @@ type APIClient struct {
 //NewEvntSrcClient creates a new client instance for interacting with evntsrc.io
 func NewEvntSrcClient(auth string, streamID int32) (*APIClient, error) {
 	api := &APIClient{
-		auth:          auth,
-		stream:        streamID,
-		Endpoint:      apiEndpoint,
-		httpClient:    newHTTPClient(),
-		ReadPipe:      make(chan []byte, 256),
-		writePipe:     make(chan *websocks.PublishCommand, 256),
-		replayPipe:    make(chan *websocks.ReplayCommand, 5),
-		subPipe:       make(chan *websocks.SubscribeCommand, 10),
-		close:         make(chan bool, 1),
-		Errors:        make(chan error, 256),
-		AcksCh:        make(chan *websocks.AckCommand, 256),
-		AppVer:        "0.1",
-		acks:          map[string]*ackCT{},
-		subscriptions: map[string][]*subscription{},
-		IgnoreSelf:    true,
-		Debug:         false,
+		auth:                       auth,
+		stream:                     streamID,
+		Endpoint:                   apiEndpoint,
+		httpClient:                 newHTTPClient(),
+		ReadPipe:                   make(chan []byte, 256),
+		writePipe:                  make(chan *websocks.PublishCommand, 56),
+		replayPipe:                 make(chan *websocks.ReplayCommand, 5),
+		subPipe:                    make(chan *websocks.SubscribeCommand, 10),
+		close:                      make(chan bool, 1),
+		Errors:                     make(chan error, 256),
+		AcksCh:                     make(chan *websocks.AckCommand, 256),
+		AppVer:                     "0.1",
+		acks:                       map[string]*ackCT{},
+		subscriptions:              map[string][]*subscription{},
+		IgnoreSelf:                 true,
+		Debug:                      false,
+		WaitForPublishConfirmation: true,
 	}
+
+	api.ackC = sync.NewCond(api.ackL.RLocker())
 
 	go api.watchAcks()
 
@@ -119,9 +124,10 @@ func (api *APIClient) watchAcks() {
 			break
 		case ack := <-api.AcksCh:
 			if ack.Ref != "" {
-				api.ackL.Lock()
+				api.ackC.L.Lock()
 				api.acks[ack.Ref] = &ackCT{ts: time.Now(), ack: ack}
-				api.ackL.Unlock()
+				api.ackC.L.Unlock()
+				api.ackC.Broadcast()
 			}
 			break
 		}
@@ -146,9 +152,10 @@ func (api *APIClient) waitForResponse(cmdRef string) (bool, error) {
 	vFound := make(chan bool, 1)
 	go func() {
 		for {
-			api.ackL.RLock()
+			api.ackC.L.Lock()
+			api.ackC.Wait()
 			if ack, ok := api.acks[cmdRef]; ok {
-				api.ackL.RUnlock()
+				api.ackC.L.Unlock()
 				ret := ack.ack.Acktype == "OK"
 				if ack.ack.Error != "" {
 					vFerr = errors.New(ack.ack.Error)
@@ -156,8 +163,7 @@ func (api *APIClient) waitForResponse(cmdRef string) (bool, error) {
 				vFound <- ret
 				return
 			}
-			api.ackL.RUnlock()
-			time.Sleep(5 * time.Millisecond)
+			api.ackC.L.Unlock()
 		}
 	}()
 	select {

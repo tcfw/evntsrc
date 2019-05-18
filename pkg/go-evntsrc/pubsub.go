@@ -240,12 +240,14 @@ func (api *APIClient) Publish(subject string, data []byte, eventType string) err
 	}
 
 	api.writePipe <- pubMsg
-	ok, err := api.waitForResponse(pubMsg.Ref)
-	if err != nil {
-		fmt.Printf("%v", err)
-	}
-	if !ok {
-		return fmt.Errorf("Failed to publish: %s", err.Error())
+	if api.WaitForPublishConfirmation {
+		ok, err := api.waitForResponse(pubMsg.Ref)
+		if err != nil {
+			fmt.Printf("%v", err)
+		}
+		if !ok {
+			return fmt.Errorf("Failed to publish: %s", err.Error())
+		}
 	}
 
 	return nil

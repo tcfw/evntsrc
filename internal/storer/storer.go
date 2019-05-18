@@ -8,7 +8,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"runtime"
 
 	"github.com/gogo/protobuf/proto"
 	nats "github.com/nats-io/go-nats"
@@ -163,10 +162,17 @@ func monitorUserStreams() {
 	log.Println("Watching for user streams...")
 
 	dispatcher := queue.NewDispatcher(&eventProcessor{})
-	if c := runtime.NumCPU(); c < 4 {
-		dispatcher.MaxWorkers = 4
-	}
+	dispatcher.MaxWorkers = 20
 	dispatcher.Run()
+
+	inbc := make(chan *pbEvent.Event, 1000)
+
+	go func() {
+		for {
+			event := <-inbc
+			dispatcher.Queue(event)
+		}
+	}()
 
 	natsConn.QueueSubscribe("_USER.>", "storers", func(m *nats.Msg) {
 		event := &pbEvent.Event{}
@@ -176,8 +182,7 @@ func monitorUserStreams() {
 			return
 		}
 
-		dispatcher.Queue(event)
-
+		inbc <- event
 	})
 }
 
@@ -190,7 +195,7 @@ func monitorReplayRequests() {
 		command := &websocks.ReplayCommand{}
 		json.Unmarshal(m.Data, command)
 
-		reply := make(chan []byte)
+		reply := make(chan []byte, 10)
 		errCh := make(chan error)
 
 		go doReplay(command, reply, errCh)

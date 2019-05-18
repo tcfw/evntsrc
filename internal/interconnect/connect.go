@@ -46,7 +46,7 @@ func Connect(endpoint string, nats string) error {
 
 func startRelay(stream pb.InterconnectService_RelayClient, natsEndpoint string) error {
 	log.Println("Opening relay [LOCAL]...")
-	toRelay := make(chan *event.Event)
+	toRelay := make(chan *event.Event, 1000)
 	closed := false
 
 	nc, err := nats.Connect(natsEndpoint)

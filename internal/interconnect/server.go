@@ -22,7 +22,7 @@ const (
 func (s *srv) Relay(stream pb.InterconnectService_RelayServer) error {
 	log.Println("Opening relay [REMOTE]...")
 
-	toRelay := make(chan *event.Event)
+	toRelay := make(chan *event.Event, 1000)
 	closed := false
 
 	relay := &relay{natsConn: s.natsConn}

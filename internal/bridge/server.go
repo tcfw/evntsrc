@@ -43,7 +43,7 @@ func (s *server) Subscribe(request *pb.SubscribeRequest, stream pb.BridgeService
 		return err
 	}
 
-	ch := make(chan *nats.Msg)
+	ch := make(chan *nats.Msg, 1000)
 	if _, err = natsConn.ChanSubscribe(fmt.Sprintf("_USER.%d.%s", request.Stream, request.Channel), ch); err != nil {
 		return err
 	}

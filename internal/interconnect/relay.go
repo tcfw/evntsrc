@@ -17,7 +17,7 @@ type relay struct {
 
 func (s *relay) WritePipe(relayOut chan *event.Event) (chan struct{}, error) {
 	writeClose := make(chan struct{})
-	natsIn := make(chan *nats.Msg)
+	natsIn := make(chan *nats.Msg, 1000)
 	regionName := viper.GetString("region")
 
 	sub, err := s.natsConn.ChanQueueSubscribe("_USER.>", "interconnect", natsIn)

@@ -245,43 +245,13 @@ func doReplay(command *websocks.ReplayCommand, reply chan []byte, errCh chan err
 	reply <- []byte("OK")
 
 	for rD.Next() {
-		event := &pbEvent.Event{
-			Metadata: map[string]string{},
-		}
-		var mdString []byte
-
-		err := rD.Scan(&event.ID,
-			&event.Stream,
-			&event.Time,
-			&event.Type,
-			&event.TypeVersion,
-			&event.CEVersion,
-			&event.Source,
-			&event.Subject,
-			&event.Acknowledged,
-			&mdString,
-			&event.ContentType,
-			&event.Data,
-		)
+		event, err := scanEvent(rD, command)
 		if err != nil {
-			errCh <- fmt.Errorf("sqld: %s", err.Error())
-			return
+			errCh <- err
 		}
-
 		if command.Query.EndID != "" && event.ID == command.Query.EndID {
 			break
 		}
-
-		err = json.Unmarshal(mdString, &event.Metadata)
-		if err != nil {
-			errCh <- fmt.Errorf("sqld md: %s", err.Error())
-			return
-		}
-		if event.Metadata == nil {
-			event.Metadata = map[string]string{}
-		}
-
-		event.Metadata["replay"] = "true"
 
 		bytes, err := proto.Marshal(event)
 		if err != nil {
@@ -305,6 +275,42 @@ func doReplay(command *websocks.ReplayCommand, reply chan []byte, errCh chan err
 		}
 		replayEventCount.With(prometheus.Labels{"stream": fmt.Sprintf("%d", command.Stream)}).Inc()
 	}
+}
+
+func scanEvent(rD *sql.Rows, command *websocks.ReplayCommand) (*pbEvent.Event, error) {
+	event := &pbEvent.Event{
+		Metadata: map[string]string{},
+	}
+	var mdString []byte
+
+	err := rD.Scan(&event.ID,
+		&event.Stream,
+		&event.Time,
+		&event.Type,
+		&event.TypeVersion,
+		&event.CEVersion,
+		&event.Source,
+		&event.Subject,
+		&event.Acknowledged,
+		&mdString,
+		&event.ContentType,
+		&event.Data,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("sqld: %s", err.Error())
+	}
+
+	err = json.Unmarshal(mdString, &event.Metadata)
+	if err != nil {
+		return nil, fmt.Errorf("sqld md: %s", err.Error())
+	}
+	if event.Metadata == nil {
+		event.Metadata = map[string]string{}
+	}
+
+	event.Metadata["replay"] = "true"
+
+	return event, nil
 }
 
 func buildBaseQuery(command *websocks.ReplayCommand) (string, []interface{}) {

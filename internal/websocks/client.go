@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	maxMessageSize = 4096
+	maxMessageSize = 1024 * 1024
 
 	// Time allowed to write a message to the peer.
 	writeWait = 10 * time.Second

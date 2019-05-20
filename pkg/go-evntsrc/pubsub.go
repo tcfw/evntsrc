@@ -70,10 +70,12 @@ const (
 
 	// Send pings to peer with this period. Must be less than pongWait.
 	pingPeriod = (pongWait * 9) / 10
+
+	maxMessageSize = 1024 * 1024
 )
 
 func (api *APIClient) readPump() {
-	api.socket.SetReadLimit(4096)
+	api.socket.SetReadLimit(maxMessageSize)
 	api.socket.SetPongHandler(func(string) error {
 		return nil
 	})

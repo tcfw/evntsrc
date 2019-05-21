@@ -40,6 +40,7 @@ func authGuard(next http.Handler) http.Handler {
 			if passportConn == nil {
 				conn, err := grpc.Dial(passportEndpoint, tracing.GRPCClientOptions()...)
 				if err != nil {
+					http.Error(w, "Failed to validate token", 500)
 					panic(err)
 				}
 
@@ -54,7 +55,9 @@ func authGuard(next http.Handler) http.Handler {
 
 			response, err := svc.VerifyToken(r.Context(), &passport.VerifyTokenRequest{Token: authToken})
 			if err != nil {
-				panic(err)
+				http.Error(w, "Failed to validate token", 500)
+				// panic(err)
+				return
 			}
 			if !response.Valid {
 				http.Error(w, "Forbidden. Invalid API Key provided", 403)

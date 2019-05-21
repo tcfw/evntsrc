@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -12,7 +13,8 @@ import (
 	ot "github.com/opentracing/opentracing-go"
 	viper "github.com/spf13/viper"
 	jaeger "github.com/uber/jaeger-client-go"
-	"github.com/uber/jaeger-client-go/zipkin"
+	zipkinTrans "github.com/uber/jaeger-client-go/transport/zipkin"
+	jZipkin "github.com/uber/jaeger-client-go/zipkin"
 	"github.com/uber/jaeger-lib/metrics/prometheus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -62,7 +64,7 @@ func InitGlobalTracer(name string) {
 		return
 	}
 
-	zipkinPropagator := zipkin.NewZipkinB3HTTPHeaderPropagator()
+	zipkinPropagator := jZipkin.NewZipkinB3HTTPHeaderPropagator()
 	injector := jaeger.TracerOptions.Injector(ot.HTTPHeaders, zipkinPropagator)
 	extractor := jaeger.TracerOptions.Extractor(ot.HTTPHeaders, zipkinPropagator)
 
@@ -71,12 +73,32 @@ func InitGlobalTracer(name string) {
 		"service": name,
 	}
 
-	sender, _ := jaeger.NewUDPTransport(defaultEndpoint, 0)
+	var transport jaeger.Transport
+
+	if strings.Contains(tracingEndpoint, ":9411") {
+		var err error
+		transport, err = zipkinTrans.NewHTTPTransport(
+			fmt.Sprintf("http://%s/api/v1/spans", tracingEndpoint),
+			zipkinTrans.HTTPBatchSize(1),
+			zipkinTrans.HTTPLogger(jaeger.StdLogger),
+		)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		var err error
+		//TODO remove once verified
+		transport, err = jaeger.NewUDPTransport(defaultEndpoint, 0)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	tracer, _ := jaeger.NewTracer(
 		name,
 		jaeger.NewConstSampler(true),
 		jaeger.NewRemoteReporter(
-			sender,
+			transport,
 			jaeger.ReporterOptions.BufferFlushInterval(1*time.Second)),
 		injector,
 		extractor,

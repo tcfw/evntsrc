@@ -23,6 +23,8 @@ func tracingWrapper(h http.Handler) http.Handler {
 			if v := r.Header.Get("x-trace"); v != "" {
 				serverSpan.SetTag("web-traceid", v)
 			}
+			serverSpan.SetTag("http.path", r.RequestURI)
+			serverSpan.SetTag("http.method", r.Method)
 			r = r.WithContext(opentracing.ContextWithSpan(r.Context(), serverSpan))
 			defer serverSpan.Finish()
 		}

@@ -69,7 +69,6 @@ func getAuthToken(ctx context.Context) (string, error) {
 
 //ValidateAuthClaims validates a token in the Authorization header and returns claims map
 func ValidateAuthClaims(ctx context.Context) (jwt.MapClaims, error) {
-
 	token, err := getAuthToken(ctx)
 	if err != nil {
 		return nil, err
@@ -103,4 +102,21 @@ func TokenClaims(token string) (map[string]interface{}, error) {
 	_, _, err := jwtParser.ParseUnverified(token, &claims)
 
 	return claims, err
+}
+
+//HasAuthToken checks if md in ctx has auth
+func HasAuthToken(ctx context.Context) (bool, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return false, fmt.Errorf("failed to parse metadata")
+	}
+	auth := md.Get("grpcgateway-authorization")
+	if auth == nil || len(auth) == 0 {
+		auth = md.Get("authorization")
+		if auth == nil || len(auth) == 0 {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }

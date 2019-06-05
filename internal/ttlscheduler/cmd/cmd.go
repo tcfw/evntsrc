@@ -8,17 +8,16 @@ import (
 func NewDefaultCommand() *cobra.Command {
 	// Parent command to which all subcommands are added.
 	cmds := &cobra.Command{
-		Use:   "interconnect",
-		Short: "interconnect",
-		Long:  `interconnect provide a GRPC bi-directional stream between federated zones`,
+		Use:   "ttlscheduler",
+		Short: "ttlscheduler",
+		Long:  `ttlscheduler schedules and manages ttl replay worker allocations`,
 		Run: func(cmd *cobra.Command, args []string) {
 			cmd.Help()
 		},
 	}
 
 	cmds.AddCommand(
-		NewServeCmd(),
-		NewConnectCmd(),
+		NewSchedulerCmd(),
 	)
 
 	return cmds

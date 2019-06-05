@@ -110,6 +110,23 @@ func (s *Server) List(ctx context.Context, request *pb.Empty) (*pb.StreamList, e
 	return &pb.StreamList{Streams: streams}, nil
 }
 
+//ListIds provides a list of ids
+func (s *Server) ListIds(ctx context.Context, searchRequest *pb.SearchRequest) (*pb.IdList, error) {
+	dbConn, err := db.NewMongoDBSession()
+	if err != nil {
+		return nil, err
+	}
+	defer dbConn.Close()
+
+	collection := dbConn.DB(dBName).C(collectionName)
+	query := collection.Find(nil).Select(bson.M{"_id": 1})
+	streams := []int32{}
+	if err = query.All(&streams); err != nil {
+		return nil, err
+	}
+	return &pb.IdList{ID: streams}, nil
+}
+
 //Get @TODO
 func (s *Server) Get(ctx context.Context, request *pb.GetRequest) (*pb.Stream, error) {
 

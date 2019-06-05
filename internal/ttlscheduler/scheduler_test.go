@@ -20,11 +20,11 @@ func Test_scheduler_NodeBindings(t *testing.T) {
 	}{
 		{
 			name:     "test 1",
-			nodes:    []*node{&node{0}},
+			nodes:    []*node{{0}},
 			streams:  []int32{1},
-			bindings: []*binding{&binding{Stream: &stream{ID: 1}, Node: &node{0}}},
+			bindings: []*binding{{Stream: &stream{ID: 1}, Node: &node{0}}},
 			args:     args{node{0}},
-			want:     []*binding{&binding{Stream: &stream{ID: 1}, Node: &node{0}}},
+			want:     []*binding{{Stream: &stream{ID: 1}, Node: &node{0}}},
 		},
 	}
 	for _, tt := range tests {
@@ -70,7 +70,7 @@ func Test_scheduler_BindStream(t *testing.T) {
 		},
 		{
 			name:     "test 1",
-			nodes:    []*node{&node{1}},
+			nodes:    []*node{{1}},
 			streams:  []int32{},
 			bindings: []*binding{},
 			args:     args{1},
@@ -79,20 +79,20 @@ func Test_scheduler_BindStream(t *testing.T) {
 		},
 		{
 			name:     "test 2",
-			nodes:    []*node{&node{1}, &node{2}},
+			nodes:    []*node{{1}, {2}},
 			streams:  []int32{1},
-			bindings: []*binding{&binding{Stream: &stream{1, 110}, Node: &node{1}}},
+			bindings: []*binding{{Stream: &stream{1, 110}, Node: &node{1}}},
 			args:     args{2},
 			want:     &binding{Stream: &stream{2, 0}, Node: &node{2}},
 			wantErr:  false,
 		},
 		{
 			name:    "test 3",
-			nodes:   []*node{&node{1}, &node{2}},
+			nodes:   []*node{{1}, {2}},
 			streams: []int32{1, 2},
 			bindings: []*binding{
-				&binding{Stream: &stream{1, 110}, Node: &node{1}},
-				&binding{Stream: &stream{2, 50}, Node: &node{2}},
+				{Stream: &stream{1, 110}, Node: &node{1}},
+				{Stream: &stream{2, 50}, Node: &node{2}},
 			},
 			args:    args{3},
 			want:    &binding{Stream: &stream{3, 0}, Node: &node{2}},
@@ -100,11 +100,11 @@ func Test_scheduler_BindStream(t *testing.T) {
 		},
 		{
 			name:    "test 4",
-			nodes:   []*node{&node{1}, &node{2}},
+			nodes:   []*node{{1}, {2}},
 			streams: []int32{1, 2},
 			bindings: []*binding{
-				&binding{Stream: &stream{1, 50}, Node: &node{1}},
-				&binding{Stream: &stream{2, 110}, Node: &node{2}},
+				{Stream: &stream{1, 50}, Node: &node{1}},
+				{Stream: &stream{2, 110}, Node: &node{2}},
 			},
 			args:    args{3},
 			want:    &binding{Stream: &stream{3, 0}, Node: &node{1}},

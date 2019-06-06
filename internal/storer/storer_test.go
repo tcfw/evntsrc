@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/nats-io/go-nats"
+	nats "github.com/nats-io/nats.go"
 
 	"github.com/tcfw/evntsrc/internal/websocks"
 
@@ -13,7 +13,7 @@ import (
 	"github.com/tcfw/evntsrc/internal/event"
 
 	"github.com/cockroachdb/cockroach-go/testserver"
-	natsTest "github.com/nats-io/gnatsd/test"
+	natsTest "github.com/nats-io/nats-server/test"
 )
 
 func setupTestDB(t *testing.T) (func(), error) {

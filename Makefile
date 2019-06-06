@@ -10,15 +10,11 @@ BINDIR    := $(CURDIR)/bin
 SHELL=/bin/bash
 
 .PHONY: bootstrap
-bootstrap:
-ifndef HAS_GLIDE
-	${GO} get -u github.com/Masterminds/glide
-endif
-	glide install --strip-vendor
+	GO111MODULE=on go get
 
 .DEFAULT_GOAL := changed
 .PHONY: all
-all: storer websocks stsmetrics streams passport users apigw bridge streamauth ingress billing wui adapter emails metrics push interconnect
+all: storer websocks stsmetrics streams passport users apigw bridge streamauth ingress billing wui emails metrics interconnect push  #adapter
 
 storer:
 	docker build -f ./build/storer/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/storer:latest .

@@ -3,7 +3,7 @@ package ingress
 import (
 	"os"
 
-	"github.com/nats-io/go-nats"
+	nats "github.com/nats-io/nats.go"
 )
 
 var natsConn *nats.Conn

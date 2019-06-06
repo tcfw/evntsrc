@@ -12,31 +12,29 @@ RUN xz -d -c /usr/local/upx-3.94-amd64_linux.tar.xz | \
 	tar -xOf - upx-3.94-amd64_linux/upx > /bin/upx && \
 	chmod a+x /bin/upx
 
-#Install glide for installing deps
-RUN curl https://glide.sh/get | sh
-
-WORKDIR /go/src/github.com/tcfw/evntsrc/
+WORKDIR /evntsrc/
 
 #Install deps and build
-COPY glide.yaml glide.yaml
-COPY glide.lock glide.lock
-RUN glide install --strip-vendor
+ENV GO111MODULE=on
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
 
 #Install V8
-COPY --from=libv8 /v8/include ./vendor/github.com/augustoroman/v8/include
-COPY --from=libv8 /v8/lib ./vendor/github.com/augustoroman/v8/libv8
+COPY --from=libv8 /v8/include ./vendor/gopkg.in/augustoroman/v8.v1/include
+COPY --from=libv8 /v8/lib ./vendor/gopkg.in/augustoroman/v8.v1/libv8
 
 #Build
 COPY . .
 RUN go build -ldflags="-w -s" -o adapter ./cmd/adapter
 RUN strip --strip-unneeded adapter
-# RUN upx adapter - UPX has unexpected results with compressing
+# RUN upx adapter - !! UPX has unexpected results with compressing
 
 # ---
 
 FROM ubuntu:latest
 
 WORKDIR /bin
-COPY --from=builder /go/src/github.com/tcfw/evntsrc/adapter adapter
+COPY --from=builder /evntsrc/adapter adapter
 
 CMD [ "adapter", "serve" ]

@@ -7,7 +7,7 @@ import (
 
 	"github.com/gogo/protobuf/proto"
 
-	nats "github.com/nats-io/go-nats"
+	nats "github.com/nats-io/nats.go"
 	pb "github.com/tcfw/evntsrc/internal/bridge/protos"
 	pbEvents "github.com/tcfw/evntsrc/internal/event/protos"
 )

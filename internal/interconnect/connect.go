@@ -9,7 +9,7 @@ import (
 
 	"google.golang.org/grpc/credentials"
 
-	nats "github.com/nats-io/go-nats"
+	nats "github.com/nats-io/nats.go"
 	"github.com/spf13/viper"
 	event "github.com/tcfw/evntsrc/internal/event/protos"
 	pb "github.com/tcfw/evntsrc/internal/interconnect/protos"

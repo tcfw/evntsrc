@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/gorilla/websocket"
-	nats "github.com/nats-io/go-nats"
+	nats "github.com/nats-io/nats.go"
 )
 
 func BenchmarkConnSub(b *testing.B) {

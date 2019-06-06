@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/gogo/protobuf/proto"
+	v8 "gopkg.in/augustoroman/v8.v1"
 
-	v8 "github.com/augustoroman/v8"
 	evntsrc_adapter "github.com/tcfw/evntsrc/internal/adapter/protos"
 	evntsrc_event "github.com/tcfw/evntsrc/internal/event/protos"
 )

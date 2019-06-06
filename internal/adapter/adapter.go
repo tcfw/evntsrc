@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/augustoroman/v8"
 	pb "github.com/tcfw/evntsrc/internal/adapter/protos"
+	v8 "gopkg.in/augustoroman/v8.v1"
 )
 
 //Server core struct

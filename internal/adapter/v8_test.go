@@ -4,10 +4,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/augustoroman/v8"
 	"github.com/stretchr/testify/assert"
-	"github.com/tcfw/evntsrc/internal/adapter/protos"
-	"github.com/tcfw/evntsrc/internal/event/protos"
+	evntsrc_adapter "github.com/tcfw/evntsrc/internal/adapter/protos"
+	evntsrc_event "github.com/tcfw/evntsrc/internal/event/protos"
+	v8 "gopkg.in/augustoroman/v8.v1"
 )
 
 func TestStartV8Pool(t *testing.T) {

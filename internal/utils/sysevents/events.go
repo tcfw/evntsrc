@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 
-	nats "github.com/nats-io/go-nats"
+	nats "github.com/nats-io/nats.go"
 )
 
 //@TODO support https://github.com/cloudevents/spec/blob/v0.1/spec.md

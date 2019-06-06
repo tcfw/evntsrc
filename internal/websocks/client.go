@@ -12,7 +12,7 @@ import (
 	pbEvent "github.com/tcfw/evntsrc/internal/event/protos"
 
 	"github.com/gorilla/websocket"
-	nats "github.com/nats-io/go-nats"
+	nats "github.com/nats-io/nats.go"
 	metrics "github.com/rcrowley/go-metrics"
 	streamauth "github.com/tcfw/evntsrc/internal/streamauth/protos"
 	"gopkg.in/mgo.v2/bson"

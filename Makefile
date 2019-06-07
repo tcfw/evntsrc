@@ -14,7 +14,7 @@ SHELL=/bin/bash
 
 .DEFAULT_GOAL := changed
 .PHONY: all
-all: storer websocks stsmetrics streams passport users apigw bridge streamauth ingress billing wui emails metrics interconnect push  #adapter
+all: storer websocks stsmetrics streams passport users apigw bridge streamauth ingress billing wui emails metrics interconnect adapter push
 
 storer:
 	docker build -f ./build/storer/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/storer:latest .

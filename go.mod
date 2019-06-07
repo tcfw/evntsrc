@@ -77,7 +77,7 @@ require (
 	google.golang.org/appengine v1.6.0 // indirect
 	google.golang.org/genproto v0.0.0-20190605220351-eb0b1bdb6ae6 // indirect
 	google.golang.org/grpc v1.21.1
-	gopkg.in/augustoroman/v8.v1 v1.0.0 // indirect
+	gopkg.in/augustoroman/v8.v1 v1.0.0
 	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
 	honnef.co/go/tools v0.0.0-20190605142022-0a11fc526260 // indirect
 )

@@ -21,8 +21,8 @@ COPY go.sum .
 RUN go mod download
 
 #Install V8
-COPY --from=libv8 /v8/include ./vendor/gopkg.in/augustoroman/v8.v1/include
-COPY --from=libv8 /v8/lib ./vendor/gopkg.in/augustoroman/v8.v1/libv8
+COPY --from=libv8 /v8/include /go/pkg/mod/gopkg.in/augustoroman/v8.v1@v1.0.0/include
+COPY --from=libv8 /v8/lib /go/pkg/mod/gopkg.in/augustoroman/v8.v1@v1.0.0/libv8
 
 #Build
 COPY . .

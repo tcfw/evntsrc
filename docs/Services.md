@@ -4,7 +4,7 @@
 - Exposed API grpc gateway
 
 ## Bridge
-- GRPC interface for NATS pub/sub and nat-to-nat relay client/server
+- GRPC interface for pub/sub
 
 ## Passport
 - Auth relay for API and web services
@@ -18,8 +18,11 @@
 ## Streams
 - Stores stream info
 
-## StSMetrics
-- Metrics on stored events 
+## StSMetrics [Deprecated]
+- Metrics on stored events
+
+## Interconnect
+- Cluster to Cluster communication
 
 ## Users
 - Stores user info

@@ -2,7 +2,9 @@ package ttlscheduler
 
 import (
 	"errors"
+	"reflect"
 	"sync"
+	"time"
 )
 
 type node struct {
@@ -26,7 +28,7 @@ type NodeFetcher interface {
 
 //StreamFetcher provides intereface to fetch stream lists
 type StreamFetcher interface {
-	GetStreams() ([]*int32, error)
+	GetStreams() ([]int32, error)
 }
 
 //Scheduler basic structure of a scheduler
@@ -38,11 +40,12 @@ type Scheduler interface {
 }
 
 type basicScheduler struct {
-	nodes    []*node
+	nodes    map[int]*node
 	streams  []int32
 	bindings []*binding
 	nf       NodeFetcher
 	sf       StreamFetcher
+	once     bool
 
 	lock sync.RWMutex
 }
@@ -54,12 +57,19 @@ func (s *basicScheduler) NodeBindings(node node) ([]*binding, error) {
 	nodeBindings := []*binding{}
 
 	for _, bind := range s.bindings {
+		if bind.Node == nil {
+			continue
+		}
 		if bind.Node.ID == node.ID {
 			nodeBindings = append(nodeBindings, bind)
 		}
 	}
 
 	return nodeBindings, nil
+}
+
+func (s *basicScheduler) GetNodes() map[int]*node {
+	return s.nodes
 }
 
 //BindStream allocates a stream to a node worker in an "optimal" pattern
@@ -70,7 +80,7 @@ func (s *basicScheduler) BindStream(id int32) (*binding, error) {
 		return nil, errors.New("No nodes to schedule on")
 	}
 	if nCount == 1 {
-		binding := &binding{Stream: &stream{id, 0}, Node: s.nodes[0]}
+		binding := &binding{Stream: &stream{id, 0}, Node: s.nodes[int(reflect.ValueOf(s.nodes).MapKeys()[0].Int())]}
 		return binding, nil
 	}
 
@@ -109,13 +119,106 @@ func (s *basicScheduler) Optimise() error {
 }
 
 func (s *basicScheduler) Observe() error {
-	return nil
+	for {
+		nodes, err := s.nf.GetNodes()
+		if err != nil {
+			return err
+		}
+
+		streams, err := s.sf.GetStreams()
+		if err != nil {
+			return err
+		}
+
+		s.lock.Lock()
+
+		s.observeNodes(nodes)
+		s.observeStreams(streams)
+
+		s.lock.Unlock()
+
+		if s.once {
+			return nil
+		}
+
+		time.Sleep(5 * time.Second)
+	}
+}
+
+func (s *basicScheduler) observeNodes(nNodes []*node) {
+	addedNodes, deletedNodes := s.nodeDiff(nNodes)
+	for id, added := range addedNodes {
+		s.nodes[id] = added
+	}
+
+	for id := range deletedNodes {
+		reschedule := []*stream{}
+		for _, binding := range s.bindings {
+			if binding.Node.ID == id {
+				reschedule = append(reschedule, binding.Stream)
+				binding.Node = nil
+			}
+		}
+
+		delete(s.nodes, id)
+
+		for _, resStream := range reschedule {
+			binding, _ := s.BindStream(resStream.ID)
+			s.bindings = append(s.bindings, binding)
+		}
+	}
+
+	final := []*binding{}
+	for _, binding := range s.bindings {
+		if binding.Node != nil {
+			final = append(final, binding)
+		}
+	}
+
+	s.bindings = final
+}
+
+func (s *basicScheduler) observeStreams(nStreams []int32) {
+}
+
+func (s *basicScheduler) streamDiff(nStreams []int32) (map[int]int32, map[int]int32) {
+	added := map[int]int32{}
+	deleted := map[int]int32{}
+	// same := map[int]int32{}
+
+	return added, deleted
+}
+
+func (s *basicScheduler) nodeDiff(nNodes []*node) (map[int]*node, map[int]*node) {
+	added := map[int]*node{}
+	deleted := map[int]*node{}
+	same := map[int]*node{}
+
+	//Find new and same
+	for _, nNode := range nNodes {
+		if _, ok := s.nodes[nNode.ID]; ok {
+			same[nNode.ID] = nNode
+		} else {
+			added[nNode.ID] = nNode
+		}
+	}
+
+	//Find deleted
+	for oNID, oNode := range s.nodes {
+		_, inA := added[oNID]
+		_, inS := same[oNID]
+		if !inA && !inS {
+			deleted[oNID] = oNode
+		}
+	}
+
+	return added, deleted
 }
 
 //NewScheduler constructs a new scheduler which can assign streams work nodes
 func NewScheduler(nf NodeFetcher, sf StreamFetcher) Scheduler {
 	return &basicScheduler{
-		nodes:    []*node{},
+		nodes:    map[int]*node{},
 		streams:  []int32{},
 		bindings: []*binding{},
 		nf:       nf,

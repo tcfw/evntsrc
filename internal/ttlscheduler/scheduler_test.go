@@ -267,3 +267,100 @@ func Test_basicScheduler_observeNodes(t *testing.T) {
 		})
 	}
 }
+
+func Test_basicScheduler_observeStreams(t *testing.T) {
+	type fields struct {
+		nodes    map[int]*node
+		streams  []int32
+		bindings []*binding
+	}
+	type args struct {
+		nStreams []int32
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   fields
+	}{
+		{
+			name: "test 1",
+			fields: fields{
+				nodes:   map[int]*node{1: {1}},
+				streams: []int32{1, 2},
+				bindings: []*binding{
+					{Stream: &stream{1, 0}, Node: &node{1}},
+					{Stream: &stream{2, 0}, Node: &node{1}},
+				},
+			},
+			args: args{nStreams: []int32{1}},
+			want: fields{
+				nodes:   map[int]*node{1: {1}},
+				streams: []int32{1},
+				bindings: []*binding{
+					{Stream: &stream{1, 0}, Node: &node{1}},
+				},
+			},
+		},
+		{
+			name: "test 2",
+			fields: fields{
+				nodes:   map[int]*node{1: {1}},
+				streams: []int32{1, 2},
+				bindings: []*binding{
+					{Stream: &stream{1, 0}, Node: &node{1}},
+					{Stream: &stream{2, 0}, Node: &node{1}},
+				},
+			},
+			args: args{nStreams: []int32{1, 2, 3}},
+			want: fields{
+				nodes:   map[int]*node{1: {1}},
+				streams: []int32{1, 2, 3},
+				bindings: []*binding{
+					{Stream: &stream{1, 0}, Node: &node{1}},
+					{Stream: &stream{2, 0}, Node: &node{1}},
+					{Stream: &stream{3, 0}, Node: &node{1}},
+				},
+			},
+		},
+		{
+			name: "test 3",
+			fields: fields{
+				nodes:   map[int]*node{1: {1}, 2: {2}},
+				streams: []int32{1, 2},
+				bindings: []*binding{
+					{Stream: &stream{1, 50}, Node: &node{1}},
+					{Stream: &stream{2, 60}, Node: &node{2}},
+				},
+			},
+			args: args{nStreams: []int32{1, 2, 3}},
+			want: fields{
+				nodes:   map[int]*node{1: {1}, 2: {2}},
+				streams: []int32{1, 2, 3},
+				bindings: []*binding{
+					{Stream: &stream{1, 50}, Node: &node{1}},
+					{Stream: &stream{2, 60}, Node: &node{2}},
+					{Stream: &stream{3, 0}, Node: &node{1}},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &basicScheduler{
+				nodes:    tt.fields.nodes,
+				streams:  tt.fields.streams,
+				bindings: tt.fields.bindings,
+			}
+			s.observeStreams(tt.args.nStreams)
+			ttComp := fields{
+				nodes:    s.nodes,
+				streams:  s.streams,
+				bindings: s.bindings,
+			}
+			if !reflect.DeepEqual(ttComp, tt.want) {
+				t.Errorf("basicScheduler.observeStreams() s = %v, want %v", ttComp, tt.want)
+			}
+		})
+	}
+}

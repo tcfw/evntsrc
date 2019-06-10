@@ -179,12 +179,66 @@ func (s *basicScheduler) observeNodes(nNodes []*node) {
 }
 
 func (s *basicScheduler) observeStreams(nStreams []int32) {
+	addedStreams, deletedStreams := s.streamDiff(nStreams)
+	for id := range addedStreams {
+		binding, _ := s.BindStream(id)
+		s.bindings = append(s.bindings, binding)
+		s.streams = append(s.streams, id)
+	}
+
+	if len(deletedStreams) > 0 {
+		final := []*binding{}
+		for id := range deletedStreams {
+			for _, binding := range s.bindings {
+				if binding.Stream.ID != id {
+					final = append(final, binding)
+				}
+			}
+
+			index := -1
+			for i, stream := range s.streams {
+				if stream == id {
+					index = i
+					break
+				}
+			}
+			if index != -1 {
+				s.streams = append(s.streams[:index], s.streams[index+1:]...)
+			}
+		}
+
+		s.bindings = final
+	}
 }
 
-func (s *basicScheduler) streamDiff(nStreams []int32) (map[int]int32, map[int]int32) {
-	added := map[int]int32{}
-	deleted := map[int]int32{}
-	// same := map[int]int32{}
+//TODO merge streamDiff and nodeDiff
+func (s *basicScheduler) streamDiff(nStreams []int32) (map[int32]int32, map[int32]int32) {
+	added := map[int32]int32{}
+	deleted := map[int32]int32{}
+	same := map[int32]int32{}
+
+	streamMap := map[int32]int32{}
+	for _, stream := range s.streams {
+		streamMap[stream] = stream
+	}
+
+	//Find new and same
+	for _, nStream := range nStreams {
+		if _, ok := streamMap[nStream]; ok {
+			same[nStream] = nStream
+		} else {
+			added[nStream] = nStream
+		}
+	}
+
+	//Find deleted
+	for oSID, oStream := range streamMap {
+		_, inA := added[oSID]
+		_, inS := same[oSID]
+		if !inA && !inS {
+			deleted[oSID] = oStream
+		}
+	}
 
 	return added, deleted
 }

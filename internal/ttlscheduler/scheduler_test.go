@@ -364,3 +364,112 @@ func Test_basicScheduler_observeStreams(t *testing.T) {
 		})
 	}
 }
+
+func Test_basicScheduler_GetNodes(t *testing.T) {
+	type fields struct {
+		nodes map[int]*node
+	}
+	tests := []struct {
+		name  string
+		nodes map[int]*node
+		want  map[int]*node
+	}{
+		{
+			name:  "test 1",
+			nodes: map[int]*node{1: {1}},
+			want:  map[int]*node{1: {1}},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &basicScheduler{
+				nodes: tt.nodes,
+			}
+			if got := s.GetNodes(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("basicScheduler.GetNodes() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+type testNodeFetcher struct{}
+
+func (tnf *testNodeFetcher) GetNodes() ([]*node, error) {
+	return []*node{{0}, {1}}, nil
+}
+
+type testStreamFetcher struct{}
+
+func (tsf *testStreamFetcher) GetStreams() ([]int32, error) {
+	return []int32{1, 2}, nil
+}
+
+func Test_basicScheduler_Observe(t *testing.T) {
+	t.Log("!! Note this test will fail sometimes due to randomized order of node map !!")
+
+	type fields struct {
+		nodes    map[int]*node
+		streams  []int32
+		bindings []*binding
+		nf       NodeFetcher
+		sf       StreamFetcher
+		once     bool
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		want    fields
+		wantErr bool
+	}{
+		{
+			name: "test 1",
+			fields: fields{
+				nodes:    map[int]*node{},
+				streams:  []int32{},
+				bindings: []*binding{},
+				nf:       &testNodeFetcher{},
+				sf:       &testStreamFetcher{},
+				once:     true,
+			},
+			want: fields{
+				nodes:   map[int]*node{0: {0}, 1: {1}},
+				streams: []int32{1, 2},
+				bindings: []*binding{
+					{Stream: &stream{1, 0}, Node: &node{0}},
+					{Stream: &stream{2, 0}, Node: &node{1}},
+				},
+				nf:   &testNodeFetcher{},
+				sf:   &testStreamFetcher{},
+				once: true,
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &basicScheduler{
+				nodes:    tt.fields.nodes,
+				streams:  tt.fields.streams,
+				bindings: tt.fields.bindings,
+				nf:       tt.fields.nf,
+				sf:       tt.fields.sf,
+				once:     tt.fields.once,
+			}
+			err := s.Observe()
+			ttComp := fields{
+				nodes:    s.nodes,
+				streams:  s.streams,
+				bindings: s.bindings,
+				nf:       s.nf,
+				sf:       s.sf,
+				once:     s.once,
+			}
+			if !reflect.DeepEqual(ttComp, tt.want) {
+				t.Errorf("basicScheduler.Observe() = %v, want %v", ttComp, tt.want)
+			}
+			if (err != nil) != tt.wantErr {
+				t.Errorf("basicScheduler.Observe() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

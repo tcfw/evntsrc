@@ -47,7 +47,8 @@ type basicScheduler struct {
 	sf       StreamFetcher
 	once     bool
 
-	lock sync.RWMutex
+	observeInternal time.Duration
+	lock            sync.RWMutex
 }
 
 func (s *basicScheduler) NodeBindings(node node) ([]*binding, error) {
@@ -86,7 +87,7 @@ func (s *basicScheduler) BindStream(id int32) (*binding, error) {
 
 	nScores := map[int]int{}
 	for i, node := range s.nodes {
-		nScores[i] = NodeScore(s, *node)
+		nScores[i] = s.nodeScore(*node)
 	}
 
 	lowestScore, lowestNode := -1, -1
@@ -102,11 +103,20 @@ func (s *basicScheduler) BindStream(id int32) (*binding, error) {
 }
 
 //NodeScore calculates a load score for a particular node
-func NodeScore(s Scheduler, node node) int {
+func (s *basicScheduler) nodeScore(node node) int {
 	score := 0
-	nodeBinds, _ := s.NodeBindings(node)
+	nodeBindings := []*binding{}
 
-	for _, binding := range nodeBinds {
+	for _, bind := range s.bindings {
+		if bind.Node == nil {
+			continue
+		}
+		if bind.Node.ID == node.ID {
+			nodeBindings = append(nodeBindings, bind)
+		}
+	}
+
+	for _, binding := range nodeBindings {
 		score += 10 + binding.Stream.MsgRate
 	}
 
@@ -141,11 +151,15 @@ func (s *basicScheduler) Observe() error {
 			return nil
 		}
 
-		time.Sleep(5 * time.Second)
+		time.Sleep(s.observeInternal)
 	}
 }
 
 func (s *basicScheduler) observeNodes(nNodes []*node) {
+	if len(nNodes) == 0 {
+		return
+	}
+
 	addedNodes, deletedNodes := s.nodeDiff(nNodes)
 	for id, added := range addedNodes {
 		s.nodes[id] = added
@@ -179,6 +193,9 @@ func (s *basicScheduler) observeNodes(nNodes []*node) {
 }
 
 func (s *basicScheduler) observeStreams(nStreams []int32) {
+	if len(nStreams) == 0 {
+		return
+	}
 	addedStreams, deletedStreams := s.streamDiff(nStreams)
 	for id := range addedStreams {
 		binding, _ := s.BindStream(id)
@@ -272,10 +289,11 @@ func (s *basicScheduler) nodeDiff(nNodes []*node) (map[int]*node, map[int]*node)
 //NewScheduler constructs a new scheduler which can assign streams work nodes
 func NewScheduler(nf NodeFetcher, sf StreamFetcher) Scheduler {
 	return &basicScheduler{
-		nodes:    map[int]*node{},
-		streams:  []int32{},
-		bindings: []*binding{},
-		nf:       nf,
-		sf:       sf,
+		nodes:           map[int]*node{},
+		streams:         []int32{},
+		bindings:        []*binding{},
+		nf:              nf,
+		sf:              sf,
+		observeInternal: 5 * time.Second,
 	}
 }

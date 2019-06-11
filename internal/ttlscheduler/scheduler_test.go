@@ -1,50 +1,12 @@
 package ttlscheduler
 
 import (
+	"context"
 	"reflect"
 	"testing"
-)
 
-func Test_scheduler_NodeBindings(t *testing.T) {
-	type args struct {
-		node node
-	}
-	tests := []struct {
-		name     string
-		nodes    map[int]*node
-		streams  []*stream
-		bindings []*binding
-		args     args
-		want     []*binding
-		wantErr  bool
-	}{
-		{
-			name:     "test 1",
-			nodes:    map[int]*node{0: {0}},
-			streams:  []*stream{{1, 0}},
-			bindings: []*binding{{Stream: &stream{ID: 1}, Node: &node{0}}},
-			args:     args{node{0}},
-			want:     []*binding{{Stream: &stream{ID: 1}, Node: &node{0}}},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			s := &basicScheduler{
-				nodes:    tt.nodes,
-				streams:  tt.streams,
-				bindings: tt.bindings,
-			}
-			got, err := s.NodeBindings(tt.args.node)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("scheduler.NodeBindings() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("scheduler.NodeBindings() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
+	pb "github.com/tcfw/evntsrc/internal/ttlscheduler/protos"
+)
 
 func Test_scheduler_BindStream(t *testing.T) {
 	type args struct {
@@ -469,6 +431,54 @@ func Test_basicScheduler_Observe(t *testing.T) {
 			}
 			if (err != nil) != tt.wantErr {
 				t.Errorf("basicScheduler.Observe() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func Test_basicScheduler_NodeBindings(t *testing.T) {
+	tests := []struct {
+		name     string
+		nodes    map[int]*node
+		streams  []*stream
+		bindings []*binding
+		req      *pb.NodeBindingRequest
+		want     *pb.NodeBindingResponse
+		wantErr  bool
+	}{
+		{
+			name:     "test 1",
+			nodes:    map[int]*node{0: {0}},
+			streams:  []*stream{},
+			bindings: []*binding{},
+			req:      &pb.NodeBindingRequest{Node: &pb.Node{Id: 0}},
+			want:     &pb.NodeBindingResponse{Bindings: []*pb.Binding{}},
+			wantErr:  false,
+		},
+		{
+			name:     "test 2",
+			nodes:    map[int]*node{0: {0}},
+			streams:  []*stream{&stream{1, 0}},
+			bindings: []*binding{&binding{Stream: &stream{1, 0}, Node: &node{0}}},
+			req:      &pb.NodeBindingRequest{Node: &pb.Node{Id: 0}},
+			want:     &pb.NodeBindingResponse{Bindings: []*pb.Binding{&pb.Binding{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: 0}}}},
+			wantErr:  false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &basicScheduler{
+				nodes:    tt.nodes,
+				streams:  tt.streams,
+				bindings: tt.bindings,
+			}
+			got, err := s.NodeBindings(context.Background(), tt.req)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("basicScheduler.NodeBindings() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("basicScheduler.NodeBindings() = %v, want %v", got, tt.want)
 			}
 		})
 	}

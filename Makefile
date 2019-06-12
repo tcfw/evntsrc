@@ -14,7 +14,7 @@ SHELL=/bin/bash
 
 .DEFAULT_GOAL := changed
 .PHONY: all
-all: storer websocks stsmetrics streams passport users apigw bridge streamauth ingress billing wui emails metrics interconnect adapter push
+all: storer websocks stsmetrics streams passport users apigw bridge streamauth ingress billing wui emails metrics interconnect ttlscheduler adapter push
 
 storer:
 	docker build -f ./build/storer/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/storer:latest .
@@ -64,6 +64,9 @@ metrics:
 interconnect:
 	docker build -f ./build/interconnect/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/interconnect:latest .
 
+ttlscheduler:
+	docker build -f ./build/ttlscheduler/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/ttlscheduler:latest .
+
 .PHONY: push
 push: 
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/storer:latest
@@ -82,6 +85,7 @@ push:
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/emails:latest
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/metrics:latest
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/interconnect:latest
+	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/ttlscheduler:latest
 
 .PHONY: changed
 changed:

@@ -13,42 +13,28 @@ import (
 	pb "github.com/tcfw/evntsrc/internal/ttlscheduler/protos"
 )
 
-type node struct {
-	ID int `json:"id,omitempty"`
-}
-
-type stream struct {
-	ID      int32 `json:"id,omitempty"`
-	MsgRate int   `json:"msg_rate,omitempty"`
-}
-
-type binding struct {
-	Stream *stream `json:"stream_id,omitempty"`
-	Node   *node   `json:"node,omitempty"`
-}
-
 //NodeFetcher builds up the node list form a source e.g. kubernetes pods
 type NodeFetcher interface {
-	GetNodes() ([]*node, error)
+	GetNodes() ([]*pb.Node, error)
 }
 
 //StreamFetcher provides intereface to fetch stream lists
 type StreamFetcher interface {
-	GetStreams() ([]*stream, error)
+	GetStreams() ([]*pb.Stream, error)
 }
 
 //Scheduler basic structure of a scheduler
 type Scheduler interface {
 	NodeBindings(context.Context, *pb.NodeBindingRequest) (*pb.NodeBindingResponse, error)
-	BindStream(*stream) (*binding, error)
+	BindStream(*pb.Stream) (*pb.Binding, error)
 	Optimise() error
 	Observe() error
 }
 
 type basicScheduler struct {
-	nodes    map[int]*node
-	streams  []*stream
-	bindings []*binding
+	nodes    map[int32]*pb.Node
+	streams  []*pb.Stream
+	bindings []*pb.Binding
 	nf       NodeFetcher
 	sf       StreamFetcher
 	once     bool
@@ -67,10 +53,10 @@ func (s *basicScheduler) NodeBindings(ctx context.Context, req *pb.NodeBindingRe
 		if bind.Node == nil {
 			continue
 		}
-		if bind.Node.ID == int(req.Node.Id) {
+		if bind.Node.Id == req.Node.Id {
 			binding := &pb.Binding{
-				Stream: &pb.Stream{Id: bind.Stream.ID, MsgRate: int64(bind.Stream.MsgRate)},
-				Node:   &pb.Node{Id: int32(bind.Node.ID)},
+				Stream: &pb.Stream{Id: bind.Stream.Id, MsgRate: int64(bind.Stream.MsgRate)},
+				Node:   &pb.Node{Id: bind.Node.Id},
 			}
 			nodeBindings = append(nodeBindings, binding)
 		}
@@ -79,28 +65,28 @@ func (s *basicScheduler) NodeBindings(ctx context.Context, req *pb.NodeBindingRe
 	return &pb.NodeBindingResponse{Bindings: nodeBindings}, nil
 }
 
-func (s *basicScheduler) GetNodes() map[int]*node {
+func (s *basicScheduler) GetNodes() map[int32]*pb.Node {
 	return s.nodes
 }
 
 //BindStream allocates a stream to a node worker in an "optimal" pattern
-func (s *basicScheduler) BindStream(stream *stream) (*binding, error) {
+func (s *basicScheduler) BindStream(stream *pb.Stream) (*pb.Binding, error) {
 	nCount := len(s.nodes)
 
 	if nCount == 0 {
 		return nil, errors.New("No nodes to schedule on")
 	}
 	if nCount == 1 {
-		binding := &binding{Stream: stream, Node: s.nodes[int(reflect.ValueOf(s.nodes).MapKeys()[0].Int())]}
+		binding := &pb.Binding{Stream: stream, Node: s.nodes[int32(reflect.ValueOf(s.nodes).MapKeys()[0].Int())]}
 		return binding, nil
 	}
 
-	nScores := map[int]int{}
+	nScores := map[int32]int64{}
 	for i, node := range s.nodes {
-		nScores[i] = s.nodeScore(*node)
+		nScores[i] = s.nodeScore(node)
 	}
 
-	lowestScore, lowestNode := -1, -1
+	lowestScore, lowestNode := int64(-1), int32(-1)
 	for node, score := range nScores {
 		if lowestNode == -1 || score < lowestScore {
 			lowestNode = node
@@ -108,20 +94,20 @@ func (s *basicScheduler) BindStream(stream *stream) (*binding, error) {
 		}
 	}
 
-	binding := &binding{Stream: stream, Node: s.nodes[lowestNode]}
+	binding := &pb.Binding{Stream: stream, Node: s.nodes[lowestNode]}
 	return binding, nil
 }
 
 //NodeScore calculates a load score for a particular node
-func (s *basicScheduler) nodeScore(node node) int {
-	score := 0
-	nodeBindings := []*binding{}
+func (s *basicScheduler) nodeScore(node *pb.Node) int64 {
+	score := int64(0)
+	nodeBindings := []*pb.Binding{}
 
 	for _, bind := range s.bindings {
 		if bind.Node == nil {
 			continue
 		}
-		if bind.Node.ID == node.ID {
+		if bind.Node.Id == node.Id {
 			nodeBindings = append(nodeBindings, bind)
 		}
 	}
@@ -171,7 +157,7 @@ func (s *basicScheduler) Observe() error {
 	}
 }
 
-func (s *basicScheduler) observeNodes(nNodes []*node) {
+func (s *basicScheduler) observeNodes(nNodes []*pb.Node) {
 	if len(nNodes) == 0 {
 		return
 	}
@@ -182,9 +168,9 @@ func (s *basicScheduler) observeNodes(nNodes []*node) {
 	}
 
 	for id := range deletedNodes {
-		reschedule := []*stream{}
+		reschedule := []*pb.Stream{}
 		for _, binding := range s.bindings {
-			if binding.Node.ID == id {
+			if binding.Node.Id == int32(id) {
 				reschedule = append(reschedule, binding.Stream)
 				binding.Node = nil
 			}
@@ -193,12 +179,12 @@ func (s *basicScheduler) observeNodes(nNodes []*node) {
 		delete(s.nodes, id)
 
 		for _, resStream := range reschedule {
-			binding, _ := s.BindStream(&stream{resStream.ID, 0})
+			binding, _ := s.BindStream(&pb.Stream{Id: resStream.Id, MsgRate: 0})
 			s.bindings = append(s.bindings, binding)
 		}
 	}
 
-	final := []*binding{}
+	final := []*pb.Binding{}
 	for _, binding := range s.bindings {
 		if binding.Node != nil {
 			final = append(final, binding)
@@ -208,29 +194,29 @@ func (s *basicScheduler) observeNodes(nNodes []*node) {
 	s.bindings = final
 }
 
-func (s *basicScheduler) observeStreams(nStreams []*stream) {
+func (s *basicScheduler) observeStreams(nStreams []*pb.Stream) {
 	if len(nStreams) == 0 {
 		return
 	}
 	addedStreams, deletedStreams := s.streamDiff(nStreams)
 	for id, aStream := range addedStreams {
-		binding, _ := s.BindStream(&stream{id, 0})
+		binding, _ := s.BindStream(&pb.Stream{Id: id, MsgRate: 0})
 		s.bindings = append(s.bindings, binding)
 		s.streams = append(s.streams, aStream)
 	}
 
 	if len(deletedStreams) > 0 {
-		final := []*binding{}
+		final := []*pb.Binding{}
 		for id := range deletedStreams {
 			for _, binding := range s.bindings {
-				if binding.Stream.ID != id {
+				if binding.Stream.Id != id {
 					final = append(final, binding)
 				}
 			}
 
 			index := -1
 			for i, stream := range s.streams {
-				if stream.ID == id {
+				if stream.Id == id {
 					index = i
 					break
 				}
@@ -245,22 +231,22 @@ func (s *basicScheduler) observeStreams(nStreams []*stream) {
 }
 
 //TODO merge streamDiff and nodeDiff
-func (s *basicScheduler) streamDiff(nStreams []*stream) (map[int32]*stream, map[int32]*stream) {
-	added := map[int32]*stream{}
-	deleted := map[int32]*stream{}
-	same := map[int32]*stream{}
+func (s *basicScheduler) streamDiff(nStreams []*pb.Stream) (map[int32]*pb.Stream, map[int32]*pb.Stream) {
+	added := map[int32]*pb.Stream{}
+	deleted := map[int32]*pb.Stream{}
+	same := map[int32]*pb.Stream{}
 
-	streamMap := map[int32]*stream{}
+	streamMap := map[int32]*pb.Stream{}
 	for _, sStream := range s.streams {
-		streamMap[sStream.ID] = sStream
+		streamMap[sStream.Id] = sStream
 	}
 
 	//Find new and same
 	for _, nStream := range nStreams {
-		if _, ok := streamMap[nStream.ID]; ok {
-			same[nStream.ID] = nStream
+		if _, ok := streamMap[nStream.Id]; ok {
+			same[nStream.Id] = nStream
 		} else {
-			added[nStream.ID] = nStream
+			added[nStream.Id] = nStream
 		}
 	}
 
@@ -276,17 +262,17 @@ func (s *basicScheduler) streamDiff(nStreams []*stream) (map[int32]*stream, map[
 	return added, deleted
 }
 
-func (s *basicScheduler) nodeDiff(nNodes []*node) (map[int]*node, map[int]*node) {
-	added := map[int]*node{}
-	deleted := map[int]*node{}
-	same := map[int]*node{}
+func (s *basicScheduler) nodeDiff(nNodes []*pb.Node) (map[int32]*pb.Node, map[int32]*pb.Node) {
+	added := map[int32]*pb.Node{}
+	deleted := map[int32]*pb.Node{}
+	same := map[int32]*pb.Node{}
 
 	//Find new and same
 	for _, nNode := range nNodes {
-		if _, ok := s.nodes[nNode.ID]; ok {
-			same[nNode.ID] = nNode
+		if _, ok := s.nodes[nNode.Id]; ok {
+			same[nNode.Id] = nNode
 		} else {
-			added[nNode.ID] = nNode
+			added[nNode.Id] = nNode
 		}
 	}
 
@@ -305,9 +291,9 @@ func (s *basicScheduler) nodeDiff(nNodes []*node) (map[int]*node, map[int]*node)
 //NewScheduler constructs a new scheduler which can assign streams work nodes
 func NewScheduler(nf NodeFetcher, sf StreamFetcher) Scheduler {
 	return &basicScheduler{
-		nodes:           map[int]*node{},
-		streams:         []*stream{},
-		bindings:        []*binding{},
+		nodes:           map[int32]*pb.Node{},
+		streams:         []*pb.Stream{},
+		bindings:        []*pb.Binding{},
 		nf:              nf,
 		sf:              sf,
 		observeInternal: 5 * time.Second,

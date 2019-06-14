@@ -32,4 +32,4 @@ FROM ubuntu:latest
 WORKDIR /bin
 COPY --from=builder /evntsrc/ttlscheduler ttlscheduler
 
-CMD [ "./ttlscheduler", "serve" ]
+CMD [ "./ttlscheduler", "run" ]

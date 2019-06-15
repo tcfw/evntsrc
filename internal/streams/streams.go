@@ -120,11 +120,17 @@ func (s *Server) ListIds(ctx context.Context, searchRequest *pb.SearchRequest) (
 
 	collection := dbConn.DB(dBName).C(collectionName)
 	query := collection.Find(nil).Select(bson.M{"_id": 1})
-	streams := []int32{}
+	streams := []struct{ ID int32 }{}
 	if err = query.All(&streams); err != nil {
 		return nil, err
 	}
-	return &pb.IdList{ID: streams}, nil
+
+	final := []int32{}
+	for _, stream := range streams {
+		final = append(final, stream.ID)
+	}
+
+	return &pb.IdList{ID: final}, nil
 }
 
 //Get @TODO

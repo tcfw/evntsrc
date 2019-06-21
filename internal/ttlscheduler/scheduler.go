@@ -32,7 +32,7 @@ type Scheduler interface {
 }
 
 type basicScheduler struct {
-	nodes    map[int32]*pb.Node
+	nodes    map[string]*pb.Node
 	streams  []*pb.Stream
 	bindings []*pb.Binding
 	nf       NodeFetcher
@@ -65,7 +65,7 @@ func (s *basicScheduler) NodeBindings(ctx context.Context, req *pb.NodeBindingRe
 	return &pb.NodeBindingResponse{Bindings: nodeBindings}, nil
 }
 
-func (s *basicScheduler) GetNodes() map[int32]*pb.Node {
+func (s *basicScheduler) GetNodes() map[string]*pb.Node {
 	return s.nodes
 }
 
@@ -77,18 +77,18 @@ func (s *basicScheduler) BindStream(stream *pb.Stream) (*pb.Binding, error) {
 		return nil, errors.New("No nodes to schedule on")
 	}
 	if nCount == 1 {
-		binding := &pb.Binding{Stream: stream, Node: s.nodes[int32(reflect.ValueOf(s.nodes).MapKeys()[0].Int())]}
+		binding := &pb.Binding{Stream: stream, Node: s.nodes[reflect.ValueOf(s.nodes).MapKeys()[0].String()]}
 		return binding, nil
 	}
 
-	nScores := map[int32]int64{}
+	nScores := map[string]int64{}
 	for i, node := range s.nodes {
 		nScores[i] = s.nodeScore(node)
 	}
 
-	lowestScore, lowestNode := int64(-1), int32(-1)
+	lowestScore, lowestNode := int64(-1), ""
 	for node, score := range nScores {
-		if lowestNode == -1 || score < lowestScore {
+		if lowestNode == "" || score < lowestScore {
 			lowestNode = node
 			lowestScore = score
 		}
@@ -170,7 +170,7 @@ func (s *basicScheduler) observeNodes(nNodes []*pb.Node) {
 	for id := range deletedNodes {
 		reschedule := []*pb.Stream{}
 		for _, binding := range s.bindings {
-			if binding.Node.Id == int32(id) {
+			if binding.Node.Id == id {
 				reschedule = append(reschedule, binding.Stream)
 				binding.Node = nil
 			}
@@ -200,7 +200,11 @@ func (s *basicScheduler) observeStreams(nStreams []*pb.Stream) {
 	}
 	addedStreams, deletedStreams := s.streamDiff(nStreams)
 	for id, aStream := range addedStreams {
-		binding, _ := s.BindStream(&pb.Stream{Id: id, MsgRate: 0})
+		binding, err := s.BindStream(&pb.Stream{Id: id, MsgRate: 0})
+		if err != nil {
+			log.Printf(err.Error())
+			continue
+		}
 		s.bindings = append(s.bindings, binding)
 		s.streams = append(s.streams, aStream)
 	}
@@ -262,10 +266,10 @@ func (s *basicScheduler) streamDiff(nStreams []*pb.Stream) (map[int32]*pb.Stream
 	return added, deleted
 }
 
-func (s *basicScheduler) nodeDiff(nNodes []*pb.Node) (map[int32]*pb.Node, map[int32]*pb.Node) {
-	added := map[int32]*pb.Node{}
-	deleted := map[int32]*pb.Node{}
-	same := map[int32]*pb.Node{}
+func (s *basicScheduler) nodeDiff(nNodes []*pb.Node) (map[string]*pb.Node, map[string]*pb.Node) {
+	added := map[string]*pb.Node{}
+	deleted := map[string]*pb.Node{}
+	same := map[string]*pb.Node{}
 
 	//Find new and same
 	for _, nNode := range nNodes {
@@ -291,7 +295,7 @@ func (s *basicScheduler) nodeDiff(nNodes []*pb.Node) (map[int32]*pb.Node, map[in
 //NewScheduler constructs a new scheduler which can assign streams work nodes
 func NewScheduler(nf NodeFetcher, sf StreamFetcher) Scheduler {
 	return &basicScheduler{
-		nodes:           map[int32]*pb.Node{},
+		nodes:           map[string]*pb.Node{},
 		streams:         []*pb.Stream{},
 		bindings:        []*pb.Binding{},
 		nf:              nf,

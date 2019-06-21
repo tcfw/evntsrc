@@ -14,7 +14,7 @@ func Test_scheduler_BindStream(t *testing.T) {
 	}
 	tests := []struct {
 		name     string
-		nodes    map[int32]*pb.Node
+		nodes    map[string]*pb.Node
 		streams  []*pb.Stream
 		bindings []*pb.Binding
 		args     args
@@ -23,7 +23,7 @@ func Test_scheduler_BindStream(t *testing.T) {
 	}{
 		{
 			name:     "test 0",
-			nodes:    map[int32]*pb.Node{},
+			nodes:    map[string]*pb.Node{},
 			streams:  []*pb.Stream{},
 			bindings: []*pb.Binding{},
 			args:     args{&pb.Stream{Id: 1, MsgRate: 0}},
@@ -32,44 +32,44 @@ func Test_scheduler_BindStream(t *testing.T) {
 		},
 		{
 			name:     "test 1",
-			nodes:    map[int32]*pb.Node{1: &pb.Node{Id: 1}},
+			nodes:    map[string]*pb.Node{"a": &pb.Node{Id: "a"}},
 			streams:  []*pb.Stream{},
 			bindings: []*pb.Binding{},
 			args:     args{&pb.Stream{Id: 1, MsgRate: 0}},
-			want:     &pb.Binding{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: 1}},
+			want:     &pb.Binding{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: "a"}},
 			wantErr:  false,
 		},
 		{
 			name:     "test 2",
-			nodes:    map[int32]*pb.Node{1: &pb.Node{Id: 1}, 2: &pb.Node{Id: 2}},
+			nodes:    map[string]*pb.Node{"a": &pb.Node{Id: "a"}, "b": &pb.Node{Id: "b"}},
 			streams:  []*pb.Stream{&pb.Stream{Id: 1, MsgRate: 0}},
-			bindings: []*pb.Binding{{Stream: &pb.Stream{Id: 1, MsgRate: 110}, Node: &pb.Node{Id: 1}}},
+			bindings: []*pb.Binding{{Stream: &pb.Stream{Id: 1, MsgRate: 110}, Node: &pb.Node{Id: "a"}}},
 			args:     args{&pb.Stream{Id: 2, MsgRate: 0}},
-			want:     &pb.Binding{Stream: &pb.Stream{Id: 2, MsgRate: 0}, Node: &pb.Node{Id: 2}},
+			want:     &pb.Binding{Stream: &pb.Stream{Id: 2, MsgRate: 0}, Node: &pb.Node{Id: "b"}},
 			wantErr:  false,
 		},
 		{
 			name:    "test 3",
-			nodes:   map[int32]*pb.Node{1: &pb.Node{Id: 1}, 2: &pb.Node{Id: 2}},
+			nodes:   map[string]*pb.Node{"a": &pb.Node{Id: "a"}, "b": &pb.Node{Id: "b"}},
 			streams: []*pb.Stream{&pb.Stream{Id: 1, MsgRate: 0}, &pb.Stream{Id: 2, MsgRate: 0}},
 			bindings: []*pb.Binding{
-				{Stream: &pb.Stream{Id: 1, MsgRate: 110}, Node: &pb.Node{Id: 1}},
-				{Stream: &pb.Stream{Id: 2, MsgRate: 50}, Node: &pb.Node{Id: 2}},
+				{Stream: &pb.Stream{Id: 1, MsgRate: 110}, Node: &pb.Node{Id: "a"}},
+				{Stream: &pb.Stream{Id: 2, MsgRate: 50}, Node: &pb.Node{Id: "b"}},
 			},
 			args:    args{&pb.Stream{Id: 3, MsgRate: 0}},
-			want:    &pb.Binding{Stream: &pb.Stream{Id: 3, MsgRate: 0}, Node: &pb.Node{Id: 2}},
+			want:    &pb.Binding{Stream: &pb.Stream{Id: 3, MsgRate: 0}, Node: &pb.Node{Id: "b"}},
 			wantErr: false,
 		},
 		{
 			name:    "test 4",
-			nodes:   map[int32]*pb.Node{1: &pb.Node{Id: 1}, 2: &pb.Node{Id: 2}},
+			nodes:   map[string]*pb.Node{"a": &pb.Node{Id: "a"}, "b": &pb.Node{Id: "b"}},
 			streams: []*pb.Stream{&pb.Stream{Id: 1, MsgRate: 0}, &pb.Stream{Id: 2, MsgRate: 0}},
 			bindings: []*pb.Binding{
-				{Stream: &pb.Stream{Id: 1, MsgRate: 50}, Node: &pb.Node{Id: 1}},
-				{Stream: &pb.Stream{Id: 2, MsgRate: 110}, Node: &pb.Node{Id: 2}},
+				{Stream: &pb.Stream{Id: 1, MsgRate: 50}, Node: &pb.Node{Id: "a"}},
+				{Stream: &pb.Stream{Id: 2, MsgRate: 110}, Node: &pb.Node{Id: "b"}},
 			},
 			args:    args{&pb.Stream{Id: 3, MsgRate: 0}},
-			want:    &pb.Binding{Stream: &pb.Stream{Id: 3, MsgRate: 0}, Node: &pb.Node{Id: 1}},
+			want:    &pb.Binding{Stream: &pb.Stream{Id: 3, MsgRate: 0}, Node: &pb.Node{Id: "a"}},
 			wantErr: false,
 		},
 	}
@@ -95,31 +95,31 @@ func Test_scheduler_BindStream(t *testing.T) {
 func Test_basicScheduler_nodeDiff(t *testing.T) {
 	tests := []struct {
 		name        string
-		nodes       map[int32]*pb.Node
+		nodes       map[string]*pb.Node
 		nNodes      []*pb.Node
-		wantAdded   map[int32]*pb.Node
-		wantDeleted map[int32]*pb.Node
+		wantAdded   map[string]*pb.Node
+		wantDeleted map[string]*pb.Node
 	}{
 		{
 			name:        "test 1",
-			nodes:       map[int32]*pb.Node{},
-			nNodes:      []*pb.Node{&pb.Node{Id: 1}},
-			wantAdded:   map[int32]*pb.Node{1: &pb.Node{Id: 1}},
-			wantDeleted: map[int32]*pb.Node{},
+			nodes:       map[string]*pb.Node{},
+			nNodes:      []*pb.Node{&pb.Node{Id: "a"}},
+			wantAdded:   map[string]*pb.Node{"a": &pb.Node{Id: "a"}},
+			wantDeleted: map[string]*pb.Node{},
 		},
 		{
 			name:        "test 2",
-			nodes:       map[int32]*pb.Node{1: &pb.Node{Id: 1}},
+			nodes:       map[string]*pb.Node{"a": &pb.Node{Id: "a"}},
 			nNodes:      []*pb.Node{},
-			wantAdded:   map[int32]*pb.Node{},
-			wantDeleted: map[int32]*pb.Node{1: &pb.Node{Id: 1}},
+			wantAdded:   map[string]*pb.Node{},
+			wantDeleted: map[string]*pb.Node{"a": &pb.Node{Id: "a"}},
 		},
 		{
 			name:        "test 3",
-			nodes:       map[int32]*pb.Node{1: &pb.Node{Id: 1}, 4: &pb.Node{Id: 4}, 2: &pb.Node{Id: 2}},
-			nNodes:      []*pb.Node{&pb.Node{Id: 1}, &pb.Node{Id: 3}, &pb.Node{Id: 2}},
-			wantAdded:   map[int32]*pb.Node{3: &pb.Node{Id: 3}},
-			wantDeleted: map[int32]*pb.Node{4: &pb.Node{Id: 4}},
+			nodes:       map[string]*pb.Node{"a": &pb.Node{Id: "a"}, "d": &pb.Node{Id: "d"}, "b": &pb.Node{Id: "b"}},
+			nNodes:      []*pb.Node{&pb.Node{Id: "a"}, &pb.Node{Id: "c"}, &pb.Node{Id: "b"}},
+			wantAdded:   map[string]*pb.Node{"c": &pb.Node{Id: "c"}},
+			wantDeleted: map[string]*pb.Node{"d": &pb.Node{Id: "d"}},
 		},
 	}
 	for _, tt := range tests {
@@ -140,7 +140,7 @@ func Test_basicScheduler_nodeDiff(t *testing.T) {
 
 func Test_basicScheduler_observeNodes(t *testing.T) {
 	type fields struct {
-		nodes    map[int32]*pb.Node
+		nodes    map[string]*pb.Node
 		streams  []*pb.Stream
 		bindings []*pb.Binding
 	}
@@ -156,56 +156,56 @@ func Test_basicScheduler_observeNodes(t *testing.T) {
 		{
 			name: "test 1",
 			fields: fields{
-				nodes:    map[int32]*pb.Node{1: &pb.Node{Id: 1}},
+				nodes:    map[string]*pb.Node{"a": &pb.Node{Id: "a"}},
 				streams:  []*pb.Stream{{Id: 1, MsgRate: 0}},
-				bindings: []*pb.Binding{{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: 1}}},
+				bindings: []*pb.Binding{{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: "a"}}},
 			},
-			args: args{nNodes: []*pb.Node{&pb.Node{Id: 1}, &pb.Node{Id: 2}}},
+			args: args{nNodes: []*pb.Node{&pb.Node{Id: "a"}, &pb.Node{Id: "b"}}},
 			want: fields{
-				nodes:    map[int32]*pb.Node{1: &pb.Node{Id: 1}, 2: &pb.Node{Id: 2}},
+				nodes:    map[string]*pb.Node{"a": &pb.Node{Id: "a"}, "b": &pb.Node{Id: "b"}},
 				streams:  []*pb.Stream{&pb.Stream{Id: 1, MsgRate: 0}},
-				bindings: []*pb.Binding{{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: 1}}},
+				bindings: []*pb.Binding{{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: "a"}}},
 			},
 		},
 		{
 			name: "test 2",
 			fields: fields{
-				nodes:   map[int32]*pb.Node{1: &pb.Node{Id: 1}, 2: &pb.Node{Id: 2}},
+				nodes:   map[string]*pb.Node{"a": &pb.Node{Id: "a"}, "b": &pb.Node{Id: "b"}},
 				streams: []*pb.Stream{&pb.Stream{Id: 1, MsgRate: 0}, &pb.Stream{Id: 2, MsgRate: 0}},
 				bindings: []*pb.Binding{
-					{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: 1}},
-					{Stream: &pb.Stream{Id: 2, MsgRate: 0}, Node: &pb.Node{Id: 2}},
+					{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: "a"}},
+					{Stream: &pb.Stream{Id: 2, MsgRate: 0}, Node: &pb.Node{Id: "b"}},
 				},
 			},
-			args: args{nNodes: []*pb.Node{&pb.Node{Id: 1}}},
+			args: args{nNodes: []*pb.Node{&pb.Node{Id: "a"}}},
 			want: fields{
-				nodes:   map[int32]*pb.Node{1: &pb.Node{Id: 1}},
+				nodes:   map[string]*pb.Node{"a": &pb.Node{Id: "a"}},
 				streams: []*pb.Stream{&pb.Stream{Id: 1, MsgRate: 0}, &pb.Stream{Id: 2, MsgRate: 0}},
 				bindings: []*pb.Binding{
-					{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: 1}},
-					{Stream: &pb.Stream{Id: 2, MsgRate: 0}, Node: &pb.Node{Id: 1}},
+					{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: "a"}},
+					{Stream: &pb.Stream{Id: 2, MsgRate: 0}, Node: &pb.Node{Id: "a"}},
 				},
 			},
 		},
 		{
 			name: "test 3",
 			fields: fields{
-				nodes:   map[int32]*pb.Node{1: &pb.Node{Id: 1}, 2: &pb.Node{Id: 2}, 3: &pb.Node{Id: 3}},
+				nodes:   map[string]*pb.Node{"a": &pb.Node{Id: "a"}, "b": &pb.Node{Id: "b"}, "c": &pb.Node{Id: "c"}},
 				streams: []*pb.Stream{&pb.Stream{Id: 1, MsgRate: 0}, &pb.Stream{Id: 2, MsgRate: 0}, &pb.Stream{Id: 3, MsgRate: 0}},
 				bindings: []*pb.Binding{
-					{Stream: &pb.Stream{Id: 1, MsgRate: 10}, Node: &pb.Node{Id: 1}},
-					{Stream: &pb.Stream{Id: 2, MsgRate: 50}, Node: &pb.Node{Id: 2}},
-					{Stream: &pb.Stream{Id: 3, MsgRate: 10}, Node: &pb.Node{Id: 3}},
+					{Stream: &pb.Stream{Id: 1, MsgRate: 10}, Node: &pb.Node{Id: "a"}},
+					{Stream: &pb.Stream{Id: 2, MsgRate: 50}, Node: &pb.Node{Id: "b"}},
+					{Stream: &pb.Stream{Id: 3, MsgRate: 10}, Node: &pb.Node{Id: "c"}},
 				},
 			},
-			args: args{nNodes: []*pb.Node{&pb.Node{Id: 1}, &pb.Node{Id: 2}}},
+			args: args{nNodes: []*pb.Node{&pb.Node{Id: "a"}, &pb.Node{Id: "b"}}},
 			want: fields{
-				nodes:   map[int32]*pb.Node{1: &pb.Node{Id: 1}, 2: &pb.Node{Id: 2}},
+				nodes:   map[string]*pb.Node{"a": &pb.Node{Id: "a"}, "b": &pb.Node{Id: "b"}},
 				streams: []*pb.Stream{&pb.Stream{Id: 1, MsgRate: 0}, &pb.Stream{Id: 2, MsgRate: 0}, &pb.Stream{Id: 3, MsgRate: 0}},
 				bindings: []*pb.Binding{
-					{Stream: &pb.Stream{Id: 1, MsgRate: 10}, Node: &pb.Node{Id: 1}},
-					{Stream: &pb.Stream{Id: 2, MsgRate: 50}, Node: &pb.Node{Id: 2}},
-					{Stream: &pb.Stream{Id: 3, MsgRate: 0}, Node: &pb.Node{Id: 1}},
+					{Stream: &pb.Stream{Id: 1, MsgRate: 10}, Node: &pb.Node{Id: "a"}},
+					{Stream: &pb.Stream{Id: 2, MsgRate: 50}, Node: &pb.Node{Id: "b"}},
+					{Stream: &pb.Stream{Id: 3, MsgRate: 0}, Node: &pb.Node{Id: "a"}},
 				},
 			},
 		},
@@ -232,7 +232,7 @@ func Test_basicScheduler_observeNodes(t *testing.T) {
 
 func Test_basicScheduler_observeStreams(t *testing.T) {
 	type fields struct {
-		nodes    map[int32]*pb.Node
+		nodes    map[string]*pb.Node
 		streams  []*pb.Stream
 		bindings []*pb.Binding
 	}
@@ -248,61 +248,61 @@ func Test_basicScheduler_observeStreams(t *testing.T) {
 		{
 			name: "test 1",
 			fields: fields{
-				nodes:   map[int32]*pb.Node{1: &pb.Node{Id: 1}},
+				nodes:   map[string]*pb.Node{"a": &pb.Node{Id: "a"}},
 				streams: []*pb.Stream{&pb.Stream{Id: 1, MsgRate: 0}, &pb.Stream{Id: 2, MsgRate: 0}},
 				bindings: []*pb.Binding{
-					{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: 1}},
-					{Stream: &pb.Stream{Id: 2, MsgRate: 0}, Node: &pb.Node{Id: 1}},
+					{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: "a"}},
+					{Stream: &pb.Stream{Id: 2, MsgRate: 0}, Node: &pb.Node{Id: "a"}},
 				},
 			},
 			args: args{nStreams: []*pb.Stream{&pb.Stream{Id: 1, MsgRate: 0}}},
 			want: fields{
-				nodes:   map[int32]*pb.Node{1: &pb.Node{Id: 1}},
+				nodes:   map[string]*pb.Node{"a": &pb.Node{Id: "a"}},
 				streams: []*pb.Stream{&pb.Stream{Id: 1, MsgRate: 0}},
 				bindings: []*pb.Binding{
-					{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: 1}},
+					{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: "a"}},
 				},
 			},
 		},
 		{
 			name: "test 2",
 			fields: fields{
-				nodes:   map[int32]*pb.Node{1: &pb.Node{Id: 1}},
+				nodes:   map[string]*pb.Node{"a": &pb.Node{Id: "a"}},
 				streams: []*pb.Stream{&pb.Stream{Id: 1, MsgRate: 0}, &pb.Stream{Id: 2, MsgRate: 0}},
 				bindings: []*pb.Binding{
-					{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: 1}},
-					{Stream: &pb.Stream{Id: 2, MsgRate: 0}, Node: &pb.Node{Id: 1}},
+					{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: "a"}},
+					{Stream: &pb.Stream{Id: 2, MsgRate: 0}, Node: &pb.Node{Id: "a"}},
 				},
 			},
 			args: args{nStreams: []*pb.Stream{&pb.Stream{Id: 1, MsgRate: 0}, &pb.Stream{Id: 2, MsgRate: 0}, &pb.Stream{Id: 3, MsgRate: 0}}},
 			want: fields{
-				nodes:   map[int32]*pb.Node{1: &pb.Node{Id: 1}},
+				nodes:   map[string]*pb.Node{"a": &pb.Node{Id: "a"}},
 				streams: []*pb.Stream{&pb.Stream{Id: 1, MsgRate: 0}, &pb.Stream{Id: 2, MsgRate: 0}, &pb.Stream{Id: 3, MsgRate: 0}},
 				bindings: []*pb.Binding{
-					{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: 1}},
-					{Stream: &pb.Stream{Id: 2, MsgRate: 0}, Node: &pb.Node{Id: 1}},
-					{Stream: &pb.Stream{Id: 3, MsgRate: 0}, Node: &pb.Node{Id: 1}},
+					{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: "a"}},
+					{Stream: &pb.Stream{Id: 2, MsgRate: 0}, Node: &pb.Node{Id: "a"}},
+					{Stream: &pb.Stream{Id: 3, MsgRate: 0}, Node: &pb.Node{Id: "a"}},
 				},
 			},
 		},
 		{
 			name: "test 3",
 			fields: fields{
-				nodes:   map[int32]*pb.Node{1: &pb.Node{Id: 1}, 2: &pb.Node{Id: 2}},
+				nodes:   map[string]*pb.Node{"a": &pb.Node{Id: "a"}, "b": &pb.Node{Id: "b"}},
 				streams: []*pb.Stream{&pb.Stream{Id: 1, MsgRate: 0}, &pb.Stream{Id: 2, MsgRate: 0}},
 				bindings: []*pb.Binding{
-					{Stream: &pb.Stream{Id: 1, MsgRate: 50}, Node: &pb.Node{Id: 1}},
-					{Stream: &pb.Stream{Id: 2, MsgRate: 60}, Node: &pb.Node{Id: 2}},
+					{Stream: &pb.Stream{Id: 1, MsgRate: 50}, Node: &pb.Node{Id: "a"}},
+					{Stream: &pb.Stream{Id: 2, MsgRate: 60}, Node: &pb.Node{Id: "b"}},
 				},
 			},
 			args: args{nStreams: []*pb.Stream{&pb.Stream{Id: 1, MsgRate: 0}, &pb.Stream{Id: 2, MsgRate: 0}, &pb.Stream{Id: 3, MsgRate: 0}}},
 			want: fields{
-				nodes:   map[int32]*pb.Node{1: &pb.Node{Id: 1}, 2: &pb.Node{Id: 2}},
+				nodes:   map[string]*pb.Node{"a": &pb.Node{Id: "a"}, "b": &pb.Node{Id: "b"}},
 				streams: []*pb.Stream{&pb.Stream{Id: 1, MsgRate: 0}, &pb.Stream{Id: 2, MsgRate: 0}, &pb.Stream{Id: 3, MsgRate: 0}},
 				bindings: []*pb.Binding{
-					{Stream: &pb.Stream{Id: 1, MsgRate: 50}, Node: &pb.Node{Id: 1}},
-					{Stream: &pb.Stream{Id: 2, MsgRate: 60}, Node: &pb.Node{Id: 2}},
-					{Stream: &pb.Stream{Id: 3, MsgRate: 0}, Node: &pb.Node{Id: 1}},
+					{Stream: &pb.Stream{Id: 1, MsgRate: 50}, Node: &pb.Node{Id: "a"}},
+					{Stream: &pb.Stream{Id: 2, MsgRate: 60}, Node: &pb.Node{Id: "b"}},
+					{Stream: &pb.Stream{Id: 3, MsgRate: 0}, Node: &pb.Node{Id: "a"}},
 				},
 			},
 		},
@@ -329,17 +329,17 @@ func Test_basicScheduler_observeStreams(t *testing.T) {
 
 func Test_basicScheduler_GetNodes(t *testing.T) {
 	type fields struct {
-		nodes map[int32]*pb.Node
+		nodes map[string]*pb.Node
 	}
 	tests := []struct {
 		name  string
-		nodes map[int32]*pb.Node
-		want  map[int32]*pb.Node
+		nodes map[string]*pb.Node
+		want  map[string]*pb.Node
 	}{
 		{
 			name:  "test 1",
-			nodes: map[int32]*pb.Node{1: &pb.Node{Id: 1}},
-			want:  map[int32]*pb.Node{1: &pb.Node{Id: 1}},
+			nodes: map[string]*pb.Node{"a": &pb.Node{Id: "a"}},
+			want:  map[string]*pb.Node{"a": &pb.Node{Id: "a"}},
 		},
 	}
 	for _, tt := range tests {
@@ -357,7 +357,7 @@ func Test_basicScheduler_GetNodes(t *testing.T) {
 type testNodeFetcher struct{}
 
 func (tnf *testNodeFetcher) GetNodes() ([]*pb.Node, error) {
-	return []*pb.Node{&pb.Node{Id: 0}, &pb.Node{Id: 1}}, nil
+	return []*pb.Node{&pb.Node{Id: "x"}, &pb.Node{Id: "a"}}, nil
 }
 
 type testStreamFetcher struct{}
@@ -370,7 +370,7 @@ func Test_basicScheduler_Observe(t *testing.T) {
 	t.Log("!! Note this test will fail sometimes due to randomized order of node map !!")
 
 	type fields struct {
-		nodes    map[int32]*pb.Node
+		nodes    map[string]*pb.Node
 		streams  []*pb.Stream
 		bindings []*pb.Binding
 		nf       NodeFetcher
@@ -386,7 +386,7 @@ func Test_basicScheduler_Observe(t *testing.T) {
 		{
 			name: "test 1",
 			fields: fields{
-				nodes:    map[int32]*pb.Node{},
+				nodes:    map[string]*pb.Node{},
 				streams:  []*pb.Stream{},
 				bindings: []*pb.Binding{},
 				nf:       &testNodeFetcher{},
@@ -394,11 +394,11 @@ func Test_basicScheduler_Observe(t *testing.T) {
 				once:     true,
 			},
 			want: fields{
-				nodes:   map[int32]*pb.Node{0: &pb.Node{Id: 0}, 1: &pb.Node{Id: 1}},
+				nodes:   map[string]*pb.Node{"x": &pb.Node{Id: "x"}, "a": &pb.Node{Id: "a"}},
 				streams: []*pb.Stream{&pb.Stream{Id: 1, MsgRate: 0}, &pb.Stream{Id: 2, MsgRate: 0}},
 				bindings: []*pb.Binding{
-					{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: 0}},
-					{Stream: &pb.Stream{Id: 2, MsgRate: 0}, Node: &pb.Node{Id: 1}},
+					{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: "x"}},
+					{Stream: &pb.Stream{Id: 2, MsgRate: 0}, Node: &pb.Node{Id: "a"}},
 				},
 				nf:   &testNodeFetcher{},
 				sf:   &testStreamFetcher{},
@@ -439,7 +439,7 @@ func Test_basicScheduler_Observe(t *testing.T) {
 func Test_basicScheduler_NodeBindings(t *testing.T) {
 	tests := []struct {
 		name     string
-		nodes    map[int32]*pb.Node
+		nodes    map[string]*pb.Node
 		streams  []*pb.Stream
 		bindings []*pb.Binding
 		req      *pb.NodeBindingRequest
@@ -448,20 +448,20 @@ func Test_basicScheduler_NodeBindings(t *testing.T) {
 	}{
 		{
 			name:     "test 1",
-			nodes:    map[int32]*pb.Node{0: &pb.Node{Id: 0}},
+			nodes:    map[string]*pb.Node{"x": &pb.Node{Id: "x"}},
 			streams:  []*pb.Stream{},
 			bindings: []*pb.Binding{},
-			req:      &pb.NodeBindingRequest{Node: &pb.Node{Id: 0}},
+			req:      &pb.NodeBindingRequest{Node: &pb.Node{Id: "x"}},
 			want:     &pb.NodeBindingResponse{Bindings: []*pb.Binding{}},
 			wantErr:  false,
 		},
 		{
 			name:     "test 2",
-			nodes:    map[int32]*pb.Node{0: &pb.Node{Id: 0}},
+			nodes:    map[string]*pb.Node{"x": &pb.Node{Id: "x"}},
 			streams:  []*pb.Stream{&pb.Stream{Id: 1, MsgRate: 0}},
-			bindings: []*pb.Binding{&pb.Binding{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: 0}}},
-			req:      &pb.NodeBindingRequest{Node: &pb.Node{Id: 0}},
-			want:     &pb.NodeBindingResponse{Bindings: []*pb.Binding{&pb.Binding{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: 0}}}},
+			bindings: []*pb.Binding{&pb.Binding{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: "x"}}},
+			req:      &pb.NodeBindingRequest{Node: &pb.Node{Id: "x"}},
+			want:     &pb.NodeBindingResponse{Bindings: []*pb.Binding{&pb.Binding{Stream: &pb.Stream{Id: 1, MsgRate: 0}, Node: &pb.Node{Id: "x"}}}},
 			wantErr:  false,
 		},
 	}

@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ttlworker
+spec:
+  ports:
+  - port: 443
+    name: https
+  selector:
+    run: ttlworker
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ttlworker
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        version: v1
+        run: ttlworker
+        app: ttlworker
+        service: ttlworker
+        tier: backend
+      annotations:
+        prometheus.io/scrape: "false"
+    spec:
+      containers:
+      - name: ttlworker
+        image: asia.gcr.io/evntsrc-io/ttlworker:latest
+        ports:
+        - containerPort: 443

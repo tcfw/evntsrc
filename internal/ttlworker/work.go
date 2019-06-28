@@ -52,12 +52,15 @@ func (w *Worker) StartAndWait() {
 
 //Start starts monitoring ttlscheduler allocations and enacts ttl replays based on bindings
 func (w *Worker) Start() {
+	log.Println("Starting...")
 	go w.watchBindings()
 }
 
 //watchBindings calls fetch streams every minute or stops working on stopWatching
 func (w *Worker) watchBindings() {
-	watchTicker := time.NewTicker(5 * time.Minute)
+	watchTicker := time.NewTicker(30 * time.Second)
+
+	log.Println("Monitoring bindings")
 
 	//Once off to seed
 	go w.fetchBindings()
@@ -66,7 +69,6 @@ func (w *Worker) watchBindings() {
 		select {
 		case <-watchTicker.C:
 			w.fetchBindings()
-			log.Println("Allocated", len(w.bindings), "bindings")
 		case <-w.stopWatching:
 			watchTicker.Stop()
 			return

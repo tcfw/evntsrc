@@ -15,6 +15,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/viper"
 	pbEvent "github.com/tcfw/evntsrc/internal/event/protos"
+	pbStorer "github.com/tcfw/evntsrc/internal/storer/protos"
 	"github.com/tcfw/evntsrc/internal/tracing"
 	"github.com/tcfw/evntsrc/internal/websocks"
 	"github.com/tcfw/go-queue"
@@ -65,7 +66,7 @@ func Start(nats string, port int) {
 	}
 
 	go RegisterMetrics()
-	// go StartGRPC(port)
+	go StartGRPC(port)
 
 	StartMonitor(nats)
 }
@@ -90,8 +91,18 @@ func StartGRPC(port int) {
 
 	grpcServer := grpc.NewServer(tracing.GRPCServerOptions()...)
 
-	log.Println("Starting gRPC server")
-	grpcServer.Serve(lis)
+	srv, err := newServer()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	pbStorer.RegisterStorerServiceServer(grpcServer, srv)
+
+	log.Println("Starting gRPC server...")
+	err = grpcServer.Serve(lis)
+	if err != nil {
+		log.Fatalf("GRPC: %s", err.Error())
+	}
 }
 
 //StartMonitor subscripts to all user channels
@@ -245,7 +256,7 @@ func doReplay(command *websocks.ReplayCommand, reply chan []byte, errCh chan err
 	reply <- []byte("OK")
 
 	for rD.Next() {
-		event, err := scanEvent(rD, command)
+		event, err := scanEvent(rD)
 		if err != nil {
 			errCh <- err
 		}
@@ -277,7 +288,7 @@ func doReplay(command *websocks.ReplayCommand, reply chan []byte, errCh chan err
 	}
 }
 
-func scanEvent(rD *sql.Rows, command *websocks.ReplayCommand) (*pbEvent.Event, error) {
+func scanEvent(rD *sql.Rows) (*pbEvent.Event, error) {
 	event := &pbEvent.Event{
 		Metadata: map[string]string{},
 	}

@@ -149,6 +149,7 @@ func (s *Server) Get(ctx context.Context, request *pb.GetRequest) (*pb.Stream, e
 		return nil, err
 	}
 
+	//Validate ownership
 	bsonq := bson.M{"owner": userClaims["sub"], "_id": request.GetID()}
 	query := collection.Find(bsonq)
 

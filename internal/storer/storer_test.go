@@ -5,12 +5,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	nats "github.com/nats-io/nats.go"
 
 	"github.com/tcfw/evntsrc/internal/websocks"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tcfw/evntsrc/internal/event"
+
+	pbEvent "github.com/tcfw/evntsrc/internal/event/protos"
 
 	"github.com/cockroachdb/cockroach-go/testserver"
 	natsTest "github.com/nats-io/nats-server/test"
@@ -62,17 +64,16 @@ func TestEventHandle(t *testing.T) {
 	defer stop()
 
 	proc := &eventProcessor{}
-
-	event := &event.Event{
+	eTime := time.Now()
+	event := &pbEvent.Event{
+		ID:      uuid.New().String(),
 		Stream:  1,
 		Subject: "test",
 		Source:  "test",
 		Type:    "test",
-		Time:    event.ZeroableTime{Time: time.Now()},
+		Time:    &eTime,
 		Data:    []byte{},
 	}
-
-	event.SetID()
 
 	assert.NotPanics(t, func() {
 		proc.Handle(event)
@@ -100,16 +101,17 @@ func TestDoReply(t *testing.T) {
 	reply := make(chan []byte, 10)
 	errCh := make(chan error, 1)
 
-	event := &event.Event{
+	eTime := time.Now()
+	event := &pbEvent.Event{
+		ID:      uuid.New().String(),
 		Stream:  1,
 		Subject: "test",
 		Source:  "test",
 		Type:    "test",
-		Time:    event.ZeroableTime{Time: time.Now()},
+		Time:    &eTime,
 		Data:    []byte{},
 	}
 
-	event.SetID()
 	proc := &eventProcessor{}
 	proc.Handle(event)
 

@@ -13,6 +13,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
+	"github.com/tcfw/evntsrc/internal/tracing"
 )
 
 func TestCanRunServer(t *testing.T) {

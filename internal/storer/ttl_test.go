@@ -38,7 +38,7 @@ func Test_extendTTL(t *testing.T) {
 				Type:     "test",
 				Time:     &eTime,
 				Data:     []byte{},
-				Metadata: map[string]string{}, //See test 3 for "null" metadata
+				Metadata: map[string]string{},
 			},
 			wantErr: false,
 		},

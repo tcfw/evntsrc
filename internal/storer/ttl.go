@@ -68,9 +68,9 @@ func setTTL(tx *sql.Tx, id string, ttl time.Time) error {
 		UPDATE 
 			event_store.events 
 		SET 
-			metadata = jsonb_set(coalesce(metadata, '{}'), '{ttl}'::string[], to_jsonb($1::timestamp), TRUE) 
+			metadata = jsonb_set(IFNULL(to_jsonb(metadata), '{}'::jsonb), '{ttl}'::string[], to_jsonb($1::timestamp), TRUE) 
 		WHERE 
-			id = $2 
+			id = $2
 		LIMIT 1`,
 		ttl, id)
 	return err

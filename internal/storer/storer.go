@@ -144,6 +144,11 @@ func (ep *eventProcessor) Handle(job interface{}) {
 		panic(err.Error)
 	}
 
+	md := string(metadataJSON)
+	if len(metadataJSON) == 0 || len(usrEvent.Metadata) == 0 {
+		md = "{}"
+	}
+
 	if _, err := tx.Exec(
 		`INSERT INTO event_store.events VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
 		usrEvent.ID,
@@ -155,7 +160,7 @@ func (ep *eventProcessor) Handle(job interface{}) {
 		usrEvent.Source,
 		usrEvent.Subject,
 		usrEvent.Acknowledged,
-		string(metadataJSON),
+		md,
 		usrEvent.ContentType,
 		usrEvent.Data,
 	); err != nil {

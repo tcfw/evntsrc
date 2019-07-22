@@ -17,7 +17,7 @@ package evntsrc_bridge
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
-import evntsrc_event "internal/event/protos"
+import evntsrc_event "github.com/tcfw/evntsrc/internal/event/protos"
 
 import context "golang.org/x/net/context"
 import grpc "google.golang.org/grpc"

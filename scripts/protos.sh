@@ -16,10 +16,11 @@ do
 		--js_out=library=evntsrc,binary:web/src/protos \
 		$file \
 		-I $dir \
+		-I /usr/local/include \
 		-I . \
 		-I $GOPATH/src \
-		-I ./vendor \
-		-I $GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis
+		-I vendor/github.com/gogo/googleapis \
+		-I vendor
 done
 
 mkdir -p web/src/protos/google/api/;
@@ -39,6 +40,6 @@ protoc \
 	-I $dir \
 	-I . \
 	-I $GOPATH/src \
-	-I ./vendor \
-	-I $GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
-	./vendor/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis/google/api/annotations.proto
+	-I vendor \
+	-I vendor/github.com/gogo/googleapis \
+	./vendor/github.com/gogo/googleapis/google/api/annotations.proto

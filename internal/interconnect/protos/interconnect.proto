@@ -2,7 +2,7 @@ syntax="proto3";
 
 package evntsrc.interconnect;
 
-import "github.com/tcfw/evntsrc/internal/event/protos/event.proto";
+import "internal/event/protos/event.proto";
 import "github.com/gogo/protobuf/gogoproto/gogo.proto";
 
 // Enable custom Marshal method.

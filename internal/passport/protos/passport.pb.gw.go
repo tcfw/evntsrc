@@ -218,13 +218,13 @@ func RegisterAuthSeviceHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 }
 
 var (
-	pattern_AuthSevice_VerifyToken_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "auth", "verify"}, ""))
+	pattern_AuthSevice_VerifyToken_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "auth", "verify"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_AuthSevice_Authenticate_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "auth", "login"}, ""))
+	pattern_AuthSevice_Authenticate_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "auth", "login"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_AuthSevice_SocialLogin_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "auth", "social"}, ""))
+	pattern_AuthSevice_SocialLogin_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "auth", "social"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_AuthSevice_RevokeToken_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "auth", "revoke"}, ""))
+	pattern_AuthSevice_RevokeToken_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "auth", "revoke"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (

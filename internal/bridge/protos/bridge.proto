@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package evntsrc.bridge;
 
-import "github.com/tcfw/evntsrc/internal/event/protos/event.proto";
+import "internal/event/protos/event.proto";
 
 message PublishRequest {
 	int32 Stream = 1;

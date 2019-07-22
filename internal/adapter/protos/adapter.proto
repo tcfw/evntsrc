@@ -1,8 +1,7 @@
 syntax="proto3";
 
 import "github.com/gogo/protobuf/gogoproto/gogo.proto";
-// import "google/api/annotations.proto";
-import "github.com/tcfw/evntsrc/internal/event/protos/event.proto";
+import "internal/event/protos/event.proto";
 
 package evntsrc.adapter;
 

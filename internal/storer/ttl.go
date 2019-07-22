@@ -8,6 +8,46 @@ import (
 	pb "github.com/tcfw/evntsrc/internal/storer/protos"
 )
 
+func (s *server) handleTTLQuery(req *pb.QueryRequest, stream pb.StorerService_QueryServer) error {
+
+	ttlQuery, ok := req.Query.(*pb.QueryRequest_Ttl)
+	if !ok {
+		return fmt.Errorf("Not TTL query")
+	}
+	ttl := ttlQuery.Ttl
+	uStream := req.Stream
+	limit := req.Limit
+
+	if limit == 0 {
+		limit = 1000
+	}
+	if limit > 1000 {
+		return fmt.Errorf("Limit too large")
+	}
+
+	query := `SELECT * FROM event_store.events WHERE stream = $1 AND metadata->>'ttl' <= $2 AND metadata->>'ttl' >= $3 AND acknowledged IS NULL ORDER BY time DESC LIMIT $4`
+
+	maxTTL := time.Now().Add(-1 * 7 * 24 * time.Hour).Format(time.RFC3339)
+
+	rD, err := pgdb.Query(query, uStream, ttl, maxTTL, limit)
+	if err != nil {
+		return err
+	}
+
+	for rD.Next() {
+		event, err := scanEvent(rD)
+		if err != nil {
+			return err
+		}
+
+		if err = stream.Send(event); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func extendTTL(req *pb.ExtendTTLRequest) error {
 	if req.CurrentTTL == nil {
 		return fmt.Errorf("Current TTL required")

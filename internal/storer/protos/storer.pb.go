@@ -22,7 +22,7 @@ import fmt "fmt"
 import math "math"
 import _ "github.com/gogo/protobuf/gogoproto"
 import _ "github.com/golang/protobuf/ptypes/timestamp"
-import evntsrc_event "internal/event/protos"
+import evntsrc_event "github.com/tcfw/evntsrc/internal/event/protos"
 
 import time "time"
 

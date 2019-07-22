@@ -2,6 +2,7 @@ package storer
 
 import (
 	"context"
+	"fmt"
 
 	"google.golang.org/grpc"
 
@@ -29,12 +30,7 @@ func newServer() (*server, error) {
 }
 
 func (s *server) Acknowledge(ctx context.Context, req *pb.AcknowledgeRequest) (*pb.AcknowledgeResponse, error) {
-	md, _ := metadata.FromIncomingContext(ctx)
-	oMDCtx := metadata.NewOutgoingContext(ctx, md)
-
-	//Try to get stream to validate access
-	_, err := s.streamConn.Get(oMDCtx, &streamsPb.GetRequest{ID: req.GetStream()})
-	if err != nil {
+	if err := s.validateStreamOwnership(ctx, req); err != nil {
 		return nil, err
 	}
 
@@ -49,5 +45,23 @@ func (s *server) ExtendTTL(ctx context.Context, req *pb.ExtendTTLRequest) (*pb.E
 	return &pb.ExtendTTLResponse{}, extendTTL(req)
 }
 func (s *server) Query(req *pb.QueryRequest, stream pb.StorerService_QueryServer) error {
-	return nil
+	switch qType := req.Query.(type) {
+	case *pb.QueryRequest_Ttl:
+		return s.handleTTLQuery(req, stream)
+	default:
+		return fmt.Errorf("Unknown query type %s", qType)
+	}
+}
+
+type streamedRequest interface {
+	GetStream() int32
+}
+
+func (s *server) validateStreamOwnership(ctx context.Context, req streamedRequest) error {
+	md, _ := metadata.FromIncomingContext(ctx)
+	oMDCtx := metadata.NewOutgoingContext(ctx, md)
+
+	//Try to get stream to validate access
+	_, err := s.streamConn.Get(oMDCtx, &streamsPb.GetRequest{ID: req.GetStream()})
+	return err
 }

@@ -8,6 +8,10 @@ import (
 	pb "github.com/tcfw/evntsrc/internal/storer/protos"
 )
 
+const (
+	MaxTTLDiff = -1 * 168 * time.Hour //1 Week
+)
+
 func (s *server) handleTTLQuery(req *pb.QueryRequest, stream pb.StorerService_QueryServer) error {
 
 	ttlQuery, ok := req.Query.(*pb.QueryRequest_Ttl)
@@ -25,9 +29,9 @@ func (s *server) handleTTLQuery(req *pb.QueryRequest, stream pb.StorerService_Qu
 		return fmt.Errorf("Limit too large")
 	}
 
-	query := `SELECT * FROM event_store.events WHERE stream = $1 AND metadata->>'ttl' <= $2 AND metadata->>'ttl' >= $3 AND acknowledged IS NULL ORDER BY time DESC LIMIT $4`
+	query := `SELECT * FROM event_store.events WHERE stream = $1 AND (metadata->>'ttl' <= $2 OR metadata->>'ttl' IS NULL) AND time >= $3 AND acknowledged IS NULL ORDER BY time DESC LIMIT $4`
 
-	maxTTL := time.Now().Add(-1 * 7 * 24 * time.Hour).Format(time.RFC3339)
+	maxTTL := time.Now().Add(MaxTTLDiff).Format(time.RFC3339)
 
 	rD, err := pgdb.Query(query, uStream, ttl, maxTTL, limit)
 	if err != nil {

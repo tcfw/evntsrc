@@ -75,13 +75,19 @@ func Test_extendTTL(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name:    "test 4 - Missing TTL time",
+			wantErr: true,
+			args:    &pb.ExtendTTLRequest{Stream: 1},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			//Create event
-			proc.Handle(tt.event)
-
-			tt.args.EventID = tt.event.ID
+			if tt.event != nil {
+				//Create event
+				proc.Handle(tt.event)
+				tt.args.EventID = tt.event.ID
+			}
 
 			if err := extendTTL(tt.args); (err != nil) != tt.wantErr {
 				t.Errorf("extendTTL() error = %v, wantErr %v", err, tt.wantErr)
@@ -99,58 +105,140 @@ func Test_server_handleTTLQuery(t *testing.T) {
 
 	proc := &eventProcessor{}
 
-	type args struct {
-		req    *pb.QueryRequest
-		stream pb.StorerService_QueryServer
-	}
+	now := time.Now()
+	pastAckTime := time.Now().Add(-1 * time.Hour)
+	oldestTTL := time.Now().Add(MaxTTLDiff).Add(-1 * time.Second)
+
 	tests := []struct {
-		name     string
-		args     args
-		events   []*pbEvent.Event
-		wantErr  bool
-		wantSend bool
+		name        string
+		req         *pb.QueryRequest
+		events      []*pbEvent.Event
+		wantErr     bool
+		wantSend    bool
+		nSentEvents int
 	}{
 		{
-			name: "test 1 - empty event set",
-			args: args{
-				req:    &pb.QueryRequest{Stream: 1, Query: &pb.QueryRequest_Ttl{}},
-				stream: pbMock.NewMockStorerService_QueryServer(gomock.NewController(t)),
-			},
+			name:     "test 1 - empty event set",
+			req:      &pb.QueryRequest{Stream: 1, Query: &pb.QueryRequest_Ttl{}},
 			events:   []*pbEvent.Event{},
 			wantErr:  false,
 			wantSend: false,
 		},
 		{
-			name: "test 2 - Invalid query",
-			args: args{
-				req:    &pb.QueryRequest{Stream: 1},
-				stream: pbMock.NewMockStorerService_QueryServer(gomock.NewController(t)),
-			},
+			name:     "test 2 - Invalid query",
+			req:      &pb.QueryRequest{Stream: 1},
 			events:   []*pbEvent.Event{},
 			wantErr:  true,
 			wantSend: false,
 		},
 		{
-			name: "test 2 - Over limit",
-			args: args{
-				req:    &pb.QueryRequest{Stream: 1, Limit: 2000, Query: &pb.QueryRequest_Ttl{}},
-				stream: pbMock.NewMockStorerService_QueryServer(gomock.NewController(t)),
-			},
+			name:     "test 2 - Over limit",
+			req:      &pb.QueryRequest{Stream: 1, Limit: 2000, Query: &pb.QueryRequest_Ttl{}},
 			events:   []*pbEvent.Event{},
 			wantErr:  true,
 			wantSend: false,
+		},
+		{
+			name: "test 3 - mixed events expired and acked, but none to replay",
+			req:  &pb.QueryRequest{Stream: 1, Query: &pb.QueryRequest_Ttl{}},
+			events: []*pbEvent.Event{
+				&pbEvent.Event{
+					ID:           uuid.New().String(),
+					Stream:       1,
+					Subject:      "test",
+					Source:       "test",
+					Type:         "test",
+					Time:         &now,
+					Acknowledged: &pastAckTime,
+					Data:         []byte{},
+				},
+				&pbEvent.Event{
+					ID:      uuid.New().String(),
+					Stream:  1,
+					Subject: "test",
+					Source:  "test",
+					Type:    "test",
+					Time:    &oldestTTL,
+					Data:    []byte{},
+				},
+			},
+			wantErr:  false,
+			wantSend: false,
+		},
+		{
+			name: "test 4 - mixed events to replay for TTL",
+			req:  &pb.QueryRequest{Stream: 1, Query: &pb.QueryRequest_Ttl{}},
+			events: []*pbEvent.Event{
+				&pbEvent.Event{
+					ID:           uuid.New().String(),
+					Stream:       1,
+					Subject:      "test",
+					Source:       "test",
+					Type:         "test",
+					Time:         &now,
+					Acknowledged: &pastAckTime,
+					Data:         []byte{},
+				},
+				&pbEvent.Event{
+					ID:      uuid.New().String(),
+					Stream:  1,
+					Subject: "test",
+					Source:  "test",
+					Type:    "test",
+					Time:    &now,
+					Data:    []byte{},
+				},
+			},
+			wantErr:     false,
+			wantSend:    true,
+			nSentEvents: 1,
+		},
+		{
+			name: "test 4 - all events to replay for TTL with and without prior TTL MD",
+			req:  &pb.QueryRequest{Stream: 1, Query: &pb.QueryRequest_Ttl{}},
+			events: []*pbEvent.Event{
+				&pbEvent.Event{
+					ID:      uuid.New().String(),
+					Stream:  1,
+					Subject: "test",
+					Source:  "test",
+					Type:    "test",
+					Time:    &now,
+					Metadata: map[string]string{
+						"ttl": time.Now().Add(1 * time.Second).Format(time.RFC3339),
+					},
+					Data: []byte{},
+				},
+				&pbEvent.Event{
+					ID:      uuid.New().String(),
+					Stream:  1,
+					Subject: "test",
+					Source:  "test",
+					Type:    "test",
+					Time:    &now,
+					Data:    []byte{},
+				},
+			},
+			wantErr:     false,
+			wantSend:    true,
+			nSentEvents: 2,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &server{}
-			if tt.wantSend {
-				tt.args.stream.(*pbMock.MockStorerService_QueryServer).EXPECT().Send(gomock.Any()).Return(gomock.Any())
-			}
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 			for _, event := range tt.events {
 				proc.Handle(event)
 			}
-			if err := s.handleTTLQuery(tt.args.req, tt.args.stream); (err != nil) != tt.wantErr {
+
+			stream := pbMock.NewMockStorerService_QueryServer(ctrl)
+			if tt.wantSend {
+				stream.EXPECT().Send(gomock.Any()).Return(nil).Times(tt.nSentEvents)
+			}
+
+			if err := s.handleTTLQuery(tt.req, stream); (err != nil) != tt.wantErr {
 				t.Errorf("server.handleTTLQuery() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

@@ -3,12 +3,14 @@ package storer
 import (
 	"database/sql"
 	"fmt"
+	"strconv"
 	"time"
 
 	pb "github.com/tcfw/evntsrc/internal/storer/protos"
 )
 
 const (
+	//MaxTTLDiff The maximum lifetime of an event
 	MaxTTLDiff = -1 * 168 * time.Hour //1 Week
 )
 
@@ -18,7 +20,7 @@ func (s *server) handleTTLQuery(req *pb.QueryRequest, stream pb.StorerService_Qu
 	if !ok {
 		return fmt.Errorf("Not TTL query")
 	}
-	ttl := ttlQuery.Ttl
+	ttl := ttlQuery.Ttl.GetTime()
 	uStream := req.Stream
 	limit := req.Limit
 
@@ -29,7 +31,22 @@ func (s *server) handleTTLQuery(req *pb.QueryRequest, stream pb.StorerService_Qu
 		return fmt.Errorf("Limit too large")
 	}
 
-	query := `SELECT * FROM event_store.events WHERE stream = $1 AND (metadata->>'ttl' <= $2 OR metadata->>'ttl' IS NULL) AND time >= $3 AND acknowledged IS NULL ORDER BY time DESC LIMIT $4`
+	if ttl == nil {
+		return fmt.Errorf("Last TTL Check time cannot be nil")
+	}
+
+	query := `
+		SELECT 
+			*
+		FROM 
+			event_store.events 
+		WHERE 
+			stream = $1 AND 
+			metadata->>'ttl' <= $2 AND 
+			(metadata->>'retries' <= 5 OR metadata->>'retries' IS NULL) AND 
+			time >= $3 AND 
+			acknowledged IS NULL 
+		ORDER BY time DESC LIMIT $4`
 
 	maxTTL := time.Now().Add(MaxTTLDiff).Format(time.RFC3339)
 
@@ -90,32 +107,41 @@ func extendTTL(req *pb.ExtendTTLRequest) error {
 
 	ttl, ok := eventMD["ttl"]
 	ttlTime, _ := time.Parse(time.RFC3339, ttl)
-
-	fmt.Printf("%s", ttlTime.String())
-
 	if ok && ttlTime != *req.CurrentTTL {
 		tx.Rollback()
 		return fmt.Errorf("incorrect matching TTL")
 	}
 
-	err = setTTL(tx, req.GetEventID(), *req.GetTTLTime())
+	err = setMD(tx, req.EventID, "ttl", req.GetTTLTime().Format(time.RFC3339))
 	if err != nil {
 		tx.Rollback()
 		return fmt.Errorf("failed to update TTL: %s", err)
 	}
 
+	retries, ok := eventMD["retries"]
+	if !ok {
+		err = setMD(tx, req.EventID, "retries", strconv.Itoa(1))
+	} else {
+		retInt, _ := strconv.Atoi(retries)
+		err = setMD(tx, req.EventID, "retries", strconv.Itoa(retInt+1))
+	}
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("failed to update Retries: %s", err)
+	}
+
 	return tx.Commit()
 }
 
-func setTTL(tx *sql.Tx, id string, ttl time.Time) error {
+func setMD(tx *sql.Tx, id string, mdField string, data string) error {
 	_, err := tx.Exec(`
 		UPDATE 
 			event_store.events 
 		SET 
-			metadata = jsonb_set(IFNULL(to_jsonb(metadata), '{}'::jsonb), '{ttl}'::string[], to_jsonb($1::timestamp), TRUE) 
+			metadata = jsonb_set(IFNULL(to_jsonb(metadata), '{}'::jsonb), $1::string[], to_jsonb($2::string), TRUE) 
 		WHERE 
-			id = $2
+			id = $3
 		LIMIT 1`,
-		ttl, id)
+		fmt.Sprintf("{%s}", mdField), data, id)
 	return err
 }

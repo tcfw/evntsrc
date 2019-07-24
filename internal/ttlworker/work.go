@@ -1,12 +1,11 @@
 package ttlworker
 
 import (
-	"context"
 	"log"
 	"os"
 	"sync"
-	"time"
 
+	storerPB "github.com/tcfw/evntsrc/internal/storer/protos"
 	ttlschedulerPB "github.com/tcfw/evntsrc/internal/ttlscheduler/protos"
 	"google.golang.org/grpc"
 )
@@ -16,6 +15,8 @@ type Worker struct {
 	grpcPort      int //TODO(tcfw): Currently unused
 	schedulerConn *grpc.ClientConn
 	schedulerCli  ttlschedulerPB.TTLSchedulerClient
+	storerConn    *grpc.ClientConn
+	storerCli    storerPB.StorerServiceClient
 	bindings      []*ttlschedulerPB.Binding
 	bindingMu     sync.RWMutex
 	stopWatching  chan struct{}
@@ -25,21 +26,38 @@ type Worker struct {
 //allocated streams
 func NewWorker(port int) (*Worker, error) {
 	var schedulerEndpoint string
+	var storerEndpoint string
+
+	//Scheduler conn
 	if schedulerEndpoint = os.Getenv("SCHEDULER_ENDPOINT"); schedulerEndpoint == "" {
-		schedulerEndpoint = "ttlscheduler.default:443"
+		schedulerEndpoint = "ttlscheduler:443"
 	}
 
-	conn, err := grpc.Dial(schedulerEndpoint, grpc.WithInsecure(), grpc.WithBlock())
+	schedulerConn, err := grpc.Dial(schedulerEndpoint, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return nil, err
 	}
 
-	schedulerClient := ttlschedulerPB.NewTTLSchedulerClient(conn)
+	schedulerClient := ttlschedulerPB.NewTTLSchedulerClient(schedulerConn)
+
+	//Storer conn
+	if storerEndpoint = os.Getenv("STORER_ENDPOINT"); storerEndpoint == "" {
+		storerEndpoint = "storer:443"
+	}
+
+	storerConn, err := grpc.Dial(storerEndpoint, grpc.WithInsecure())
+	if err != nil {
+		return nil, err
+	}
+
+	storerClient := storerPB.NewStorerServiceClient(storerConn)
 
 	return &Worker{
 		grpcPort:      port,
-		schedulerConn: conn,
+		schedulerConn: schedulerConn,
 		schedulerCli:  schedulerClient,
+		storerConn:    storerConn,
+		storerCli:    storerClient,
 		bindings:      []*ttlschedulerPB.Binding{},
 	}, nil
 }
@@ -54,48 +72,6 @@ func (w *Worker) StartAndWait() {
 func (w *Worker) Start() {
 	log.Println("Starting...")
 	go w.watchBindings()
-}
-
-//watchBindings calls fetch streams every minute or stops working on stopWatching
-func (w *Worker) watchBindings() {
-	watchTicker := time.NewTicker(30 * time.Second)
-
-	log.Println("Monitoring bindings")
-
-	//Once off to seed
-	go w.fetchBindings()
-
-	for {
-		select {
-		case <-watchTicker.C:
-			w.fetchBindings()
-		case <-w.stopWatching:
-			watchTicker.Stop()
-			return
-		}
-	}
-}
-
-//fetchBindings calls the ttlscheduler to fetch bindings which have been allocated to this worker
-//based on the hostname as the node ID
-func (w *Worker) fetchBindings() error {
-	id := w.identifier()
-
-	bindingsResp, err := w.schedulerCli.NodeBindings(context.Background(), &ttlschedulerPB.NodeBindingRequest{Node: &ttlschedulerPB.Node{Id: id}})
-	if err != nil {
-		return err
-	}
-
-	w.bindingMu.Lock()
-	w.bindings = bindingsResp.Bindings
-	w.bindingMu.Unlock()
-
-	return nil
-}
-
-func (w *Worker) identifier() string {
-	hostname, _ := os.Hostname()
-	return hostname
 }
 
 //Stop closes the GRPC connection to the scheduler

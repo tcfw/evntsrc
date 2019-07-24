@@ -39,7 +39,9 @@ message QueryRequest {
 	}
 }
 
-message QueryTTLExpired{}
+message QueryTTLExpired{
+	google.protobuf.Timestamp Time = 1 [(gogoproto.stdtime) = true];
+}
 
 service StorerService {
 	rpc Acknowledge(AcknowledgeRequest) returns (AcknowledgeResponse);

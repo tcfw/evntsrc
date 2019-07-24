@@ -12,6 +12,7 @@ goog.provide('proto.evntsrc.storer.QueryTTLExpired');
 goog.require('jspb.BinaryReader');
 goog.require('jspb.BinaryWriter');
 goog.require('jspb.Message');
+goog.require('proto.google.protobuf.Timestamp');
 
 
 /**
@@ -60,7 +61,7 @@ proto.evntsrc.storer.QueryTTLExpired.prototype.toObject = function(opt_includeIn
  */
 proto.evntsrc.storer.QueryTTLExpired.toObject = function(includeInstance, msg) {
   var f, obj = {
-
+    time: (f = msg.getTime()) && proto.google.protobuf.Timestamp.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -97,6 +98,11 @@ proto.evntsrc.storer.QueryTTLExpired.deserializeBinaryFromReader = function(msg,
     }
     var field = reader.getFieldNumber();
     switch (field) {
+    case 1:
+      var value = new proto.google.protobuf.Timestamp;
+      reader.readMessage(value,proto.google.protobuf.Timestamp.deserializeBinaryFromReader);
+      msg.setTime(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -126,6 +132,44 @@ proto.evntsrc.storer.QueryTTLExpired.prototype.serializeBinary = function() {
  */
 proto.evntsrc.storer.QueryTTLExpired.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
+  f = message.getTime();
+  if (f != null) {
+    writer.writeMessage(
+      1,
+      f,
+      proto.google.protobuf.Timestamp.serializeBinaryToWriter
+    );
+  }
+};
+
+
+/**
+ * optional google.protobuf.Timestamp Time = 1;
+ * @return {?proto.google.protobuf.Timestamp}
+ */
+proto.evntsrc.storer.QueryTTLExpired.prototype.getTime = function() {
+  return /** @type{?proto.google.protobuf.Timestamp} */ (
+    jspb.Message.getWrapperField(this, proto.google.protobuf.Timestamp, 1));
+};
+
+
+/** @param {?proto.google.protobuf.Timestamp|undefined} value */
+proto.evntsrc.storer.QueryTTLExpired.prototype.setTime = function(value) {
+  jspb.Message.setWrapperField(this, 1, value);
+};
+
+
+proto.evntsrc.storer.QueryTTLExpired.prototype.clearTime = function() {
+  this.setTime(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {!boolean}
+ */
+proto.evntsrc.storer.QueryTTLExpired.prototype.hasTime = function() {
+  return jspb.Message.getField(this, 1) != null;
 };
 
 

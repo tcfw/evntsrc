@@ -119,7 +119,7 @@ func Test_server_handleTTLQuery(t *testing.T) {
 	}{
 		{
 			name:     "test 1 - empty event set",
-			req:      &pb.QueryRequest{Stream: 1, Query: &pb.QueryRequest_Ttl{}},
+			req:      &pb.QueryRequest{Stream: 1, Query: &pb.QueryRequest_Ttl{Ttl: &pb.QueryTTLExpired{Time: &now}}},
 			events:   []*pbEvent.Event{},
 			wantErr:  false,
 			wantSend: false,
@@ -133,14 +133,14 @@ func Test_server_handleTTLQuery(t *testing.T) {
 		},
 		{
 			name:     "test 2 - Over limit",
-			req:      &pb.QueryRequest{Stream: 1, Limit: 2000, Query: &pb.QueryRequest_Ttl{}},
+			req:      &pb.QueryRequest{Stream: 1, Limit: 2000, Query: &pb.QueryRequest_Ttl{Ttl: &pb.QueryTTLExpired{Time: &now}}},
 			events:   []*pbEvent.Event{},
 			wantErr:  true,
 			wantSend: false,
 		},
 		{
 			name: "test 3 - mixed events expired and acked, but none to replay",
-			req:  &pb.QueryRequest{Stream: 1, Query: &pb.QueryRequest_Ttl{}},
+			req:  &pb.QueryRequest{Stream: 1, Query: &pb.QueryRequest_Ttl{Ttl: &pb.QueryTTLExpired{Time: &now}}},
 			events: []*pbEvent.Event{
 				&pbEvent.Event{
 					ID:           uuid.New().String(),
@@ -167,7 +167,7 @@ func Test_server_handleTTLQuery(t *testing.T) {
 		},
 		{
 			name: "test 4 - mixed events to replay for TTL",
-			req:  &pb.QueryRequest{Stream: 1, Query: &pb.QueryRequest_Ttl{}},
+			req:  &pb.QueryRequest{Stream: 1, Query: &pb.QueryRequest_Ttl{Ttl: &pb.QueryTTLExpired{Time: &now}}},
 			events: []*pbEvent.Event{
 				&pbEvent.Event{
 					ID:           uuid.New().String(),
@@ -195,7 +195,7 @@ func Test_server_handleTTLQuery(t *testing.T) {
 		},
 		{
 			name: "test 4 - all events to replay for TTL with and without prior TTL MD",
-			req:  &pb.QueryRequest{Stream: 1, Query: &pb.QueryRequest_Ttl{}},
+			req:  &pb.QueryRequest{Stream: 1, Query: &pb.QueryRequest_Ttl{Ttl: &pb.QueryTTLExpired{Time: &now}}},
 			events: []*pbEvent.Event{
 				&pbEvent.Event{
 					ID:      uuid.New().String(),
@@ -205,7 +205,7 @@ func Test_server_handleTTLQuery(t *testing.T) {
 					Type:    "test",
 					Time:    &now,
 					Metadata: map[string]string{
-						"ttl": time.Now().Add(1 * time.Second).Format(time.RFC3339),
+						"ttl": time.Now().Add(-5 * time.Second).Format(time.RFC3339),
 					},
 					Data: []byte{},
 				},

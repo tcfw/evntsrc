@@ -30,6 +30,9 @@ func (w *Worker) processStream(stream int32) error {
 		}
 
 		//replay event
+		if _, err = w.storerCli.ReplayEvent(ctx, &storer.ReplayEventRequest{Stream: stream, EventID: event.GetID()}); err != nil {
+			return err
+		}
 
 		//Extend TTL
 		var cTTL *time.Time
@@ -42,8 +45,7 @@ func (w *Worker) processStream(stream int32) error {
 		nTTL := time.Now().Add(5 * time.Minute)
 		//TODO(tcfw) allow stream and event based TTL retry config
 
-		_, err = w.storerCli.ExtendTTL(ctx, &storer.ExtendTTLRequest{Stream: stream, EventID: event.GetID(), CurrentTTL: cTTL, TTLTime: &nTTL})
-		if err != nil {
+		if _, err = w.storerCli.ExtendTTL(ctx, &storer.ExtendTTLRequest{Stream: stream, EventID: event.GetID(), CurrentTTL: cTTL, TTLTime: &nTTL}); err != nil {
 			return err
 		}
 	}

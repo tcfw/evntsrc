@@ -6,6 +6,7 @@ import (
 
 	"google.golang.org/grpc"
 
+	"github.com/gogo/protobuf/proto"
 	pb "github.com/tcfw/evntsrc/internal/storer/protos"
 	streamsPb "github.com/tcfw/evntsrc/internal/streams/protos"
 	grpcRoundRobin "google.golang.org/grpc/balancer/roundrobin"
@@ -51,6 +52,31 @@ func (s *server) Query(req *pb.QueryRequest, stream pb.StorerService_QueryServer
 	default:
 		return fmt.Errorf("Unknown query type %s", qType)
 	}
+}
+
+func (s *server) ReplayEvent(ctx context.Context, req *pb.ReplayEventRequest) (*pb.ReplayEventResponse, error) {
+	rQ, err := pgdb.Query(`SELECT * FROM event_store.events WHERE stream = $1 AND id = $2 LIMIT 1`, req.GetStream(), req.GetEventID())
+	if err != nil {
+		return nil, fmt.Errorf("sqlc: %s", err.Error())
+	}
+
+	event, err := scanEvent(rQ)
+	if err != nil {
+		return nil, err
+	}
+
+	bytes, err := proto.Marshal(event)
+	if err != nil {
+		return nil, fmt.Errorf("failed replay proto marshal: %s", err.Error())
+	}
+
+	dest := fmt.Sprintf("_USER.%d.%s", event.Stream, event.Subject)
+	err = natsConn.Publish(dest, bytes)
+	if err != nil {
+		return nil, fmt.Errorf("natspub: %s", err.Error())
+	}
+
+	return &pb.ReplayEventResponse{}, nil
 }
 
 type streamedRequest interface {

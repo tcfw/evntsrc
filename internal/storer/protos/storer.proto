@@ -43,8 +43,16 @@ message QueryTTLExpired{
 	google.protobuf.Timestamp Time = 1 [(gogoproto.stdtime) = true];
 }
 
+message ReplayEventRequest {
+	int32 Stream = 1;
+	string EventID = 2;
+}
+
+message ReplayEventResponse{}
+
 service StorerService {
 	rpc Acknowledge(AcknowledgeRequest) returns (AcknowledgeResponse);
 	rpc ExtendTTL(ExtendTTLRequest) returns (ExtendTTLResponse);
 	rpc Query(QueryRequest) returns (stream evntsrc.event.Event);
+	rpc ReplayEvent(ReplayEventRequest) returns (ReplayEventResponse);
 }

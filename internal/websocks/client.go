@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gogo/protobuf/proto"
+	"github.com/tcfw/evntsrc/internal/event"
 	pbEvent "github.com/tcfw/evntsrc/internal/event/protos"
 
 	"github.com/gorilla/websocket"
@@ -36,6 +37,11 @@ var (
 	space   = []byte{' '}
 )
 
+//Publisher provides a way to broadcast an event
+type Publisher interface {
+	Publish(channel string, event *event.Event) error
+}
+
 //Client maintains WS info
 type Client struct {
 	// The websocket connection.
@@ -57,6 +63,8 @@ type Client struct {
 	seq          map[string]int64
 	seqLock      sync.Mutex
 	closed       bool
+
+	publisher Publisher
 }
 
 //NewClient constructs a new websocket evntsrc client
@@ -69,6 +77,7 @@ func NewClient(conn *websocket.Conn) *Client {
 		seq:           map[string]int64{},
 		closed:        false,
 		closeConnSub:  make(chan bool, 1),
+		publisher:     &NatsPublisher{},
 	}
 }
 

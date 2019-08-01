@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gogo/protobuf/proto"
 	"github.com/tcfw/evntsrc/internal/event"
 )
 
@@ -109,16 +108,13 @@ func (c *Client) doPublish(command *InboundCommand, message []byte) {
 		return
 	}
 
-	rEvent := &event.Event{}
-	rEvent.SetID()
+	rEvent := event.NewEvent()
 	rEvent.Stream = c.auth.Stream
 	rEvent.Subject = subcommand.Subject
-	rEvent.CEVersion = "0.1"
 	rEvent.Type = subcommand.Type
 	rEvent.TypeVersion = subcommand.TypeVersion
 	rEvent.ContentType = subcommand.ContentType
 	rEvent.Data = []byte(subcommand.Data)
-	rEvent.Time = event.ZeroableTime{Time: time.Now()}
 	rEvent.Metadata = map[string]string{"source_ip": c.conn.RemoteAddr().String()}
 	rEvent.Source = subcommand.Source
 	if rEvent.Source == "" {
@@ -132,10 +128,7 @@ func (c *Client) doPublish(command *InboundCommand, message []byte) {
 	rEvent.Metadata["relative_seq"] = fmt.Sprintf("%s-%d", c.connectionID, c.seq[channel])
 	c.seqLock.Unlock()
 
-	eventJSONBytes, _ := proto.Marshal(rEvent.ToProtobuf())
-	natsConn.Publish(channel, eventJSONBytes)
-
-	bytePublishCounter.WithLabelValues(fmt.Sprintf("%d", c.auth.Stream)).Add(float64(len(eventJSONBytes)))
+	c.publisher.Publish(channel, rEvent)
 
 	c.sendStruct(&AckCommand{
 		Ref:     command.Ref,

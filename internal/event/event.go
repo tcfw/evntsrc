@@ -2,11 +2,9 @@ package event
 
 import (
 	"encoding/json"
-	"log"
+	"time"
 
-	"github.com/globalsign/mgo"
 	"github.com/google/uuid"
-	"github.com/tcfw/evntsrc/internal/utils/db"
 
 	pbEvent "github.com/tcfw/evntsrc/internal/event/protos"
 )
@@ -28,6 +26,17 @@ type Event struct {
 	Data         []byte            `json:"data,omitempty"`
 }
 
+//NewEvent fills an event with basic info
+func NewEvent() *Event {
+	ev := &Event{
+		CEVersion:   "0.1",
+		TypeVersion: "0.1",
+		Time:        ZeroableTime{Time: time.Now()},
+	}
+	ev.SetID()
+	return ev
+}
+
 //SetID sets a new ID for the event based on UUID
 func (e *Event) SetID() {
 	e.ID = uuid.New().String()
@@ -47,31 +56,6 @@ func (e *Event) SetDataFromStruct(jsonStruct interface{}) error {
 //SetDataFromString converts a string to bytes and stores in data
 func (e *Event) SetDataFromString(data string) {
 	e.Data = []byte(data)
-}
-
-//Store saves the event to DB
-func (e *Event) Store() error {
-	dbConn, err := db.NewMongoDBSession()
-	if err != nil {
-		return err
-	}
-	defer dbConn.Close()
-
-	collection := dbConn.DB("events").C("store")
-
-	if err = collection.Insert(e); err != nil {
-		log.Println(err.Error())
-		return err
-	}
-
-	if err = collection.EnsureIndex(mgo.Index{
-		Key:    []string{"stream"},
-		Unique: false,
-	}); err != nil {
-		log.Printf("Error ensuring stream index: %s\n", err.Error())
-	}
-
-	return nil
 }
 
 //ToProtobuf converts structed event to protobuf event

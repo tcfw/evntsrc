@@ -2,7 +2,6 @@ package storer
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net"
@@ -121,56 +120,7 @@ type eventProcessor struct{}
 func (ep *eventProcessor) Handle(job interface{}) {
 	usrEvent := job.(*pbEvent.Event)
 
-	if isReplay, ok := usrEvent.Metadata["replay"]; ok && isReplay == "true" {
-		return
-	}
-
-	if _, ok := usrEvent.Metadata["forwarded"]; ok {
-		return
-	}
-
-	if isNonPersistent, ok := usrEvent.Metadata["non-persistent"]; ok && isNonPersistent == "true" {
-		return
-	}
-
-	metadataJSON, err := json.Marshal(usrEvent.Metadata)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	tx, err := pgdb.Begin()
-	if err != nil {
-		panic(err.Error)
-	}
-
-	md := string(metadataJSON)
-	if len(metadataJSON) == 0 || len(usrEvent.Metadata) == 0 {
-		md = "{}"
-	}
-
-	if _, err := tx.Exec(
-		`INSERT INTO event_store.events VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
-		usrEvent.ID,
-		usrEvent.Stream,
-		usrEvent.Time,
-		usrEvent.Type,
-		usrEvent.TypeVersion,
-		usrEvent.CEVersion,
-		usrEvent.Source,
-		usrEvent.Subject,
-		usrEvent.Acknowledged,
-		md,
-		usrEvent.ContentType,
-		usrEvent.Data,
-	); err != nil {
-		log.Fatal(err)
-		panic(err.Error)
-	}
-
-	tx.Commit()
-
-	storeCount.With(prometheus.Labels{"stream": fmt.Sprintf("%d", usrEvent.Stream)}).Inc()
-
+	storeEvent(usrEvent, pgdb)
 }
 
 func monitorUserStreams() {

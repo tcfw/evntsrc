@@ -79,6 +79,12 @@ func (s *server) ReplayEvent(ctx context.Context, req *pb.ReplayEventRequest) (*
 	return &pb.ReplayEventResponse{}, nil
 }
 
+func (s *server) Store(ctx context.Context, req *pb.StoreRequest) (*pb.StoreResponse, error) {
+	err := storeEvent(req.Event, pgdb)
+
+	return &pb.StoreResponse{}, err
+}
+
 type streamedRequest interface {
 	GetStream() int32
 }

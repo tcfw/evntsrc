@@ -50,9 +50,16 @@ message ReplayEventRequest {
 
 message ReplayEventResponse{}
 
+message StoreRequest {
+	evntsrc.event.Event Event = 1;
+}
+
+message StoreResponse {}
+
 service StorerService {
 	rpc Acknowledge(AcknowledgeRequest) returns (AcknowledgeResponse);
 	rpc ExtendTTL(ExtendTTLRequest) returns (ExtendTTLResponse);
 	rpc Query(QueryRequest) returns (stream evntsrc.event.Event);
 	rpc ReplayEvent(ReplayEventRequest) returns (ReplayEventResponse);
+	rpc Store(StoreRequest) returns (StoreResponse);
 }

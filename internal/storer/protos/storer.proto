@@ -62,4 +62,6 @@ service StorerService {
 	rpc Query(QueryRequest) returns (stream evntsrc.event.Event);
 	rpc ReplayEvent(ReplayEventRequest) returns (ReplayEventResponse);
 	rpc Store(StoreRequest) returns (StoreResponse);
+
+	//TODO(tcfw) delete()
 }

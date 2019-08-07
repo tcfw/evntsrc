@@ -2,7 +2,14 @@ syntax = "proto3";
 
 package evntsrc.bridge;
 
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
 import "internal/event/protos/event.proto";
+
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option (gogoproto.goproto_registration) = true;
+option (gogoproto.messagename_all) = true;
 
 message PublishRequest {
 	int32 Stream = 1;

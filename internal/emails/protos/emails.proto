@@ -2,6 +2,14 @@ syntax="proto3";
 
 package evntsrc.emails;
 
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option (gogoproto.goproto_registration) = true;
+option (gogoproto.messagename_all) = true;
+
 message Email {
   string from = 1;
   repeated string to = 2;

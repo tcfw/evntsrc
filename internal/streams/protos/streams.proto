@@ -66,6 +66,8 @@ service StreamsService {
 		};
 	}
 
+	//TODO(tcfw) update()
+
 	rpc Delete(Stream) returns (Empty) {
 		option (google.api.http) = {
 			delete: "/v1/stream/{ID}"

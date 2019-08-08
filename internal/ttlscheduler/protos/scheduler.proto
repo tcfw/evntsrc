@@ -1,0 +1,41 @@
+syntax="proto3";
+package evntsrc.ttlscheduler;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+// Enable custom Marshal method.
+option (gogoproto.marshaler_all) = true;
+// Enable custom Unmarshal method.
+option (gogoproto.unmarshaler_all) = true;
+// Enable custom Size method (Required by Marshal and Unmarshal).
+option (gogoproto.sizer_all) = true;
+// Enable registration with golang/protobuf for the grpc-gateway.
+option (gogoproto.goproto_registration) = true;
+// Enable generation of XXX_MessageName methods for grpc-go/status.
+option (gogoproto.messagename_all) = true;
+
+message Stream {
+	int32 id = 1;
+	int64 msgRate = 2;
+}
+
+message Node {
+	string id = 1;
+}
+
+message Binding {
+	Stream stream = 1;
+	Node node = 2;
+}
+
+message NodeBindingRequest {
+	Node node = 1;
+}
+
+message NodeBindingResponse {
+	repeated Binding bindings = 1;
+}
+
+service TTLScheduler {
+	rpc NodeBindings(NodeBindingRequest) returns (NodeBindingResponse);
+}

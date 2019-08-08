@@ -61,7 +61,7 @@ func (s *Server) processByQuery(ctx context.Context, req *pb.MetricsRequest, que
 	interval, resolution := apiInterval(&req.Interval)
 
 	span := tracing.StartChildSpan(opentracing.SpanFromContext(ctx), "Prometheus")
-	modelVal, err := api.QueryRange(ctx, query, promApi.Range{Start: interval, End: time.Now(), Step: resolution})
+	modelVal, _, err := api.QueryRange(ctx, query, promApi.Range{Start: interval, End: time.Now(), Step: resolution})
 	if err != nil {
 		return nil, err
 	}

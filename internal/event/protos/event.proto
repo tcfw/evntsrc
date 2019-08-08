@@ -3,7 +3,9 @@ syntax = "proto3";
 package evntsrc.event;
 
 import "github.com/gogo/protobuf/gogoproto/gogo.proto";
-import "google/protobuf/timestamp.proto";
+import "github.com/golang/protobuf/ptypes/timestamp/timestamp.proto";
+
+option go_package = "github.com/tcfw/evntsrc/internal/event/protos";
 
 // Enable custom Marshal method.
 option (gogoproto.marshaler_all) = true;

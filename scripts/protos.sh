@@ -12,14 +12,14 @@ do
 	protoc \
 		--gofast_out=Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,Mgoogle/api/annotations.proto=github.com/gogo/googleapis/google/api,plugins=grpc:$dir/ \
 		--grpc-gateway_out=Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,Mgoogle/api/annotations.proto=github.com/gogo/googleapis/google/api,logtostderr=true:$dir/ \
-		--js_out=import_style=commonjs_strict,binary:web/src/protos \
-		--js_out=library=evntsrc,binary:web/src/protos \
+		--js_out=import_style=commonjs,binary:web/src/protos \
 		$file \
 		-I $dir \
+		-I /usr/local/include \
 		-I . \
 		-I $GOPATH/src \
-		-I ./vendor \
-		-I $GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis
+		-I vendor/github.com/gogo/googleapis \
+		-I vendor
 done
 
 mkdir -p web/src/protos/google/api/;
@@ -35,10 +35,11 @@ protoc \
 
 # Google annotations
 protoc \
-	--js_out=library=annotations_pb,binary:web/src/protos/google/api/ \
+	--js_out=library=annotations_pb,binary:web/src/protos/github.com/gogo/googleapis/google/api/ \
 	-I $dir \
 	-I . \
 	-I $GOPATH/src \
-	-I ./vendor \
-	-I $GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
-	./vendor/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis/google/api/annotations.proto
+	-I vendor \
+	-I vendor/github.com/gogo/googleapis \
+	./vendor/github.com/gogo/googleapis/google/api/annotations.proto
+cp web/src/protos/github.com/gogo/googleapis/google/api/annotations_pb.js web/src/protos/google/api

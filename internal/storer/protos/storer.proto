@@ -1,0 +1,67 @@
+syntax="proto3";
+
+package evntsrc.storer;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "github.com/golang/protobuf/ptypes/timestamp/timestamp.proto";
+import "internal/event/protos/event.proto";
+
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option (gogoproto.goproto_registration) = true;
+option (gogoproto.messagename_all) = true;
+
+message AcknowledgeRequest {
+	int32 Stream = 1;
+	string EventID = 2;
+}
+
+message AcknowledgeResponse {
+	google.protobuf.Timestamp Time = 1 [(gogoproto.stdtime) = true];
+}
+
+message ExtendTTLRequest {
+	int32 Stream = 1;
+	string EventID = 2;
+	google.protobuf.Timestamp CurrentTTL = 3 [(gogoproto.stdtime) = true];
+	google.protobuf.Timestamp TTLTime = 4 [(gogoproto.stdtime) = true];
+}
+
+message ExtendTTLResponse {}
+
+message QueryRequest {
+	int32 Stream = 1;
+	int32 limit = 2;
+
+	oneof query {
+		QueryTTLExpired ttl = 3;
+	}
+}
+
+message QueryTTLExpired{
+	google.protobuf.Timestamp Time = 1 [(gogoproto.stdtime) = true];
+}
+
+message ReplayEventRequest {
+	int32 Stream = 1;
+	string EventID = 2;
+}
+
+message ReplayEventResponse{}
+
+message StoreRequest {
+	evntsrc.event.Event Event = 1;
+}
+
+message StoreResponse {}
+
+service StorerService {
+	rpc Acknowledge(AcknowledgeRequest) returns (AcknowledgeResponse);
+	rpc ExtendTTL(ExtendTTLRequest) returns (ExtendTTLResponse);
+	rpc Query(QueryRequest) returns (stream evntsrc.event.Event);
+	rpc ReplayEvent(ReplayEventRequest) returns (ReplayEventResponse);
+	rpc Store(StoreRequest) returns (StoreResponse);
+
+	//TODO(tcfw) delete()
+}

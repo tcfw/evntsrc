@@ -107,7 +107,10 @@ func request_StreamsService_Delete_0(ctx context.Context, marshaler runtime.Mars
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "ID", err)
 	}
 
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_StreamsService_Delete_0); err != nil {
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_StreamsService_Delete_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -238,13 +241,13 @@ func RegisterStreamsServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 }
 
 var (
-	pattern_StreamsService_Create_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "stream"}, ""))
+	pattern_StreamsService_Create_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "stream"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_StreamsService_List_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "streams"}, ""))
+	pattern_StreamsService_List_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "streams"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_StreamsService_Get_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "stream", "ID"}, ""))
+	pattern_StreamsService_Get_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "stream", "ID"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_StreamsService_Delete_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "stream", "ID"}, ""))
+	pattern_StreamsService_Delete_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "stream", "ID"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (

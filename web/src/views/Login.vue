@@ -116,9 +116,10 @@
   </el-row>
 </template>
 <script>
-import protos from "@/protos/passport_pb.js";
 import errorReader from "@/protos/error.js";
 import Avatar from "@/components/Avatar";
+
+const proto = require('@/protos/passport_pb.js')
 
 export default {
   name: "Login",
@@ -263,7 +264,7 @@ export default {
       this.$Message.error("Failed to login using Google");
     },
     socialLogin() {
-      var socialTokens = new protos.evntsrc.passport.Tokens();
+      var socialTokens = new proto.Tokens();
 
       switch (this.profileKnowledge.provider) {
         case "google":
@@ -276,7 +277,7 @@ export default {
           break;
       }
 
-      var socialRequest = new protos.evntsrc.passport.SocialRequest();
+      var socialRequest = new proto.SocialRequest();
       socialRequest.setProvider(this.profileKnowledge.provider);
       socialRequest.setIdptokens(socialTokens);
 
@@ -314,9 +315,9 @@ export default {
       localStorage.setItem("prokno-n", this.loginForm.email);
     },
     readinAuthResponse(response, setProfileKnowledge) {
-      var authResponse = protos.evntsrc.passport.AuthResponse.deserializeBinary(response.data);
+      var authResponse = proto.AuthResponse.deserializeBinary(response.data);
 
-      if (!authResponse.getSuccess()) {
+    if (!authResponse.getSuccess()) {
         this.$message.error({
           content: "Unable to log you in. Please try again.",
           duration: 10
@@ -343,6 +344,7 @@ export default {
         this.applyProfileKnowledgeFromStandard();
       }
 
+
       this.$root.fetchMe();
       this.$router.push("/");
     },
@@ -360,11 +362,11 @@ export default {
           } else {
             this.submitting = true;
 
-            var userCreds = new protos.evntsrc.passport.UserCreds();
+            var userCreds = new proto.UserCreds();
             userCreds.setPassword(this.loginForm.password);
             userCreds.setUsername(this.loginForm.email);
 
-            var authRequest = new protos.evntsrc.passport.AuthRequest();
+            var authRequest = new proto.AuthRequest();
             authRequest.setUsercreds(userCreds);
 
             axios

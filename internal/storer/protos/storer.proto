@@ -56,12 +56,18 @@ message StoreRequest {
 
 message StoreResponse {}
 
+message DeleteRequest {
+	int32 Stream = 1;
+	string EventID = 2;
+}
+
+message DeleteResponse {}
+
 service StorerService {
 	rpc Acknowledge(AcknowledgeRequest) returns (AcknowledgeResponse);
 	rpc ExtendTTL(ExtendTTLRequest) returns (ExtendTTLResponse);
 	rpc Query(QueryRequest) returns (stream evntsrc.event.Event);
 	rpc ReplayEvent(ReplayEventRequest) returns (ReplayEventResponse);
 	rpc Store(StoreRequest) returns (StoreResponse);
-
-	//TODO(tcfw) delete()
+	rpc Delete(DeleteRequest) returns (DeleteResponse);
 }

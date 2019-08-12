@@ -112,7 +112,7 @@ func BroadcastEvent(ctx context.Context, event EventInterface) error {
 		return err
 	}
 
-	return nc.Publish("io.evntsrc."+event.GetChannel(), buf)
+	return nc.Publish("_INTERNAL.io.evntsrc."+event.GetChannel(), buf)
 }
 
 //UserEvent used for broadcasting general user svc events

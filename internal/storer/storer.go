@@ -110,6 +110,7 @@ func StartMonitor(nats string) {
 
 	monitorUserStreams()
 	monitorReplayRequests()
+	monitorInternalStreams()
 
 	//Wait forever
 	select {}
@@ -123,6 +124,7 @@ func (ep *eventProcessor) Handle(job interface{}) {
 	storeEvent(usrEvent, pgdb)
 }
 
+//monitorUserStreams watches for all user channels typically prefixed with _USER
 func monitorUserStreams() {
 	log.Println("Watching for user streams...")
 
@@ -140,6 +142,35 @@ func monitorUserStreams() {
 	}()
 
 	natsConn.QueueSubscribe("_USER.>", "storers", func(m *nats.Msg) {
+		event := &pbEvent.Event{}
+		err := proto.Unmarshal(m.Data, event)
+		if err != nil {
+			log.Printf("%s\n", err.Error())
+			return
+		}
+
+		inbc <- event
+	})
+}
+
+//monitorInternalStreams watches for all internal events prefixed with _INTERNAL
+func monitorInternalStreams() {
+	log.Println("Watching for internal streams...")
+
+	dispatcher := queue.NewDispatcher(&eventProcessor{})
+	dispatcher.MaxWorkers = 10
+	dispatcher.Run()
+
+	inbc := make(chan *pbEvent.Event, 100)
+
+	go func() {
+		for {
+			event := <-inbc
+			dispatcher.Queue(event)
+		}
+	}()
+
+	natsConn.QueueSubscribe("_INTERNAL.>", "storers", func(m *nats.Msg) {
 		event := &pbEvent.Event{}
 		err := proto.Unmarshal(m.Data, event)
 		if err != nil {

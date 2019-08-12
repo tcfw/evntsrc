@@ -16,7 +16,7 @@ type Worker struct {
 	schedulerConn *grpc.ClientConn
 	schedulerCli  ttlschedulerPB.TTLSchedulerClient
 	storerConn    *grpc.ClientConn
-	storerCli    storerPB.StorerServiceClient
+	storerCli     storerPB.StorerServiceClient
 	bindings      []*ttlschedulerPB.Binding
 	bindingMu     sync.RWMutex
 	stopWatching  chan struct{}
@@ -57,7 +57,7 @@ func NewWorker(port int) (*Worker, error) {
 		schedulerConn: schedulerConn,
 		schedulerCli:  schedulerClient,
 		storerConn:    storerConn,
-		storerCli:    storerClient,
+		storerCli:     storerClient,
 		bindings:      []*ttlschedulerPB.Binding{},
 	}, nil
 }

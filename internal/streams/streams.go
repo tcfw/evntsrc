@@ -50,7 +50,7 @@ func (s *Server) validateCreate(request *pb.Stream) error {
 	return nil
 }
 
-//Create @TODO
+//Create stores a new stream in the DB
 func (s *Server) Create(ctx context.Context, request *pb.Stream) (*pb.Stream, error) {
 	if err := s.validateCreate(request); err != nil {
 		return nil, status.Errorf(codes.FailedPrecondition, err.Error())
@@ -80,7 +80,7 @@ func (s *Server) Create(ctx context.Context, request *pb.Stream) (*pb.Stream, er
 	return s.Get(ctx, &pb.GetRequest{ID: request.ID})
 }
 
-//List @TODO
+//List provides a list of streams the user is an owner of
 func (s *Server) List(ctx context.Context, request *pb.Empty) (*pb.StreamList, error) {
 	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
@@ -133,7 +133,7 @@ func (s *Server) ListIds(ctx context.Context, searchRequest *pb.SearchRequest) (
 	return &pb.IdList{ID: final}, nil
 }
 
-//Get @TODO
+//Get fetches the stream from DB
 func (s *Server) Get(ctx context.Context, request *pb.GetRequest) (*pb.Stream, error) {
 
 	dbConn, err := db.NewMongoDBSession()
@@ -165,9 +165,28 @@ func (s *Server) Get(ctx context.Context, request *pb.GetRequest) (*pb.Stream, e
 	return &stream, nil
 }
 
-//Delete @TODO
-func (s *Server) Delete(ctx context.Context, request *pb.Stream) (*pb.Empty, error) {
+//Update updates the record in the DB with the matching owner and id then returns the same stream
+func (s *Server) Update(ctx context.Context, request *pb.Stream) (*pb.Stream, error) {
+	dbConn, err := db.NewMongoDBSession()
+	if err != nil {
+		return nil, err
+	}
+	defer dbConn.Close()
 
+	collection := dbConn.DB(dBName).C(collectionName)
+
+	//Validate ownership via Get
+	if _, err = s.Get(ctx, &pb.GetRequest{ID: request.ID}); err != nil {
+		return request, err
+	}
+
+	err = collection.Update(bson.M{"_id": request.ID}, request)
+
+	return request, err
+}
+
+//Delete deletes the stream
+func (s *Server) Delete(ctx context.Context, request *pb.Stream) (*pb.Empty, error) {
 	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
 		return nil, err
@@ -183,6 +202,8 @@ func (s *Server) Delete(ctx context.Context, request *pb.Stream) (*pb.Empty, err
 
 	bsonq := bson.M{"owner": userClaims["sub"], "_id": request.GetID()}
 	err = collection.Remove(bsonq)
+
+	//TODO(tcfw) broadcast delete
 
 	return &pb.Empty{}, err
 }

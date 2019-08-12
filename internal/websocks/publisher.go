@@ -3,7 +3,6 @@ package websocks
 import (
 	"fmt"
 
-	"github.com/gogo/protobuf/proto"
 	"github.com/tcfw/evntsrc/internal/event"
 )
 
@@ -12,7 +11,7 @@ type NatsPublisher struct{}
 
 //Publish takes in a channel and an event, converts it into protobuf and sends it into a nats cluster
 func (n *NatsPublisher) Publish(channel string, event *event.Event) error {
-	eventJSONBytes, _ := proto.Marshal(event.ToProtobuf())
+	eventBytes, _ := event.ToProtobuf().Marshal()
 
 	labels := []string{
 		fmt.Sprintf("%d", event.Stream),
@@ -22,7 +21,7 @@ func (n *NatsPublisher) Publish(channel string, event *event.Event) error {
 		labels = append(labels, "control")
 	}
 
-	bytePublishCounter.WithLabelValues(labels...).Add(float64(len(eventJSONBytes)))
+	bytePublishCounter.WithLabelValues(labels...).Add(float64(len(eventBytes)))
 
-	return natsConn.Publish(channel, eventJSONBytes)
+	return natsConn.Publish(channel, eventBytes)
 }

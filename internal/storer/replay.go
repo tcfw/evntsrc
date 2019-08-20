@@ -48,6 +48,8 @@ func doReplay(command *websocks.ReplayCommand, reply chan []byte, errCh chan err
 		return
 	}
 
+	log.Printf("Starting replay to %s [%s]\n", command.Dest, command.Ref)
+
 	qSelector, params := buildBaseQuery(command)
 
 	count, err := countEvents(qSelector, params)
@@ -71,6 +73,8 @@ func doReplay(command *websocks.ReplayCommand, reply chan []byte, errCh chan err
 
 	//Ack replay request
 	reply <- []byte("OK")
+
+	c := 0
 
 	for rD.Next() {
 		event, err := scanEvent(rD)
@@ -102,7 +106,9 @@ func doReplay(command *websocks.ReplayCommand, reply chan []byte, errCh chan err
 			}
 		}
 		replayEventCount.With(prometheus.Labels{"stream": fmt.Sprintf("%d", command.Stream)}).Inc()
+		c++
 	}
+	log.Printf("Replay complete [%s] - %d\n", command.Ref, c)
 }
 
 func scanEvent(rD *sql.Rows) (*pbEvent.Event, error) {

@@ -19,6 +19,8 @@ func (n *NatsPublisher) Publish(channel string, event *event.Event) error {
 
 	if event.Subject == "advertisement" {
 		labels = append(labels, "control")
+	} else {
+		labels = append(labels, "event")
 	}
 
 	bytePublishCounter.WithLabelValues(labels...).Add(float64(len(eventBytes)))

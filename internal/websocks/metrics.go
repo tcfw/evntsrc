@@ -18,7 +18,7 @@ var (
 	bytePublishCounter = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Name: "event_publish_byte_count",
 		Help: "Counter of stream event bytes published",
-	}, []string{"stream"})
+	}, []string{"stream", "type"})
 
 	byteSubscribeCounter = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Name: "event_subscribe_byte_count",

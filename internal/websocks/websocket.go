@@ -22,6 +22,7 @@ var upgrader = websocket.Upgrader{
 }
 
 func serveWs(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Connection %s\n", r.RemoteAddr)
 	span, ctx := tracing.StartSpan(r.Context(), "serveWs")
 	if v := r.Header.Get("x-trace"); v != "" {
 		span.SetTag("web-traceid", v)
@@ -70,6 +71,8 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		})
 		go client.broadcastConnect()
 	}
+
+	go client.ConnSub()
 
 	m := metrics.GetOrRegisterCounter("wsConnections", nil)
 	m.Inc(1)

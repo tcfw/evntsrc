@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	maxMessageSize = 1024 * 1024
+	maxMessageSize = 1024 * 1024 //1MB
 
 	// Time allowed to write a message to the peer.
 	writeWait = 10 * time.Second
@@ -30,6 +30,9 @@ const (
 
 	// Send pings to peer with this period. Must be less than pongWait.
 	pingPeriod = (pongWait * 9) / 10
+
+	// Max msgs & commands in flight (per chan)
+	maxInflight = 50
 )
 
 var (
@@ -71,7 +74,7 @@ type Client struct {
 func NewClient(conn *websocket.Conn) *Client {
 	return &Client{
 		conn:          conn,
-		send:          make(chan []byte, 256),
+		send:          make(chan []byte, maxInflight),
 		subscriptions: map[string]chan bool{},
 		connectionID:  bson.NewObjectId().Hex(),
 		seq:           map[string]int64{},
@@ -98,6 +101,7 @@ func (c *Client) close() {
 	}
 
 	c.closeConnSub <- true
+	log.Printf("Closed %s\n", c.conn.RemoteAddr().String())
 }
 
 func (c *Client) sendStruct(msg interface{}) error {
@@ -132,7 +136,7 @@ func (c *Client) processCommand(command *InboundCommand, message []byte) {
 
 //ConnSub subscribes to a connection specific channel
 func (c *Client) ConnSub() error {
-	ch := make(chan *nats.Msg, 1024)
+	ch := make(chan *nats.Msg, maxInflight)
 	sub, err := natsConn.ChanSubscribe(fmt.Sprintf("_CONN.%s", c.connectionID), ch)
 	if err != nil {
 		return err
@@ -169,7 +173,7 @@ func (c *Client) Subscribe(channel string, cmd *InboundCommand) {
 
 	//Subscribe to NATS user channel and forward events to websocket
 	go func(c *Client, channel string, unsub chan bool) {
-		ch := make(chan *nats.Msg, 1024)
+		ch := make(chan *nats.Msg, maxInflight)
 		sub, err := natsConn.ChanSubscribe(fmt.Sprintf("_USER.%d.%s", c.auth.Stream, channel), ch)
 		ack := &AckCommand{
 			Ref:     cmd.Ref,
@@ -240,8 +244,6 @@ func (c *Client) readPump() {
 
 	socketGauge.WithLabelValues(fmt.Sprintf("%d", c.auth.Stream)).Inc()
 
-	go c.ConnSub()
-
 	c.conn.SetReadLimit(maxMessageSize)
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error {
@@ -252,7 +254,7 @@ func (c *Client) readPump() {
 
 	timeoutEnabled := true
 
-	readCh := make(chan *readPRPC, 50)
+	readCh := make(chan *readPRPC, maxInflight)
 	closed := make(chan bool, 1)
 	initTimeout := time.After(15 * time.Second)
 

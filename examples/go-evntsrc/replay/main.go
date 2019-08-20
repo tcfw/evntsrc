@@ -32,9 +32,13 @@ func main() {
 	setup()
 
 	//Initialise a new Evntsrc API Client
-	client, _ := newClient()
+	client, err := newClient()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
-	d := make([]byte, 1024*200)
+	d := make([]byte, 1024)
 	rand.Read(d)
 
 	//Publish some events ~ to be later received
@@ -51,14 +55,15 @@ func main() {
 		}
 	}
 
-	//Start to listen for some events
+	//Start to listen for events
 	client.SubscribeFunc(channel, func(evnt *evntsrc.Event) {
 		received++
 		fmt.Printf("R:%d ", received)
 	})
 
 	//Replay recent events
-	if err := client.Replay(channel, evntsrc.ReplayQuery{StartTime: &startTime}, nil); err != nil {
+	fmt.Println("Replay")
+	if err := client.Replay(channel, evntsrc.ReplayQuery{StartTime: &startTime}, true); err != nil {
 		fmt.Printf("%s\n", err.Error())
 		os.Exit(1)
 	}
@@ -76,8 +81,18 @@ func main() {
 
 //newClient create a new evntsrc API client
 func newClient() (*evntsrc.APIClient, error) {
+	tempCrypto, err := evntsrc.TemporaryCrypto()
+	if err != nil {
+		return nil, err
+	}
+
+	options := []evntsrc.ClientOption{
+		evntsrc.WithOwnEvents(), //See our own events
+		evntsrc.WithCrypto(tempCrypto),
+	}
+
 	//Create initial config
-	client, err := evntsrc.NewEvntSrcClient(apiKey, 1)
+	client, err := evntsrc.NewEvntSrcClient(apiKey, 1, options...)
 	if err != nil {
 		return nil, err
 	}
@@ -85,8 +100,13 @@ func newClient() (*evntsrc.APIClient, error) {
 	//Staging config
 	client.Staging()
 
-	//See our own events
-	client.IgnoreSelf = false
+	//Listen for errors
+	go func() {
+		for {
+			msg := <-client.Errors
+			fmt.Printf("##!!ERRR: %s\n", msg.Error())
+		}
+	}()
 
 	return client, err
 }

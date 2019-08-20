@@ -18,6 +18,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+//openConn dials the evntsrc realtime endpoint and attempts to authenticate
 func (api *APIClient) openConn() error {
 	var headers *http.Header
 	if api.auth != "" {
@@ -42,11 +43,15 @@ func (api *APIClient) openConn() error {
 
 	conn, resp, err := websocket.DefaultDialer.Dial(url, *headers)
 	if err != nil {
-		fmt.Printf("%v\n", resp)
+		if api.Debug {
+			fmt.Printf("%v\n", resp)
+		}
 		return err
 	}
 	conn.SetCloseHandler(func(code int, text string) error {
-		fmt.Printf("CLOSED %v %v\n", code, text)
+		if api.Debug {
+			fmt.Printf("CLOSED %v %v\n", code, text)
+		}
 		message := websocket.FormatCloseMessage(code, "")
 		conn.WriteControl(websocket.CloseMessage, message, time.Now().Add(writeWait))
 		api.close <- true
@@ -74,6 +79,8 @@ const (
 	maxMessageSize = 1024 * 1024
 )
 
+//readPump listens to messages from the socket and handles the message
+//accordingly
 func (api *APIClient) readPump() {
 	api.socket.SetReadLimit(maxMessageSize)
 	api.socket.SetPongHandler(func(string) error {
@@ -92,11 +99,18 @@ func (api *APIClient) readPump() {
 		_, message, err := api.socket.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				fmt.Printf("ERR Reading: %v\n", err)
+				//TODO(tcfw) handle this better
+				if api.Debug {
+					fmt.Printf("ERR Reading: %v\n", err)
+				}
 			}
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, []byte{'\n'}, []byte{' '}, -1))
+
+		if api.Debug {
+			fmt.Printf("#!RCV[%d]: %s\n", len(message), string(message))
+		}
 
 		if strings.HasPrefix(string(message), `{"acktype"`) {
 			command := &websocks.AckCommand{}
@@ -125,6 +139,8 @@ func (api *APIClient) readPump() {
 	}
 }
 
+//writePump listesn to each type of command and forwards the command to the
+//relevant do* function to write to the socket
 func (api *APIClient) writePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
@@ -158,6 +174,9 @@ func (api *APIClient) writePump() {
 	}
 }
 
+//distributeReadPipe listens for new events from the inbound socket read pipe
+//(see readPump()) and distributes them to each of the related subscribed
+//chans or callbacks
 func (api *APIClient) distributeReadPipe() {
 	for {
 		msg, ok := <-api.ReadPipe
@@ -172,13 +191,37 @@ func (api *APIClient) distributeReadPipe() {
 			continue
 		}
 
-		if source, ok := evnt.Metadata["relative_seq"]; api.IgnoreSelf && ok && strings.HasPrefix(source, fmt.Sprintf("%s-", api.connectionID)) {
+		evnt.Data, _ = base64.StdEncoding.DecodeString(string(evnt.Data))
+
+		if source, ok := evnt.Metadata["relative_seq"]; api.options.IgnoreSelf && ok && strings.HasPrefix(source, fmt.Sprintf("%s-", api.connectionID)) {
 			continue
 		}
 
+		_, encrypted := evnt.Metadata["e"]
+		//Warn if event is encrypted by no crypto
+		if encrypted && api.options.Crypto == nil {
+			api.Errors <- fmt.Errorf("Encrypted message received but crypto not set up: event id %s", evnt.ID)
+		}
+
+		if api.options.Crypto != nil && encrypted {
+			if err := api.options.Crypto.Verify(evnt.Data, evnt.Metadata); err != nil {
+				api.Errors <- err
+				continue
+			}
+
+			data, err := api.options.Crypto.Decrypt(evnt.Data, evnt.Metadata)
+			if err != nil {
+				api.Errors <- err
+				continue
+			}
+			evnt.Data = data
+		}
+
 		go func(evnt *Event) {
+			c := 0
 			for subject := range api.subscriptions {
 				if subject == evnt.Subject {
+					c++
 					for _, subset := range api.subscriptions[subject] {
 						switch subset.subType {
 						case funcSubType:
@@ -191,10 +234,14 @@ func (api *APIClient) distributeReadPipe() {
 					}
 				}
 			}
+			if c == 0 {
+				api.Errors <- fmt.Errorf("Received event wasn't listen for")
+			}
 		}(evnt)
 	}
 }
 
+//doPublish writes the publish command to the socket
 func (api *APIClient) doPublish(data *websocks.PublishCommand) error {
 	if api.socket == nil {
 		if err := api.openConn(); err != nil {
@@ -205,6 +252,7 @@ func (api *APIClient) doPublish(data *websocks.PublishCommand) error {
 	return api.socket.WriteJSON(data)
 }
 
+//doReplay writes the replay command to the socket
 func (api *APIClient) doReplay(data *websocks.ReplayCommand) error {
 	if api.socket == nil {
 		if err := api.openConn(); err != nil {
@@ -212,9 +260,15 @@ func (api *APIClient) doReplay(data *websocks.ReplayCommand) error {
 		}
 	}
 
+	if api.Debug {
+		jsonBytes, _ := json.Marshal(data)
+		fmt.Printf("#!RPL[%d]: %s\n", len(jsonBytes), string(jsonBytes))
+	}
+
 	return api.socket.WriteJSON(data)
 }
 
+//doSendSubscribe writes the sub command to the socket
 func (api *APIClient) doSendSubscribe(data *websocks.SubscribeCommand) error {
 	if api.socket == nil {
 		if err := api.openConn(); err != nil {
@@ -233,12 +287,30 @@ func (api *APIClient) Publish(subject string, data []byte, eventType string) err
 		}
 	}
 
+	md := map[string]string{}
+
+	if api.options.Crypto != nil {
+		encBytes, encMd, err := api.options.Crypto.Encrypt([]byte(data))
+		if err != nil {
+			return err
+		}
+
+		data = encBytes
+		for k, v := range encMd {
+			md[k] = v
+		}
+
+		//Encrypted flag
+		md["e"] = "1"
+	}
+
 	pubMsg := &websocks.PublishCommand{
 		SubscribeCommand: &websocks.SubscribeCommand{InboundCommand: &websocks.InboundCommand{Ref: uuid.New().String(), Command: "pub"}, Subject: subject},
 		Data:             base64.StdEncoding.EncodeToString(data),
 		ContentType:      "application/json",
 		Type:             eventType,
 		TypeVersion:      api.AppVer,
+		Metadata:         md,
 	}
 
 	api.writePipe <- pubMsg
@@ -255,6 +327,8 @@ func (api *APIClient) Publish(subject string, data []byte, eventType string) err
 	return nil
 }
 
+//doSubscribe sends the subscribe event to the write pump and waits
+//for ack from websocks
 func (api *APIClient) doSubscribe(subject string) error {
 	subMsg := &websocks.SubscribeCommand{
 		InboundCommand: &websocks.InboundCommand{Ref: uuid.New().String(), Command: "sub"},
@@ -326,17 +400,14 @@ func (api *APIClient) Unsubscribe(subject string) error {
 
 //Replay starts replaying events in chronological order
 //Justme defaults to true if not specified
-func (api *APIClient) Replay(subject string, query ReplayQuery, justme *bool) error {
+func (api *APIClient) Replay(subject string, query ReplayQuery, justme bool) error {
 	cmd := &websocks.ReplayCommand{
 		SubscribeCommand: &websocks.SubscribeCommand{
 			InboundCommand: &websocks.InboundCommand{Ref: uuid.New().String(), Command: "replay"},
 			Subject:        subject,
 		},
-		Query: query,
-	}
-
-	if justme == nil || *justme {
-		cmd.JustMe = true
+		JustMe: justme,
+		Query:  query,
 	}
 
 	api.replayPipe <- cmd

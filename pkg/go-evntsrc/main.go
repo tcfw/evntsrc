@@ -46,12 +46,12 @@ type APIClient struct {
 	ackL       sync.RWMutex
 	ackC       *sync.Cond
 
-	//Ignore events we published
-	IgnoreSelf bool
+	//Config options
+	options *ClientOptions
 }
 
 //NewEvntSrcClient creates a new client instance for interacting with evntsrc.io
-func NewEvntSrcClient(auth string, streamID int32) (*APIClient, error) {
+func NewEvntSrcClient(auth string, streamID int32, options ...ClientOption) (*APIClient, error) {
 	api := &APIClient{
 		auth:                       auth,
 		stream:                     streamID,
@@ -67,10 +67,26 @@ func NewEvntSrcClient(auth string, streamID int32) (*APIClient, error) {
 		AppVer:                     "0.1",
 		acks:                       map[string]*ackCT{},
 		subscriptions:              map[string][]*subscription{},
-		IgnoreSelf:                 true,
 		Debug:                      false,
 		WaitForPublishConfirmation: true,
 	}
+
+	if auth == "" {
+		return nil, fmt.Errorf("Empty auth string is not allowed")
+	}
+	if streamID == 0 {
+		return nil, fmt.Errorf("Empty stream ID is not allowed")
+	}
+
+	defaultOptions := &ClientOptions{
+		IgnoreSelf: true,
+	}
+
+	for _, option := range options {
+		option(defaultOptions)
+	}
+
+	api.options = defaultOptions
 
 	api.ackC = sync.NewCond(api.ackL.RLocker())
 
@@ -147,9 +163,11 @@ func (api *APIClient) gcAcks() {
 	}
 }
 
+//waitForResponse waits for an acknowledge msg from websocks relating to command ref
+//or fail on timeout after 30 seconds
 func (api *APIClient) waitForResponse(cmdRef string) (bool, error) {
 	var vFerr error
-	vFound := make(chan bool, 1)
+	vFound := make(chan bool)
 	go func() {
 		for {
 			api.ackC.L.Lock()
@@ -183,10 +201,10 @@ func (api *APIClient) formatURL(apiType string, methodEndpoint string) string {
 	return fmt.Sprintf("%s://%s.%s/%s/%s", protocol, apiType, api.Endpoint, apiVersion, methodEndpoint)
 }
 
-//Staging switches to the staging env endpoints
+//Staging switches to the staging env endpoints and enabled debug mode
 func (api *APIClient) Staging() {
 	api.Endpoint = stagingAPIEndpoint
-	api.Debug = true
+	// api.Debug = true
 }
 
 func (api *APIClient) getSocket() *websocket.Conn {

@@ -4,6 +4,7 @@ import (
 	"crypto/rsa"
 	fmt "fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"time"
 
@@ -32,10 +33,10 @@ func UserClaims(user *users.User) map[string]interface{} {
 //GetKeyPrivate reads a private PEM formatted RSA cert
 func GetKeyPrivate() (*rsa.PrivateKey, error) {
 	dat, _ := ioutil.ReadFile(tlsKeyDir + "/priv.pem")
-	key, er := jwt.ParseRSAPrivateKeyFromPEM(dat)
-	if er != nil {
-		fmt.Printf("Err: %s", er)
-		return nil, er
+	key, err := jwt.ParseRSAPrivateKeyFromPEM(dat)
+	if err != nil {
+		log.Printf("Err: %s", err)
+		return nil, err
 	}
 
 	return key, nil
@@ -44,10 +45,10 @@ func GetKeyPrivate() (*rsa.PrivateKey, error) {
 //GetKeyPublic reads a public PEM formatted RSA cert
 func GetKeyPublic() (*rsa.PublicKey, error) {
 	dat, _ := ioutil.ReadFile(tlsKeyDir + "/pub.pem")
-	key, er := jwt.ParseRSAPublicKeyFromPEM(dat)
-	if er != nil {
-		fmt.Printf("Err: %s", er)
-		return nil, er
+	key, err := jwt.ParseRSAPublicKeyFromPEM(dat)
+	if err != nil {
+		log.Printf("Err: %s", err)
+		return nil, err
 	}
 
 	return key, nil

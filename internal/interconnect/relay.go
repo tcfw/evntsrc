@@ -2,6 +2,7 @@ package interconnect
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/gogo/protobuf/proto"
 
@@ -36,7 +37,7 @@ func (s *relay) WritePipe(relayOut chan *event.Event) (chan struct{}, error) {
 				ev := &event.Event{}
 				err := proto.Unmarshal(msg.Data, ev)
 				if err != nil {
-					fmt.Printf("Failed to relay event: %s\n", err.Error())
+					log.Printf("Failed to relay event: %s\n", err.Error())
 				}
 				//Ignore replays
 				if _, ok := ev.Metadata["replay"]; ok {
@@ -69,7 +70,7 @@ func (s *relay) publishedForwarded(forwardedEventReq *pb.ForwardingRequest) erro
 	channel := fmt.Sprintf("_USER.%d.%s", forwardedEventReq.Event.Stream, forwardedEventReq.Event.Subject)
 	eventBytes, err := proto.Marshal(forwardedEventReq.Event)
 	if err != nil {
-		fmt.Printf("failed to forward event: %s\n", err.Error())
+		log.Printf("failed to forward event: %s\n", err.Error())
 	}
 
 	return s.natsConn.Publish(channel, eventBytes)

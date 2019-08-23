@@ -247,7 +247,6 @@ func (c *Client) readPump() {
 	c.conn.SetReadLimit(maxMessageSize)
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error {
-		fmt.Println("handled pong")
 		c.conn.SetReadDeadline(time.Now().Add(pongWait))
 		return nil
 	})
@@ -299,7 +298,7 @@ func (c *Client) readPump() {
 			c.processCommand(rpc.command, rpc.message)
 		case <-initTimeout:
 			if timeoutEnabled && len(c.subscriptions) == 0 {
-				fmt.Println("Closing socket due to no initial activity")
+				log.Println("Closing socket due to no initial activity")
 				c.close()
 				return
 			}

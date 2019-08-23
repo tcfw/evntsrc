@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
 	pb "github.com/tcfw/evntsrc/internal/bridge/protos"
+	"github.com/tcfw/evntsrc/internal/tracing"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
@@ -31,14 +32,14 @@ func main() {
 	}
 
 	go func() {
-		fmt.Println("Opened stream")
+		log.Println("Opened stream")
 		for {
 			event, err := stream.Recv()
 			if err != nil {
 				return
 			}
-			fmt.Printf("%v\n", event)
-			fmt.Printf("Latency: %s\n", time.Since(*event.GetTime()))
+			log.Printf("%v\n", event)
+			log.Printf("Latency: %s\n", time.Since(*event.GetTime()))
 		}
 	}()
 

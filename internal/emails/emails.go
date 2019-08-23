@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"mime"
 	"net/http"
 	"os"
@@ -29,9 +30,9 @@ func (p *emailProcessor) Handle(job interface{}) {
 	client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
 	resp, err := client.Send(msg)
 	if err != nil {
-		fmt.Printf("Failed to send: %v ~ %e", msg, err)
+		log.Printf("Failed to send: %v ~ %e", msg, err)
 	} else {
-		fmt.Printf("Sent email (%s)\n", resp.Headers["X-Message-Id"])
+		log.Printf("Sent email (%s)\n", resp.Headers["X-Message-Id"])
 	}
 }
 

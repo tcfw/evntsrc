@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"os"
 
 	"google.golang.org/grpc"
@@ -37,6 +37,6 @@ func main() {
 		Html:      `<h3>Welcome to your new Account</h3><p>If you did not sign up, please contact us at <a href="mailto:support@evntsrc.io">support@evntsrc.io</a>`,
 	})
 
-	fmt.Printf("ERR: %v\n", err)
+	log.Printf("ERR: %v\n", err)
 
 }

@@ -33,10 +33,10 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	useAuthHeader := false
 
 	if authHeader := r.Header.Get("Authorization"); authHeader != "" {
-		fmt.Println("Attempting basic auth login")
+		log.Println("Attempting basic auth login")
 		u, p, ok := r.BasicAuth()
 		if !ok {
-			fmt.Println("Failed to obtain basic auth")
+			log.Println("Failed to obtain basic auth")
 			http.Error(w, "Invalid auth", http.StatusForbidden)
 			return
 		}
@@ -57,10 +57,10 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	client := NewClient(conn)
 
 	if useAuthHeader {
-		fmt.Printf("Attempting to use auth (stream: %v)\n", streamint)
+		log.Printf("Attempting to use auth (stream: %v)\n", streamint)
 		err := client.authFromHeader(ctx, apiKey, apiSec, int32(streamint))
 		if err != nil {
-			fmt.Println("Attempting to use auth: failed. Closing connection")
+			log.Println("Attempting to use auth: failed. Closing connection")
 			conn.WriteControl(websocket.CloseMessage, []byte("Auth Failed"), time.Now().Add(5*time.Second))
 			conn.Close()
 			return

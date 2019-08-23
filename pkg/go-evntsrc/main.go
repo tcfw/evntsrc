@@ -41,7 +41,7 @@ type APIClient struct {
 	replayPipe chan *websocks.ReplayCommand
 	subPipe    chan *websocks.SubscribeCommand
 	close      chan bool
-	Errors     chan error
+	errCh      chan error
 	AcksCh     chan *websocks.AckCommand
 	ackL       sync.RWMutex
 	ackC       *sync.Cond
@@ -62,7 +62,7 @@ func NewEvntSrcClient(auth string, streamID int32, options ...ClientOption) (*AP
 		replayPipe:                 make(chan *websocks.ReplayCommand, 5),
 		subPipe:                    make(chan *websocks.SubscribeCommand, 10),
 		close:                      make(chan bool, 1),
-		Errors:                     make(chan error, 256),
+		errCh:                      make(chan error, 256),
 		AcksCh:                     make(chan *websocks.AckCommand, 256),
 		AppVer:                     "0.1",
 		acks:                       map[string]*ackCT{},
@@ -131,6 +131,8 @@ func newHTTPClient() *http.Client {
 	}
 }
 
+//watchAcks listens for acknowlegements and stores them in the
+//temporary ack map
 func (api *APIClient) watchAcks() {
 	gci := time.Tick(1 * time.Minute)
 	for {
@@ -150,6 +152,8 @@ func (api *APIClient) watchAcks() {
 	}
 }
 
+//gcAcks garbage collections recent acknowledgements that are
+//older than a 1 minute
 func (api *APIClient) gcAcks() {
 	defer func() {
 		api.ackL.Unlock()

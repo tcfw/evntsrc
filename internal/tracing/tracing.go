@@ -46,7 +46,6 @@ func ExtractOTHeadersFromContext(ctx context.Context) *metadata.MD {
 	pairs := []string{}
 	for _, h := range otHeaders {
 		if v, ok := ctx.Value(h).(string); ok && len(v) > 0 {
-			fmt.Printf("Found %v %v", h, v)
 			pairs = append(pairs, h, v)
 		}
 	}

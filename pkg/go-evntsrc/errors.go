@@ -7,8 +7,14 @@ import "time"
 func (api *APIClient) pubError(err error) {
 	go func() {
 		select {
-		case api.Errors <- err:
+		case api.errCh <- err:
 		case <-time.After(10 * time.Second):
 		}
 	}()
+}
+
+//Errors provides a channel for reading errors from
+//API calls and subscription issues
+func (api *APIClient) Errors() <-chan error {
+	return api.errCh
 }

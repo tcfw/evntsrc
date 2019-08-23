@@ -223,12 +223,15 @@ func (api *APIClient) distributeReadPipe() {
 				if subject == evnt.Subject {
 					c++
 					for _, subset := range api.subscriptions[subject] {
+						subbersEvent := evnt
 						switch subset.subType {
 						case funcSubType:
-							subset.f(evnt)
+							go subset.f(subbersEvent)
 							break
 						case chanSubType:
-							subset.ch <- evnt
+							go func() {
+								subset.ch <- subbersEvent
+							}()
 							break
 						}
 					}

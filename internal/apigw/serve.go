@@ -3,17 +3,24 @@ package apigw
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
-	"os"
 
-	"github.com/go-http-utils/logger"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/rs/cors"
 	"github.com/tcfw/evntsrc/internal/tracing"
+	"go.uber.org/zap"
 )
 
 //Run starts the JSON gw
 func Run(port int) error {
+	logger, err := zap.NewProduction()
+	if err != nil {
+		log.Fatalf("can't initialize zap logger: %v", err)
+	}
+	defer logger.Sync()
+	zap.ReplaceGlobals(logger)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -36,9 +43,9 @@ func Run(port int) error {
 
 	handler := authGuard(mux)
 	handler = tracingWrapper(handler)
-	handler = logger.Handler(handler, os.Stdout, logger.CommonLoggerType)
+	handler = loggingWrapper(handler)
 	handler = cors.AllowAll().Handler(handler)
 
-	fmt.Printf("Starting API GW (port %d)\n", port)
+	log.Printf("Starting API GW (port %d)\n", port)
 	return http.ListenAndServe(fmt.Sprintf(":%d", port), handler)
 }

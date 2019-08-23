@@ -52,8 +52,10 @@ require (
 	github.com/stripe/stripe-go v61.16.0+incompatible
 	github.com/tcfw/go-queue v0.0.0-20181023114850-d9d11e86c81c
 	github.com/tstranex/u2f v1.0.0
+	github.com/uber-go/zap v1.10.0 // indirect
 	github.com/uber/jaeger-client-go v2.16.0+incompatible
 	github.com/uber/jaeger-lib v2.0.0+incompatible
+	go.uber.org/zap v1.10.0
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
 	golang.org/x/net v0.0.0-20190628185345-da137c7871d7
 	golang.org/x/sys v0.0.0-20190712062909-fae7ac547cb7 // indirect

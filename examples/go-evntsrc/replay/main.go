@@ -1,12 +1,14 @@
 package main
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"flag"
 	"fmt"
-	"math/rand"
 	"os"
 	"time"
+
+	mrand "math/rand"
 
 	evntsrc "github.com/tcfw/evntsrc/pkg/go-evntsrc"
 )
@@ -103,7 +105,7 @@ func newClient() (*evntsrc.APIClient, error) {
 	//Listen for errors
 	go func() {
 		for {
-			msg := <-client.Errors
+			msg := <-client.Errors()
 			fmt.Printf("##!!ERRR: %s\n", msg.Error())
 		}
 	}()
@@ -113,14 +115,12 @@ func newClient() (*evntsrc.APIClient, error) {
 
 //randChanName random test channel name
 func randChanName() string {
-	rand.Seed(time.Now().UnixNano())
-
 	letterRunes := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	n := 25
 
 	b := make([]rune, n)
 	for i := range b {
-		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+		b[i] = letterRunes[mrand.Intn(len(letterRunes))]
 	}
 	return fmt.Sprintf("test_%s", string(b))
 }

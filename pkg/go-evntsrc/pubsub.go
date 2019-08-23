@@ -191,6 +191,13 @@ func (api *APIClient) distributeReadPipe() {
 			continue
 		}
 
+		if evnt.Stream == 0 && evnt.Subject == "puback" {
+			go func() {
+				api.AcksCh <- &websocks.AckCommand{Acktype: "OK", Ref: evnt.ID}
+			}()
+			continue
+		}
+
 		evnt.Data, _ = base64.StdEncoding.DecodeString(string(evnt.Data))
 
 		if source, ok := evnt.Metadata["relative_seq"]; api.options.IgnoreSelf && ok && strings.HasPrefix(source, fmt.Sprintf("%s-", api.connectionID)) {

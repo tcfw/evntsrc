@@ -146,7 +146,11 @@ func (c *Client) ConnSub() error {
 		select {
 		case msg := <-ch:
 			ev := &pbEvent.Event{}
-			proto.Unmarshal(msg.Data, ev)
+			err := proto.Unmarshal(msg.Data, ev)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
 			jsonBytes, _ := json.Marshal(ev)
 			c.send <- jsonBytes
 		case <-c.closeConnSub:

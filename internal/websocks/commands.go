@@ -137,7 +137,11 @@ func (c *Client) doPublish(command *InboundCommand, message []byte) {
 	rEvent.Metadata["relative_seq"] = fmt.Sprintf("%s-%d", c.connectionID, c.seq[channel])
 	c.seqLock.Unlock()
 
+	rEvent.Metadata["_cid"] = c.connectionID
+
 	c.publisher.Publish(channel, rEvent)
+
+	//TODO(tcfw) wait for storer ack
 
 	c.sendStruct(&AckCommand{
 		Ref:     command.Ref,

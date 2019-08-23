@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gogo/protobuf/proto"
 	nats "github.com/nats-io/nats.go"
@@ -121,7 +122,24 @@ type eventProcessor struct{}
 func (ep *eventProcessor) Handle(job interface{}) {
 	usrEvent := job.(*pbEvent.Event)
 
-	storeEvent(usrEvent, pgdb)
+	err := storeEvent(usrEvent, pgdb)
+	if err != nil {
+
+	}
+	go ep.ackPub(usrEvent)
+}
+
+func (ep *eventProcessor) ackPub(event *pbEvent.Event) {
+	src, ok := event.Metadata["_cid"]
+	if !ok {
+		return
+	}
+
+	now := time.Now()
+	ack := &pbEvent.Event{Time: &now, ID: event.ID, Stream: 0, Subject: "puback"}
+	bytes, _ := proto.Marshal(ack)
+
+	natsConn.Publish(fmt.Sprintf("_CONN.%s", src), bytes)
 }
 
 //monitorUserStreams watches for all user channels typically prefixed with _USER

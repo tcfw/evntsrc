@@ -123,7 +123,7 @@ func newClient() (*evntsrc.APIClient, error) {
 func pipeErrors(client *evntsrc.APIClient) {
 	for {
 		select {
-		case err := <-client.Errors:
+		case err := <-client.Errors():
 			fmt.Printf("ERR: %v\n", err.Error())
 		}
 	}

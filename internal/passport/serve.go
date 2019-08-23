@@ -127,6 +127,7 @@ func (s *Server) Authenticate(ctx context.Context, request *pb.AuthRequest) (*pb
 			grpc.SendHeader(ctx, metadata.Pairs("Grpc-Metadata-X-RateLimit-Remaining", fmt.Sprintf("%d", remaining+1)))
 			events.BroadcastNonStreamingEvent(ctx, events.AuthenticateEvent{Event: &events.Event{Type: "io.evntsrc.passport.limite_increased"}, Err: fmt.Sprintf("limit increased"), IP: remoteIP.String(), User: username})
 			incRateLimit(username, remoteIP)
+			log.Printf("Unknown user %s @ %s", username, remoteIP)
 			return &pb.AuthResponse{Success: false}, status.Errorf(codes.Unauthenticated, "unknown username or password")
 		}
 
@@ -139,6 +140,7 @@ func (s *Server) Authenticate(ctx context.Context, request *pb.AuthRequest) (*pb
 			grpc.SendHeader(ctx, metadata.Pairs("Grpc-Metadata-X-RateLimit-Remaining", fmt.Sprintf("%d", remaining+1)))
 			events.BroadcastNonStreamingEvent(ctx, events.AuthenticateEvent{Event: &events.Event{Type: "io.evntsrc.passport.limite_increased"}, Err: fmt.Sprintf("limit increased"), IP: remoteIP.String(), User: user.Id})
 			incRateLimit(username, remoteIP)
+			log.Printf("Password mismatch for user %s @ %s", username, remoteIP)
 			return &pb.AuthResponse{Success: false}, status.Errorf(codes.Unauthenticated, "incorrect username or password")
 		}
 
@@ -173,6 +175,8 @@ func (s *Server) Authenticate(ctx context.Context, request *pb.AuthRequest) (*pb
 
 	cookie := http.Cookie{Name: "snounce", Value: nounce, Domain: "evntsrc.io", Path: "/", Expires: time.Now().Add(1 * time.Hour)}
 	grpc.SendHeader(ctx, metadata.Pairs("Grpc-Metadata-Set-Cookie", cookie.String()))
+
+	log.Printf("Successful login for %s @ %s", token.Claims.(jwt.MapClaims)["sub"].(string), remoteIP)
 
 	return &pb.AuthResponse{
 		Success: true,

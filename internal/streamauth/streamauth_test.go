@@ -200,3 +200,11 @@ func (s *MockStreamClient) List(ctx context.Context, in *evntsrc_streams.Empty, 
 func (s *MockStreamClient) Delete(ctx context.Context, in *evntsrc_streams.Stream, opts ...grpc.CallOption) (*evntsrc_streams.Empty, error) {
 	return nil, nil
 }
+
+func (s *MockStreamClient) ListIds(ctx context.Context, searchRequest *evntsrc_streams.SearchRequest, opts ...grpc.CallOption) (*evntsrc_streams.IdList, error) {
+	return nil, nil
+}
+
+func (s *MockStreamClient) Update(ctx context.Context, request *evntsrc_streams.Stream, opts ...grpc.CallOption) (*evntsrc_streams.Stream, error) {
+	return nil, nil
+}

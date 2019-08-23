@@ -117,7 +117,7 @@ func (api *APIClient) readPump() {
 			if err = json.Unmarshal(message, command); err != nil {
 				errMsg := &websocks.AckCommand{Acktype: "Error", Error: "Failed to parse command"}
 				jsonBytes, _ := json.Marshal(errMsg)
-				api.Errors <- errors.New(string(jsonBytes))
+				api.pubError(errors.New(string(jsonBytes)))
 			}
 
 			api.AcksCh <- command
@@ -128,7 +128,7 @@ func (api *APIClient) readPump() {
 			if err = json.Unmarshal(message, info); err != nil {
 				errMsg := &websocks.AckCommand{Acktype: "Error", Error: "Failed to parse connection info"}
 				jsonBytes, _ := json.Marshal(errMsg)
-				api.Errors <- errors.New(string(jsonBytes))
+				api.pubError(errors.New(string(jsonBytes)))
 				return
 			}
 			api.connectionID = info.ConnectionID
@@ -151,24 +151,24 @@ func (api *APIClient) writePump() {
 		select {
 		case msg := <-api.writePipe:
 			if err := api.doPublish(msg); err != nil {
-				api.Errors <- err
+				api.pubError(err)
 			}
 			break
 		case msg := <-api.replayPipe:
 			if err := api.doReplay(msg); err != nil {
-				api.Errors <- err
+				api.pubError(err)
 			}
 			break
 		case msg := <-api.subPipe:
 			if err := api.doSendSubscribe(msg); err != nil {
-				api.Errors <- err
+				api.pubError(err)
 			}
 			break
 		case <-api.close:
 			return
 		case <-ticker.C:
 			if err := api.socket.WriteMessage(websocket.PingMessage, nil); err != nil {
-				api.Errors <- fmt.Errorf("Failed to send ping")
+				api.pubError(fmt.Errorf("Failed to send ping"))
 			}
 		}
 	}
@@ -187,7 +187,7 @@ func (api *APIClient) distributeReadPipe() {
 
 		evnt := &Event{}
 		if err := json.Unmarshal(msg, evnt); err != nil {
-			api.Errors <- err
+			api.pubError(err)
 			continue
 		}
 
@@ -200,18 +200,18 @@ func (api *APIClient) distributeReadPipe() {
 		_, encrypted := evnt.Metadata["e"]
 		//Warn if event is encrypted by no crypto
 		if encrypted && api.options.Crypto == nil {
-			api.Errors <- fmt.Errorf("Encrypted message received but crypto not set up: event id %s", evnt.ID)
+			api.pubError(fmt.Errorf("Encrypted message received but crypto not set up: event id %s", evnt.ID))
 		}
 
 		if api.options.Crypto != nil && encrypted {
 			if err := api.options.Crypto.Verify(evnt.Data, evnt.Metadata); err != nil {
-				api.Errors <- err
+				api.pubError(err)
 				continue
 			}
 
 			data, err := api.options.Crypto.Decrypt(evnt.Data, evnt.Metadata)
 			if err != nil {
-				api.Errors <- err
+				api.pubError(err)
 				continue
 			}
 			evnt.Data = data
@@ -235,7 +235,7 @@ func (api *APIClient) distributeReadPipe() {
 				}
 			}
 			if c == 0 {
-				api.Errors <- fmt.Errorf("Received event wasn't listen for")
+				api.pubError(fmt.Errorf("Received event wasn't listen for"))
 			}
 		}(evnt)
 	}

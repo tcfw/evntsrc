@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"log"
 
 	pbEvent "github.com/tcfw/evntsrc/internal/event/protos"
 
@@ -26,12 +25,12 @@ func storeEvent(event *pbEvent.Event, db *sql.DB) error {
 
 	metadataJSON, err := json.Marshal(event.Metadata)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	tx, err := db.Begin()
 	if err != nil {
-		panic(err.Error)
+		return err
 	}
 
 	md := string(metadataJSON)
@@ -54,12 +53,27 @@ func storeEvent(event *pbEvent.Event, db *sql.DB) error {
 		event.ContentType,
 		event.Data,
 	); err != nil {
-		log.Fatal(err)
-		panic(err.Error)
+		tx.Rollback()
+		return fmt.Errorf("ev store: %s", err)
 	}
 
-	tx.Commit()
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("ev commit: %s", err)
+	}
 
 	storeCount.With(prometheus.Labels{"stream": fmt.Sprintf("%d", event.Stream)}).Inc()
 	return nil
+}
+
+func setMD(tx *sql.Tx, id string, mdField string, data string) error {
+	_, err := tx.Exec(`
+		UPDATE
+			event_store.events 
+		SET 
+			metadata = jsonb_set(IFNULL(to_jsonb(metadata), '{}'::jsonb), $1::string[], to_jsonb($2::string), TRUE) 
+		WHERE 
+			id = $3
+		LIMIT 1`,
+		fmt.Sprintf("{%s}", mdField), data, id)
+	return err
 }

@@ -124,8 +124,9 @@ func (ep *eventProcessor) Handle(job interface{}) {
 
 	err := storeEvent(usrEvent, pgdb)
 	if err != nil {
-
+		log.Println(err)
 	}
+
 	go ep.ackPub(usrEvent)
 }
 

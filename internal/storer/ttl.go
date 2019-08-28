@@ -1,7 +1,6 @@
 package storer
 
 import (
-	"database/sql"
 	"fmt"
 	"strconv"
 	"time"
@@ -131,17 +130,4 @@ func extendTTL(req *pb.ExtendTTLRequest) error {
 	}
 
 	return tx.Commit()
-}
-
-func setMD(tx *sql.Tx, id string, mdField string, data string) error {
-	_, err := tx.Exec(`
-		UPDATE 
-			event_store.events 
-		SET 
-			metadata = jsonb_set(IFNULL(to_jsonb(metadata), '{}'::jsonb), $1::string[], to_jsonb($2::string), TRUE) 
-		WHERE 
-			id = $3
-		LIMIT 1`,
-		fmt.Sprintf("{%s}", mdField), data, id)
-	return err
 }

@@ -41,7 +41,7 @@ var (
 	defaultEndpoint = "jaeger-agent:5775"
 )
 
-//ExtractOTHeadersFromContext TODO
+//ExtractOTHeadersFromContext creates metadata from Zipkin B3 propagation HTTP headers
 func ExtractOTHeadersFromContext(ctx context.Context) *metadata.MD {
 	pairs := []string{}
 	for _, h := range otHeaders {

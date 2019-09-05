@@ -12,7 +12,7 @@ import (
 	nats "github.com/nats-io/nats.go"
 )
 
-//@TODO support https://github.com/cloudevents/spec/blob/v0.1/spec.md
+//TODO(tcfw) support https://github.com/cloudevents/spec/blob/v0.3/spec.md
 
 //Event is the basic structure all events should include
 type Event struct {

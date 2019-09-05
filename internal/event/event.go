@@ -10,7 +10,7 @@ import (
 )
 
 //Event is the main event structure for all events throughout the system
-// @TODO move to protobuf?
+// TODO(tcfw) move to protobuf?
 type Event struct {
 	ID           string            `json:"eventId" bson:"_id"`
 	Stream       int32             `json:"stream"`

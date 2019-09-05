@@ -57,7 +57,7 @@ func startSubscribe(client *evntsrc.APIClient) {
 	fmt.Printf("Subscribing (%v)...\n", channel)
 	client.SubscribeFunc(channel, func(evnt *evntsrc.Event) {
 		//Dislay ping latency results
-		//TODO move decoding to client lib
+		//TODO(tcfw) move decoding to client lib
 		decoded, _ := base64.StdEncoding.DecodeString(string(evnt.Data))
 		msg := &testMsg{}
 		json.Unmarshal(decoded, msg)

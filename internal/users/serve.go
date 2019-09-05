@@ -36,7 +36,7 @@ func newServer() *server {
 	return &server{}
 }
 
-//Create @TODO Validation
+//Create takes in a request and creates a new user
 func (s *server) Create(ctx context.Context, request *protos.User) (*protos.User, error) {
 
 	dbConn, err := db.NewMongoDBSession()
@@ -49,6 +49,7 @@ func (s *server) Create(ctx context.Context, request *protos.User) (*protos.User
 
 	id := bson.NewObjectId().Hex()
 	now := time.Now()
+	//TODO(tcfw) validate request
 
 	request.CreatedAt = &now
 	password, _ := validatePassword(request.Password)
@@ -72,7 +73,7 @@ func (s *server) Create(ctx context.Context, request *protos.User) (*protos.User
 	return &user, nil
 }
 
-//Delete TODO
+//Delete deletes a user
 func (s *server) Delete(ctx context.Context, request *protos.UserRequest) (*protos.Empty, error) {
 	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
@@ -102,7 +103,7 @@ func (s *server) Delete(ctx context.Context, request *protos.UserRequest) (*prot
 	}
 }
 
-//Get TODO
+//Get finds a user
 func (s *server) Get(ctx context.Context, request *protos.UserRequest) (*protos.User, error) {
 	user, err := s.Find(ctx, &protos.UserRequest{Query: &protos.UserRequest_Id{Id: request.GetId()}})
 	if err != nil {
@@ -113,7 +114,7 @@ func (s *server) Get(ctx context.Context, request *protos.UserRequest) (*protos.
 	return user, nil
 }
 
-//Find TODO
+//Find queries for a user based on email or id depending on the id
 func (s *server) Find(ctx context.Context, request *protos.UserRequest) (*protos.User, error) {
 	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
@@ -145,12 +146,13 @@ func (s *server) Find(ctx context.Context, request *protos.UserRequest) (*protos
 	return &user, nil
 }
 
-//FindUsers TODO
+//FindUsers finds multiple users
 func (s *server) FindUsers(request *protos.UserRequest, stream protos.UserService_FindUsersServer) error {
+	//TODO(tcfw) is this different to List now?
 	return nil
 }
 
-//List TODO
+//List creates a list of all users in the DB
 func (s *server) List(ctx context.Context, request *protos.Empty) (*protos.UserList, error) {
 	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
@@ -171,7 +173,7 @@ func (s *server) List(ctx context.Context, request *protos.Empty) (*protos.UserL
 	return list, nil
 }
 
-//SetPassword TODO
+//SetPassword changes the users password
 func (s *server) SetPassword(ctx context.Context, request *protos.PasswordUpdateRequest) (*protos.Empty, error) {
 	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
@@ -214,6 +216,7 @@ func (s *server) SetPassword(ctx context.Context, request *protos.PasswordUpdate
 	return nil, err
 }
 
+//validatePassword checks for password complexity
 func validatePassword(password string) (*string, error) {
 
 	if password == "" {
@@ -237,7 +240,7 @@ func validatePassword(password string) (*string, error) {
 	return &stringHash, nil
 }
 
-//Update TODO
+//Update updates a users details given they exist
 func (s *server) Update(ctx context.Context, request *protos.UserUpdateRequest) (*protos.User, error) {
 	dbConn, err := db.NewMongoDBSession()
 	if err != nil {

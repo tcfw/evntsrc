@@ -119,8 +119,10 @@ func (s *basicScheduler) nodeScore(node *pb.Node) int64 {
 	return score
 }
 
-//Optimise @TODO
+//Optimise reviews all allocations and attempts to optimise
+//to even the load between each node available
 func (s *basicScheduler) Optimise() error {
+	//TODO(tcfw)
 	return nil
 }
 
@@ -234,8 +236,8 @@ func (s *basicScheduler) observeStreams(nStreams []*pb.Stream) {
 	}
 }
 
-//TODO merge streamDiff and nodeDiff
 func (s *basicScheduler) streamDiff(nStreams []*pb.Stream) (map[int32]*pb.Stream, map[int32]*pb.Stream) {
+	//TODO(tcfw) merge streamDiff and nodeDiff
 	added := map[int32]*pb.Stream{}
 	deleted := map[int32]*pb.Stream{}
 	same := map[int32]*pb.Stream{}

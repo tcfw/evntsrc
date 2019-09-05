@@ -29,7 +29,7 @@ func NewServer() *Server {
 	return &Server{}
 }
 
-//GetPlans @TODO
+//GetPlans queries stripe for all available plans
 func (s *Server) GetPlans(ctx context.Context, _ *pb.Empty) (*pb.PlanList, error) {
 
 	plans := []*pb.Plan{}
@@ -75,7 +75,7 @@ func (s *Server) GetPlans(ctx context.Context, _ *pb.Empty) (*pb.PlanList, error
 	return &pb.PlanList{Plans: plans}, nil
 }
 
-//CreateCustomerFromUser @TODO
+//CreateCustomerFromUser creates a new stripe customer given a user
 func (s *Server) CreateCustomerFromUser(ctx context.Context, request *pb.CreateRequest) (*pb.CreateResponse, error) {
 
 	if request.CardToken == "" || request.UserId == "" {
@@ -114,7 +114,7 @@ func (s *Server) CreateCustomerFromUser(ctx context.Context, request *pb.CreateR
 	return &pb.CreateResponse{CustomerId: customer.ID}, nil
 }
 
-//AttachPaymentMethod @TODO
+//AttachPaymentMethod attaches a payment method to the stripe customer such as a credit card token
 func (s *Server) AttachPaymentMethod(ctx context.Context, request *pb.CreateRequest) (*pb.Empty, error) {
 	if request.CardToken == "" || request.UserId == "" {
 		return nil, errors.New("All params required")
@@ -142,7 +142,7 @@ func (s *Server) AttachPaymentMethod(ctx context.Context, request *pb.CreateRequ
 	return nil, err
 }
 
-//GetUserInfo @TODO
+//GetUserInfo fetches the customer info given a user id
 func (s *Server) GetUserInfo(ctx context.Context, request *pb.InfoRequest) (*pb.Customer, error) {
 
 	if request.UserId == "" {
@@ -154,6 +154,7 @@ func (s *Server) GetUserInfo(ctx context.Context, request *pb.InfoRequest) (*pb.
 		return nil, err
 	}
 
+	//Validate the user exists
 	user, err := users.Find(withAuthContext(ctx), &evntsrc_users.UserRequest{Query: &evntsrc_users.UserRequest_Id{Id: request.UserId}})
 	if err != nil {
 		return nil, err
@@ -265,12 +266,14 @@ func (s *Server) GetUserInfo(ctx context.Context, request *pb.InfoRequest) (*pb.
 	return rCustomer, nil
 }
 
-//SubscribeUser @TODO
+//SubscribeUser subscribes a user/customer to a stripe plan
 func (s *Server) SubscribeUser(ctx context.Context, request *pb.SubscribeRequest) (*pb.SubscribeResponse, error) {
+	//TODO(tcfw)
 	return nil, status.Errorf(codes.Unavailable, "Not implemented")
 }
 
-//TerminateSubscription @TODO
+//TerminateSubscription removes/ends a stripe plan for a customer
 func (s *Server) TerminateSubscription(ctx context.Context, request *pb.TerminateRequest) (*pb.Empty, error) {
+	//TODO(tcfw)
 	return nil, status.Errorf(codes.Unavailable, "Not implemented")
 }

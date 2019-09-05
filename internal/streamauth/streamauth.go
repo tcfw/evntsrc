@@ -126,10 +126,10 @@ func (s *server) List(ctx context.Context, request *pb.ListRequest) (*pb.KeyList
 	return &pb.KeyList{Keys: streamKeys}, nil
 }
 
-//ListAll @TODO ~> change to paged request
+//ListAll provides a list of all stream keys
 func (s *server) ListAll(ctx context.Context, request *pb.Empty) (*pb.KeyList, error) {
-
-	//@TODO Verify user admin token claim
+	//TODO(tcfw) change to paged request
+	//TODO(tcfw) Verify user admin token claim
 
 	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
@@ -183,10 +183,11 @@ func (s *server) Get(ctx context.Context, request *pb.GetRequest) (*pb.StreamKey
 	return &key, nil
 }
 
-//Update @TODO
+//Update updates a stream key info
 func (s *server) Update(ctx context.Context, request *pb.StreamKey) (*pb.StreamKey, error) {
 
 	/*
+		TODO(tcfw)
 		Validate ownership of stream
 		DB Connect
 		Encrypt secret
@@ -197,7 +198,7 @@ func (s *server) Update(ctx context.Context, request *pb.StreamKey) (*pb.StreamK
 	return nil, status.Errorf(codes.Unavailable, "Not implemented")
 }
 
-//Delete @TODO
+//Delete deletes a stream key perminately
 func (s *server) Delete(ctx context.Context, request *pb.StreamKey) (*pb.Empty, error) {
 	if err := s.validateOwnership(ctx, request.GetStream()); err != nil {
 		return nil, err

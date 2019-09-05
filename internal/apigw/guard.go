@@ -26,7 +26,8 @@ var (
 	passportConn *grpc.ClientConn
 )
 
-//@TODO secure against session fixation
+//authGuard validates the http request for auth tokens and validates them
+//against the passport service
 func authGuard(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if shouldValidate(r) {

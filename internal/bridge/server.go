@@ -61,7 +61,7 @@ func (s *server) Subscribe(request *pb.SubscribeRequest, stream pb.BridgeService
 	}
 }
 
-// @TODO move to grpc interceptor
+// TODO(tcfw) move to grpc interceptor
 func (s *server) ValidateAuth(request interface{}) error {
 	return nil
 }

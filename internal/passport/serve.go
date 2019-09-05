@@ -189,8 +189,10 @@ func (s *Server) Authenticate(ctx context.Context, request *pb.AuthRequest) (*pb
 	}, nil
 }
 
-//Refresh TODO
+//Refresh allows the creation of a auth token given a refresh token validating the refresh
+//token has not been used before and has not expired
 func (s *Server) Refresh(context.Context, *pb.RefreshRequest) (*pb.AuthResponse, error) {
+	//TODO(tcfw)
 	return &pb.AuthResponse{}, nil
 }
 

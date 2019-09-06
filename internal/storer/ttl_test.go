@@ -142,7 +142,7 @@ func Test_server_handleTTLQuery(t *testing.T) {
 			name: "test 3 - mixed events expired and acked, but none to replay",
 			req:  &pb.QueryRequest{Stream: 1, Query: &pb.QueryRequest_Ttl{Ttl: &pb.QueryTTLExpired{Time: &now}}},
 			events: []*pbEvent.Event{
-				&pbEvent.Event{
+				{
 					ID:           uuid.New().String(),
 					Stream:       1,
 					Subject:      "test",
@@ -152,7 +152,7 @@ func Test_server_handleTTLQuery(t *testing.T) {
 					Acknowledged: &pastAckTime,
 					Data:         []byte{},
 				},
-				&pbEvent.Event{
+				{
 					ID:      uuid.New().String(),
 					Stream:  1,
 					Subject: "test",
@@ -169,7 +169,7 @@ func Test_server_handleTTLQuery(t *testing.T) {
 			name: "test 4 - mixed events to replay for TTL",
 			req:  &pb.QueryRequest{Stream: 1, Query: &pb.QueryRequest_Ttl{Ttl: &pb.QueryTTLExpired{Time: &now}}},
 			events: []*pbEvent.Event{
-				&pbEvent.Event{
+				{
 					ID:           uuid.New().String(),
 					Stream:       1,
 					Subject:      "test",
@@ -179,7 +179,7 @@ func Test_server_handleTTLQuery(t *testing.T) {
 					Acknowledged: &pastAckTime,
 					Data:         []byte{},
 				},
-				&pbEvent.Event{
+				{
 					ID:      uuid.New().String(),
 					Stream:  1,
 					Subject: "test",
@@ -197,7 +197,7 @@ func Test_server_handleTTLQuery(t *testing.T) {
 			name: "test 4 - all events to replay for TTL with and without prior TTL MD",
 			req:  &pb.QueryRequest{Stream: 1, Query: &pb.QueryRequest_Ttl{Ttl: &pb.QueryTTLExpired{Time: &now}}},
 			events: []*pbEvent.Event{
-				&pbEvent.Event{
+				{
 					ID:      uuid.New().String(),
 					Stream:  1,
 					Subject: "test",
@@ -209,7 +209,7 @@ func Test_server_handleTTLQuery(t *testing.T) {
 					},
 					Data: []byte{},
 				},
-				&pbEvent.Event{
+				{
 					ID:      uuid.New().String(),
 					Stream:  1,
 					Subject: "test",

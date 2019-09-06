@@ -8,12 +8,12 @@ import (
 	fake "github.com/icrowley/fake"
 	assert "github.com/stretchr/testify/assert"
 	"github.com/tcfw/evntsrc/internal/passport"
+	"github.com/tcfw/evntsrc/internal/tracing"
 	protos "github.com/tcfw/evntsrc/internal/users/protos"
 	"github.com/tcfw/evntsrc/internal/utils/db"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
-	"github.com/tcfw/evntsrc/internal/tracing"
 )
 
 func TestCanRunServer(t *testing.T) {

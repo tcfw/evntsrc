@@ -9,6 +9,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
+	//K8S in-cluster authenticator
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 

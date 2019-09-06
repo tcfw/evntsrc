@@ -79,7 +79,7 @@ func (ecl *AES256) Decrypt(in []byte, md map[string]string) ([]byte, error) {
 }
 
 //Verify validates the payload given metadata
-//Will only check the existance of the AES nonce
+//Will only check the existence of the AES nonce
 func (ecl *AES256) Verify(in []byte, md map[string]string) error {
 	if _, ok := md[mdAESNonce]; !ok {
 		return fmt.Errorf("No nonce found")

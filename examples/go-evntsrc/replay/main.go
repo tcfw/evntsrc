@@ -3,12 +3,9 @@ package main
 import (
 	"crypto/rand"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"os"
 	"time"
-
-	mrand "math/rand"
 
 	evntsrc "github.com/tcfw/evntsrc/pkg/go-evntsrc"
 )
@@ -79,69 +76,4 @@ func main() {
 		time.Sleep(100 * time.Millisecond)
 	}
 
-}
-
-//newClient create a new evntsrc API client
-func newClient() (*evntsrc.APIClient, error) {
-	tempCrypto, err := evntsrc.TemporaryCrypto()
-	if err != nil {
-		return nil, err
-	}
-
-	options := []evntsrc.ClientOption{
-		evntsrc.WithOwnEvents(), //See our own events
-		evntsrc.WithCrypto(tempCrypto),
-	}
-
-	//Create initial config
-	client, err := evntsrc.NewEvntSrcClient(apiKey, 1, options...)
-	if err != nil {
-		return nil, err
-	}
-
-	//Staging config
-	client.Staging()
-
-	//Listen for errors
-	go func() {
-		for {
-			msg := <-client.Errors()
-			fmt.Printf("##!!ERRR: %s\n", msg.Error())
-		}
-	}()
-
-	return client, err
-}
-
-//randChanName random test channel name
-func randChanName() string {
-	letterRunes := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-	n := 25
-
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = letterRunes[mrand.Intn(len(letterRunes))]
-	}
-	return fmt.Sprintf("test_%s", string(b))
-}
-
-//setup read flag and set up globals
-func setup() {
-	flags()
-
-	if channel == "" {
-		channel = randChanName()
-	}
-
-	sent = 0
-	received = 0
-	startTime = time.Now()
-}
-
-//flags read in flags/config from command line
-func flags() {
-	flag.StringVar(&apiKey, "apikey", "", "API Key")
-	flag.StringVar(&channel, "channel", "", "Specify a channel")
-	flag.IntVar(&msgCount, "m", 10, "Number of messages to send")
-	flag.Parse()
 }

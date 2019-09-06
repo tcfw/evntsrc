@@ -20,8 +20,8 @@ type EncrypterDecrypter interface {
 	Verify([]byte, map[string]string) error
 }
 
-//TemporaryCrypto generates ephemeral crypto for use in testing
-func TemporaryCrypto() (*esCrypto.ECDSASHA384AES256, error) {
+//EphemeralCrypto generates ephemeral crypto for use in testing
+func EphemeralCrypto() (*esCrypto.ECDSASHA384AES256, error) {
 	ephemAESKey := make([]byte, 32)
 	if _, err := rand.Read(ephemAESKey); err != nil {
 		return nil, err

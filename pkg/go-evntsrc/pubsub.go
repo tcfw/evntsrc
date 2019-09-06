@@ -48,6 +48,7 @@ func (api *APIClient) openConn() error {
 		}
 		return err
 	}
+
 	conn.SetCloseHandler(func(code int, text string) error {
 		if api.Debug {
 			fmt.Printf("CLOSED %v %v\n", code, text)
@@ -237,7 +238,11 @@ func (api *APIClient) distributeReadPipe() {
 							break
 						case chanSubType:
 							go func() {
-								subset.ch <- subbersEvent
+								//Timeout chan send after 30 seconds
+								select {
+								case subset.ch <- subbersEvent:
+								case <-time.After(30 * time.Second):
+								}
 							}()
 							break
 						}
@@ -317,7 +322,7 @@ func (api *APIClient) Publish(subject string, data []byte, eventType string) err
 	pubMsg := &websocks.PublishCommand{
 		SubscribeCommand: &websocks.SubscribeCommand{InboundCommand: &websocks.InboundCommand{Ref: uuid.New().String(), Command: "pub"}, Subject: subject},
 		Data:             base64.StdEncoding.EncodeToString(data),
-		ContentType:      "application/json",
+		ContentType:      "application/octet-stream",
 		Type:             eventType,
 		TypeVersion:      api.AppVer,
 		Metadata:         md,
@@ -347,16 +352,15 @@ func (api *APIClient) doSubscribe(subject string) error {
 
 	api.subPipe <- subMsg
 
-	_, err := api.waitForResponse(subMsg.Ref)
-	if err != nil {
+	if _, err := api.waitForResponse(subMsg.Ref); err != nil {
 		return fmt.Errorf("Failed to subscribe: %s", err.Error())
 	}
 
 	return nil
 }
 
-//Subscribe to a subject inside the stream via a channel
-func (api *APIClient) Subscribe(subject string) (chan *Event, error) {
+//SubscribeChan to a subject inside the stream via a channel
+func (api *APIClient) SubscribeChan(subject string) (<-chan *Event, error) {
 	if err := api.doSubscribe(subject); err != nil {
 		return nil, err
 	}
@@ -396,7 +400,7 @@ func (api *APIClient) Unsubscribe(subject string) error {
 				close(subscription.ch)
 				break
 			case funcSubType:
-				//nothing to do
+				//nothing to do, just stop sending events
 				break
 			}
 		}
@@ -406,25 +410,4 @@ func (api *APIClient) Unsubscribe(subject string) error {
 	}
 
 	return fmt.Errorf("No subscription for subject '%s'", subject)
-}
-
-//Replay starts replaying events in chronological order
-//Justme defaults to true if not specified
-func (api *APIClient) Replay(subject string, query ReplayQuery, justme bool) error {
-	cmd := &websocks.ReplayCommand{
-		SubscribeCommand: &websocks.SubscribeCommand{
-			InboundCommand: &websocks.InboundCommand{Ref: uuid.New().String(), Command: "replay"},
-			Subject:        subject,
-		},
-		JustMe: justme,
-		Query:  query,
-	}
-
-	api.replayPipe <- cmd
-
-	if _, err := api.waitForResponse(cmd.Ref); err != nil && err.Error() != "OK" {
-		return fmt.Errorf("Failed to start replay: %s", err.Error())
-	}
-
-	return nil
 }

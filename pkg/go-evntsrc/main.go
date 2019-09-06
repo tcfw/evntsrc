@@ -50,8 +50,8 @@ type APIClient struct {
 	options *ClientOptions
 }
 
-//NewEvntSrcClient creates a new client instance for interacting with evntsrc.io
-func NewEvntSrcClient(auth string, streamID int32, options ...ClientOption) (*APIClient, error) {
+//NewClient creates a new client instance for interacting with evntsrc.io
+func NewClient(auth string, streamID int32, options ...ClientOption) (*APIClient, error) {
 	api := &APIClient{
 		auth:                       auth,
 		stream:                     streamID,

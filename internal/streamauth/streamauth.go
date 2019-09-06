@@ -3,6 +3,7 @@ package streamauth
 import (
 	"context"
 	"crypto/rand"
+	"errors"
 	"log"
 	"sync"
 
@@ -36,8 +37,17 @@ func newServer() *server {
 
 //Create creates a new stream key
 func (s *server) Create(ctx context.Context, request *pb.StreamKey) (*pb.StreamKey, error) {
-	if err := request.Validate(true); err != nil {
-		return nil, err
+	if request.GetId() != "" {
+		return nil, errors.New("New keys cannot have an id")
+	}
+	if request.GetKey() != "" {
+		return nil, errors.New("New keys Cannot have a key")
+	}
+	if request.GetSecret() != "" {
+		return nil, errors.New("New keys Cannot have a secret")
+	}
+	if request.GetStream() == 0 {
+		return nil, errors.New("Must have stream set")
 	}
 
 	if err := s.validateOwnership(ctx, request.GetStream()); err != nil {

@@ -303,7 +303,6 @@ func (s *Server) SocialLogin(ctx context.Context, request *pb.SocialRequest) (*p
 
 //RevokeToken adds a token to the revoked tokens list
 func (s *Server) RevokeToken(ctx context.Context, request *pb.Revoke) (*pb.Empty, error) {
-
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, fmt.Errorf("failed to parse metadata")
@@ -330,20 +329,9 @@ func (s *Server) RevokeToken(ctx context.Context, request *pb.Revoke) (*pb.Empty
 		return nil, err
 	}
 
-	if request.Id == "" {
-		request.Id = claims["sub"].(string)
-	}
-
-	if request.Jti == "" {
-		request.Jti = claims["jti"].(string)
-	}
-
-	if _, ok := claims["admin"]; request.Id != claims["sub"].(string) && !ok {
-		return nil, status.Errorf(codes.PermissionDenied, "Unauthorized")
-	}
-
-	if request.Reason == "" {
-		request.Reason = "LOGOUT"
+	request, err = s.populateRevokeRequestDefaults(request, claims)
+	if err != nil {
+		return nil, err
 	}
 
 	err = revokeToken(claims, request.Reason)
@@ -352,6 +340,26 @@ func (s *Server) RevokeToken(ctx context.Context, request *pb.Revoke) (*pb.Empty
 	}
 
 	return &pb.Empty{}, nil
+}
+
+func (s *Server) populateRevokeRequestDefaults(req *pb.Revoke, claims map[string]interface{}) (*pb.Revoke, error) {
+	if req.Id == "" {
+		req.Id = claims["sub"].(string)
+	}
+
+	if req.Jti == "" {
+		req.Jti = claims["jti"].(string)
+	}
+
+	if _, ok := claims["admin"]; req.Id != claims["sub"].(string) && !ok {
+		return nil, status.Errorf(codes.PermissionDenied, "Unauthorized")
+	}
+
+	if req.Reason == "" {
+		req.Reason = "LOGOUT"
+	}
+
+	return req, nil
 }
 
 //RunGRPC starts the GRPC server

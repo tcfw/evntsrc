@@ -16,7 +16,7 @@ func TestECDSASHA384AES256(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	privateKey, err := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
+	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		t.Fatal(err)
 	}

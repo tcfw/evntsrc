@@ -17,12 +17,12 @@ import (
 )
 
 func TestECDSASHA384ECDHAES256(t *testing.T) {
-	privateKey, err := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
+	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	remoteKey, err := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
+	remoteKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,7 +67,7 @@ func TestECDSASHA384ECDHAES256(t *testing.T) {
 }
 
 func TestMismatchCurves(t *testing.T) {
-	privateKey, err := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
+	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -102,12 +102,12 @@ func TestMismatchCurves(t *testing.T) {
 }
 
 func TestCertValidation(t *testing.T) {
-	privateKey, err := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
+	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	remoteKey, err := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
+	remoteKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -148,7 +148,7 @@ func TestCertValidation(t *testing.T) {
 }
 
 func TestFetchpubCert(t *testing.T) {
-	remoteKey, err := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
+	remoteKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		t.Fatal(err)
 	}

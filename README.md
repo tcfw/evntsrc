@@ -1,4 +1,6 @@
-# EvntSrc
+[![Evntsrc.io](https://github.com/tcfw/evntsrc/raw/master/docs/resources/logo@.2x.png)](https://evntsrc.io)
+
+---
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/tcfw/evntsrc)](https://goreportcard.com/report/github.com/tcfw/evntsrc)
 
@@ -14,4 +16,4 @@ see the [LICENSE](https://github.com/tcfw/evntsrc/blob/master/LICENSE) file for 
 
 ## Authors
 
-* **Tom Worrall** - *Initial work* - [tcfw](https://github.com/tcfw)
+* **Tom Worrall** - [tcfw](https://github.com/tcfw)

@@ -119,7 +119,7 @@ export default {
     }
   },
   mounted() {
-    axios.get(this.$config.API + "/me").then(d => {
+    this.$http.get(this.$config.API + "/me").then(d => {
       this.editProfileForm = d.data;
       this.editProfileForm.current_password = "";
       this.editProfileForm.new_password = "";
@@ -138,8 +138,7 @@ export default {
 
           var updateRequest = new proto.evntsrc.users.UserUpdateRequest();
           updateRequest.setUser(user);
-          axios
-            .post(this.$config.API + "/me", updateRequest.toObject())
+          this.$http.post(this.$config.API + "/me", updateRequest.toObject())
             .then(resp => {
               this.$root.me = resp.data;
               this.$message({
@@ -159,8 +158,7 @@ export default {
                   this.editProfileForm.current_password
                 );
                 passRequest.setPassword(this.editProfileForm.new_password);
-                axios
-                  .post(
+                this.$http.post(
                     this.$config.API + "/me/password",
                     passRequest.toObject()
                   )

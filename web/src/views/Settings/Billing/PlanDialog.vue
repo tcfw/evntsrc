@@ -26,13 +26,13 @@
       </el-col>
     </el-row>
     <span slot="footer" class="dialog-footer">
-      <el-button @click="visible = false" size="small">Cancel</el-button>
+      <el-button @click="hide" size="small">Cancel</el-button>
       <el-button
         type="primary"
         @click="update"
         size="small"
         :loading="submitting"
-        >
+      >
         Change
       </el-button>
     </span>
@@ -42,15 +42,25 @@
 export default {
   name: "PlanDialog",
   props: {
-    products: Object,
+    products: Array,
     visible: Boolean
   },
   data() {
     return {
-      submitting: false
+      submitting: false,
+      changeSubscription: null
     };
   },
+  filters: {
+    formatAmount(value) {
+      var decValue = parseFloat(value) / 100;
+      return decValue.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
+    }
+  },
   methods: {
+    hide() {
+      this.visible = false;
+    },
     update() {
       this.submitting = true;
     },

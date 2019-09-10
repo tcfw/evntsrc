@@ -81,12 +81,12 @@ export default {
       if (this.searchInput != "") {
         url += "/search?query=" + this.searchInput;
       }
-      axios
+      this.$http
         .get(url)
         .then(d => {
           this.buildList(d.data);
         })
-        .catch(e => {
+        .catch(() => {
           this.error =
             "Failed to " +
             (this.searchInput ? "search" : "load") +
@@ -115,7 +115,7 @@ export default {
       if (this.searchInput == "") {
         return this.streams;
       }
-      return _.filter(
+      return this._.filter(
         this.streams,
         stream => stream.Name.search(new RegExp(this.searchInput, "gi")) >= 0
       );

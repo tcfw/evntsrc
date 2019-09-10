@@ -1,1 +1,3 @@
-window.moment = require("moment");
+import Vue from "vue";
+
+Vue.prototype.$moment = require("moment");

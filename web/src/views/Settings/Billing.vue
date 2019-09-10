@@ -176,7 +176,7 @@
   </div>
 </template>
 <script>
-import billing_pb from "@/protos/billing_pb.js";
+// import billing_pb from "@/protos/billing_pb.js";
 import CreditCardDialog from "./Billing/CreditCardDialog.vue";
 import PlanDialog from "./Billing/PlanDialog.vue";
 
@@ -209,8 +209,8 @@ export default {
     }
   },
   methods: {
-    fetchInfo(me) {
-      axios
+    fetchInfo() {
+      this.$http
         .get(this.$config.API + "/billing/user/" + this.$root.me.id)
         .then(d => {
           this.loading = false;
@@ -226,7 +226,7 @@ export default {
         });
     },
     fetchPlans() {
-      axios.get(this.$config.API + "/billing/plans").then(d => {
+      this.$http.get(this.$config.API + "/billing/plans").then(d => {
         this.plans = d.data.plans;
         this.plansLoading = false;
       });
@@ -236,24 +236,24 @@ export default {
         return {
           name: ""
         };
-      var plan = _.find(this.plans, {
+      var plan = this._.find(this.plans, {
         id: planId
       });
       return plan;
     },
     timeUntil(time) {
-      return moment().to(moment.unix(time));
+      return this.$moment().to(moment.unix(time));
     },
     formatTime(time) {
-      return moment.unix(time).format("LL");
+      return this.$moment.unix(time).format("LL");
     },
     products() {
       if (this.loading == true || this.plansLoading == true) return [];
-      var currentPlan = _.find(this.plans, {
+      var currentPlan = this._.find(this.plans, {
         id: this.info.subscriptions[0].plan
       });
-      return _.sortBy(
-        _.reduce(
+      return this._.sortBy(
+        this._.reduce(
           this.plans,
           (carry, plan) => {
             if (

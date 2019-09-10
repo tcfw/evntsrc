@@ -1,1 +1,3 @@
-window._ = require("lodash");
+import Vue from "vue";
+
+Vue.prototype._ = require("lodash");

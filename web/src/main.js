@@ -37,7 +37,7 @@ window.app = new Vue({
   methods: {
     fetchMe() {
       if (this.loggedIn()) {
-        axios.get(this.$config.API + "/me").then(d => {
+        this.$http.get(this.$config.API + "/me").then(d => {
           this.me = d.data;
           this.$emit("me.ready", this.me);
         });
@@ -48,7 +48,7 @@ window.app = new Vue({
       return this.$cookie.get("session") != null;
     },
     logout() {
-      axios.post(this.$config.API + "/auth/revoke");
+      this.$http.post(this.$config.API + "/auth/revoke");
       this.$cookie.delete("session");
       this.applySession();
       this.$message({
@@ -59,7 +59,7 @@ window.app = new Vue({
     },
     applySession() {
       let session = this.$cookie.get("session");
-      axios.defaults.headers.common["Authorization"] = session;
+      this.$http.defaults.headers.common["Authorization"] = session;
     },
     gapiCallback() {
       this.$emit("gapi.loaded");

@@ -6,7 +6,9 @@
     title="Payment Method"
     :show-close="false"
   >
-    <label style="margin-top: -25px; margin-bottom: 15px; display: block;">Credit or debit card</label>
+    <label style="margin-top: -25px; margin-bottom: 15px; display: block;">
+      Credit or debit card
+    </label>
     <el-card>
       <div id="stripeElement"></div>
     </el-card>
@@ -17,9 +19,9 @@
         @click="submit"
         size="small"
         :loading="submitting"
-        >
-          Attach card
-        </el-button>
+      >
+        Attach card
+      </el-button>
     </span>
   </el-dialog>
 </template>
@@ -62,7 +64,7 @@ export default {
             cardToken: result.token.id,
             userId: this.$root.me.id
           };
-          axios
+          this.$http
             .post(
               this.$config.API +
                 "/billing/user/" +

@@ -28,8 +28,7 @@ export default {
     };
   },
   created() {
-    axios
-      .get(this.$config.API + "/stream/" + this.$route.params.id + "/keys")
+    this.$http.get(this.$config.API + "/stream/" + this.$route.params.id + "/keys")
       .then(d => {
         this.loading = false;
         this.keys = d.data.keys;

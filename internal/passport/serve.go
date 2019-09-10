@@ -173,7 +173,7 @@ func (s *Server) Authenticate(ctx context.Context, request *pb.AuthRequest) (*pb
 		return nil, fmt.Errorf("Failed to generate nounce")
 	}
 
-	cookie := http.Cookie{Name: "snounce", Value: nounce, Domain: "evntsrc.io", Path: "/", Expires: time.Now().Add(1 * time.Hour)}
+	cookie := http.Cookie{Name: "snounce", Value: nounce, Domain: "evntsrc.io", Path: "/", Expires: time.Now().Add(1 * time.Hour), Secure: true}
 	grpc.SendHeader(ctx, metadata.Pairs("Grpc-Metadata-Set-Cookie", cookie.String()))
 
 	log.Printf("Successful login for %s @ %s", token.Claims.(jwt.MapClaims)["sub"].(string), remoteIP)
@@ -244,7 +244,7 @@ func (s *Server) VerifyToken(ctx context.Context, request *pb.VerifyTokenRequest
 			return nil, err
 		}
 
-		cookie := http.Cookie{Name: "snounce", Value: newSnounce, Domain: "evntsrc.io", Path: "/", Expires: time.Now().Add(1 * time.Hour)}
+		cookie := http.Cookie{Name: "snounce", Value: newSnounce, Domain: "evntsrc.io", Path: "/", Expires: time.Now().Add(1 * time.Hour), Secure: true}
 		grpc.SendHeader(ctx, metadata.Pairs("Grpc-Metadata-Set-Cookie", cookie.String()))
 	}
 

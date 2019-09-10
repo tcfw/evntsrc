@@ -281,8 +281,7 @@ export default {
       socialRequest.setProvider(this.profileKnowledge.provider);
       socialRequest.setIdptokens(socialTokens);
 
-      axios
-        .post(
+      this.$http.post(
           this.$config.API + "/auth/social",
           socialRequest.serializeBinary(),
           {
@@ -336,7 +335,9 @@ export default {
       );
 
       this.$cookie.set("session", authResponse.getTokens().getToken(), {
-        expires: expires
+        expires: expires,
+        path: "/",
+        secure: process.env.VUE_APP_SEC_COOKIE
       });
       this.$root.applySession();
 
@@ -369,8 +370,7 @@ export default {
             var authRequest = new proto.AuthRequest();
             authRequest.setUsercreds(userCreds);
 
-            axios
-              .post(
+            this.$http.post(
                 this.$config.API + "/auth/login",
                 authRequest.serializeBinary(),
                 {

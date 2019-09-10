@@ -199,8 +199,6 @@ func (api *APIClient) distributeReadPipe() {
 			continue
 		}
 
-		evnt.Data, _ = base64.StdEncoding.DecodeString(string(evnt.Data))
-
 		if source, ok := evnt.Metadata["relative_seq"]; api.options.IgnoreSelf && ok && strings.HasPrefix(source, fmt.Sprintf("%s-", api.connectionID)) {
 			continue
 		}
@@ -257,7 +255,7 @@ func (api *APIClient) distributeReadPipe() {
 }
 
 //doPublish writes the publish command to the socket
-func (api *APIClient) doPublish(data *websocks.PublishCommand) error {
+func (api *APIClient) doPublish(data *websocks.PublishEventCommand) error {
 	if api.socket == nil {
 		if err := api.openConn(); err != nil {
 			return fmt.Errorf("Failed to publish: %s", err.Error())
@@ -294,43 +292,56 @@ func (api *APIClient) doSendSubscribe(data *websocks.SubscribeCommand) error {
 	return api.socket.WriteJSON(data)
 }
 
-//Publish publishes an event through evntsrc
+//Publish publishes data given an subject and event type
 func (api *APIClient) Publish(subject string, data []byte, eventType string) error {
+	evnt := &Event{
+		Subject: subject,
+		Data:    data,
+		Type:    eventType,
+	}
+
+	return api.PublishEvent(evnt)
+}
+
+//PublishEvent pubs an event to the stream
+func (api *APIClient) PublishEvent(ev *Event) error {
 	if api.socket == nil {
 		if err := api.openConn(); err != nil {
 			return fmt.Errorf("Failed to publish: %s", err.Error())
 		}
 	}
 
-	md := map[string]string{}
+	if ev.Metadata == nil {
+		ev.Metadata = map[string]string{}
+	}
+
+	if ev.ContentType == "" {
+		ev.ContentType = "application/octet-stream"
+	}
 
 	if api.options.Crypto != nil {
-		encBytes, encMd, err := api.options.Crypto.Encrypt([]byte(data))
+		encBytes, encMd, err := api.options.Crypto.Encrypt([]byte(ev.Data))
 		if err != nil {
 			return err
 		}
 
-		data = encBytes
+		ev.Data = encBytes
 		for k, v := range encMd {
-			md[k] = v
+			ev.Metadata[k] = v
 		}
 
 		//Encrypted flag
-		md["e"] = "1"
+		ev.Metadata["e"] = "1"
 	}
 
-	pubMsg := &websocks.PublishCommand{
-		SubscribeCommand: &websocks.SubscribeCommand{InboundCommand: &websocks.InboundCommand{Ref: uuid.New().String(), Command: "pub"}, Subject: subject},
-		Data:             base64.StdEncoding.EncodeToString(data),
-		ContentType:      "application/octet-stream",
-		Type:             eventType,
-		TypeVersion:      api.AppVer,
-		Metadata:         md,
+	pubCmd := &websocks.PublishEventCommand{
+		SubscribeCommand: &websocks.SubscribeCommand{InboundCommand: &websocks.InboundCommand{Ref: uuid.New().String(), Command: "epub"}, Subject: ev.Subject},
+		Event:            ev,
 	}
 
-	api.writePipe <- pubMsg
+	api.writePipe <- pubCmd
 	if api.WaitForPublishConfirmation {
-		ok, err := api.waitForResponse(pubMsg.Ref)
+		ok, err := api.waitForResponse(pubCmd.Ref)
 		if err != nil {
 			fmt.Printf("%v", err)
 		}

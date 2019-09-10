@@ -10,11 +10,12 @@ import (
 )
 
 const (
-	commandSubscribe   = "sub"
-	commandUnsubscribe = "unsub"
-	commandPublish     = "pub"
-	commandAuth        = "auth"
-	commandReplay      = "replay"
+	commandSubscribe    = "sub"
+	commandUnsubscribe  = "unsub"
+	commandPublish      = "pub"
+	commandPublishEvent = "epub"
+	commandAuth         = "auth"
+	commandReplay       = "replay"
 )
 
 //InboundCommand is the basic struct for all commands coming from browser
@@ -37,7 +38,7 @@ type SubscribeCommand struct {
 	Subject string `json:"subject"`
 }
 
-//PublishCommand sends data through to NATS
+//PublishCommand sends data (server-side event) through to NATS
 type PublishCommand struct {
 	*SubscribeCommand
 	Data        string            `json:"data"`
@@ -46,6 +47,12 @@ type PublishCommand struct {
 	TypeVersion string            `json:"typeVersion"`
 	ContentType string            `json:"contentType"`
 	Metadata    map[string]string `json:"metadata"`
+}
+
+//PublishEventCommand sends an client-side event through NATS
+type PublishEventCommand struct {
+	*SubscribeCommand
+	Event *event.Event `json:"event"`
 }
 
 //UnsubscribeCommand starts a subscription
@@ -109,44 +116,86 @@ func (c *Client) doPublish(command *InboundCommand, message []byte) {
 		return
 	}
 
-	rEvent := event.NewEvent()
-	rEvent.Stream = c.auth.Stream
-	rEvent.Subject = subcommand.Subject
-	rEvent.Type = subcommand.Type
-	rEvent.TypeVersion = subcommand.TypeVersion
-	rEvent.ContentType = subcommand.ContentType
-	rEvent.Data = []byte(subcommand.Data)
-	rEvent.Source = subcommand.Source
-	if rEvent.Source == "" {
-		rEvent.Source = "ws"
-	}
-	rEvent.Metadata = map[string]string{"source_ip": c.conn.RemoteAddr().String()}
+	ev := event.NewEvent()
+	ev.Stream = c.auth.Stream
+	ev.Subject = subcommand.Subject
+	ev.Type = subcommand.Type
+	ev.TypeVersion = subcommand.TypeVersion
+	ev.ContentType = subcommand.ContentType
+	ev.Data = []byte(subcommand.Data)
+	ev.Source = subcommand.Source
+	ev.Metadata = map[string]string{}
 	if len(subcommand.Metadata) > 0 {
 		for mdK, mdV := range subcommand.Metadata {
 			//Do not override existing metadata
-			if _, ok := rEvent.Metadata[mdK]; !ok {
-				rEvent.Metadata[mdK] = mdV
+			if _, ok := ev.Metadata[mdK]; !ok {
+				ev.Metadata[mdK] = mdV
 			}
 		}
 	}
 
-	channel := fmt.Sprintf("_USER.%d.%s", c.auth.Stream, subcommand.Subject)
-
-	c.seqLock.Lock()
-	c.seq[channel]++
-	rEvent.Metadata["relative_seq"] = fmt.Sprintf("%s-%d", c.connectionID, c.seq[channel])
-	c.seqLock.Unlock()
-
-	rEvent.Metadata["_cid"] = c.connectionID
-
-	c.publisher.Publish(channel, rEvent)
-
-	//TODO(tcfw) wait for storer ack
+	if err := c.publishEvent(ev); err != nil {
+		c.sendStruct(&AckCommand{
+			Ref:     command.Ref,
+			Acktype: "Error",
+			Error:   fmt.Sprintf("Failed to publish event: %s", err),
+		})
+	}
 
 	c.sendStruct(&AckCommand{
 		Ref:     command.Ref,
 		Acktype: "OK",
 	})
+}
+
+func (c *Client) doPublishEvent(command *InboundCommand, message []byte) {
+	subcommand := &PublishEventCommand{}
+	if err := json.Unmarshal(message, subcommand); err != nil {
+		c.sendStruct(&AckCommand{Ref: command.Ref, Acktype: "Error", Error: "Failed to parse command"})
+		return
+	}
+
+	ev := subcommand.Event
+	ev.SetID()
+	ev.Stream = c.auth.Stream
+	ev.Subject = subcommand.Subject
+	ev.Time = event.ZeroableTime{Time: time.Now()}
+
+	if err := c.publishEvent(ev); err != nil {
+		c.sendStruct(&AckCommand{
+			Ref:     command.Ref,
+			Acktype: "Error",
+			Error:   fmt.Sprintf("Failed to publish event: %s", err),
+		})
+	}
+
+	c.sendStruct(&AckCommand{
+		Ref:     command.Ref,
+		Acktype: "OK",
+	})
+}
+
+func (c *Client) publishEvent(ev *event.Event) error {
+	if ev.Source == "" {
+		ev.Source = "ws"
+	}
+	if ev.Metadata == nil {
+		ev.Metadata = map[string]string{}
+	}
+	ev.Metadata["source_ip"] = c.conn.RemoteAddr().String()
+
+	channel := fmt.Sprintf("_USER.%d.%s", c.auth.Stream, ev.Subject)
+
+	c.seqLock.Lock()
+	c.seq[channel]++
+	ev.Metadata["relative_seq"] = fmt.Sprintf("%s-%d", c.connectionID, c.seq[channel])
+	c.seqLock.Unlock()
+
+	ev.Metadata["_cid"] = c.connectionID
+
+	//TODO(tcfw) wait for storer ack
+
+	return c.publisher.Publish(channel, ev)
 }
 
 func (c *Client) doAuth(command *InboundCommand, message []byte) {

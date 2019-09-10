@@ -37,7 +37,7 @@ type APIClient struct {
 	subscriptions              map[string][]*subscription
 
 	ReadPipe   chan []byte
-	writePipe  chan *websocks.PublishCommand
+	writePipe  chan *websocks.PublishEventCommand
 	replayPipe chan *websocks.ReplayCommand
 	subPipe    chan *websocks.SubscribeCommand
 	close      chan bool
@@ -58,7 +58,7 @@ func NewClient(auth string, streamID int32, options ...ClientOption) (*APIClient
 		Endpoint:                   apiEndpoint,
 		httpClient:                 newHTTPClient(),
 		ReadPipe:                   make(chan []byte, 256),
-		writePipe:                  make(chan *websocks.PublishCommand, 56),
+		writePipe:                  make(chan *websocks.PublishEventCommand, 56),
 		replayPipe:                 make(chan *websocks.ReplayCommand, 5),
 		subPipe:                    make(chan *websocks.SubscribeCommand, 10),
 		close:                      make(chan bool, 1),

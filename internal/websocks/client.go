@@ -125,6 +125,8 @@ func (c *Client) processCommand(command *InboundCommand, message []byte) {
 	case commandPublish:
 		c.doPublish(command, message)
 		break
+	case commandPublishEvent:
+		c.doPublishEvent(command, message)
 	case commandAuth:
 		c.doAuth(command, message)
 		break

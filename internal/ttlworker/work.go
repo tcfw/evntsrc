@@ -12,7 +12,6 @@ import (
 
 //Worker primary ttl worker
 type Worker struct {
-	grpcPort      int //TODO(tcfw): Currently unused
 	schedulerConn *grpc.ClientConn
 	schedulerCli  ttlschedulerPB.TTLSchedulerClient
 	storerConn    *grpc.ClientConn

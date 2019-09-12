@@ -122,7 +122,7 @@ func (s *basicScheduler) nodeScore(node *pb.Node) int64 {
 //Optimise reviews all allocations and attempts to optimise
 //to even the load between each node available
 func (s *basicScheduler) Optimise() error {
-	//TODO(tcfw)
+	//TODO(tcfw) attempt to optimise schedulings
 	return nil
 }
 

@@ -100,7 +100,7 @@ func (api *APIClient) readPump() {
 		_, message, err := api.socket.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				//TODO(tcfw) handle this better
+				//TODO(tcfw) reconnect to websocks
 				if api.Debug {
 					fmt.Printf("ERR Reading: %v\n", err)
 				}

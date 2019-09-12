@@ -66,6 +66,7 @@ type Client struct {
 	seq          map[string]int64
 	seqLock      sync.Mutex
 	closed       bool
+	storerAcks   *Acks
 
 	publisher Publisher
 }
@@ -81,11 +82,14 @@ func NewClient(conn *websocket.Conn) *Client {
 		closed:        false,
 		closeConnSub:  make(chan bool, 1),
 		publisher:     &NatsPublisher{},
+		storerAcks:    NewAcks(),
 	}
 }
 
 func (c *Client) close() {
 	c.conn.Close()
+
+	c.storerAcks.Stop()
 
 	if !c.closed {
 		socketGauge.WithLabelValues(fmt.Sprintf("%d", c.auth.Stream)).Dec()
@@ -152,6 +156,9 @@ func (c *Client) ConnSub() error {
 			if err != nil {
 				log.Println(err)
 				continue
+			}
+			if ev.Stream == 0 && ev.Subject == "puback" {
+				c.storerAcks.Add(ev.ID, "puback")
 			}
 			jsonBytes, _ := json.Marshal(ev)
 			c.send <- jsonBytes

@@ -197,7 +197,7 @@ func (s *server) Get(ctx context.Context, request *pb.GetRequest) (*pb.StreamKey
 func (s *server) Update(ctx context.Context, request *pb.StreamKey) (*pb.StreamKey, error) {
 
 	/*
-		TODO(tcfw)
+		TODO(tcfw) update a stream key
 		Validate ownership of stream
 		DB Connect
 		Encrypt secret

@@ -193,9 +193,15 @@ func (c *Client) publishEvent(ev *event.Event) error {
 
 	ev.Metadata["_cid"] = c.connectionID
 
-	//TODO(tcfw) wait for storer ack
+	if err := c.publisher.Publish(channel, ev); err != nil {
+		return err
+	}
 
-	return c.publisher.Publish(channel, ev)
+	if err := c.storerAcks.WaitForKeyWithTimeout(ev.ID, 30*time.Second); err != nil {
+		return fmt.Errorf("%s waiting for storage", err)
+	}
+
+	return nil
 }
 
 func (c *Client) doAuth(command *InboundCommand, message []byte) {

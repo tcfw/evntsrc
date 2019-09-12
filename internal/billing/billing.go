@@ -268,12 +268,12 @@ func (s *Server) GetUserInfo(ctx context.Context, request *pb.InfoRequest) (*pb.
 
 //SubscribeUser subscribes a user/customer to a stripe plan
 func (s *Server) SubscribeUser(ctx context.Context, request *pb.SubscribeRequest) (*pb.SubscribeResponse, error) {
-	//TODO(tcfw)
+	//TODO(tcfw) subscribe user to plan in stripe
 	return nil, status.Errorf(codes.Unavailable, "Not implemented")
 }
 
 //TerminateSubscription removes/ends a stripe plan for a customer
 func (s *Server) TerminateSubscription(ctx context.Context, request *pb.TerminateRequest) (*pb.Empty, error) {
-	//TODO(tcfw)
+	//TODO(tcfw) terminate subscription in stripe
 	return nil, status.Errorf(codes.Unavailable, "Not implemented")
 }

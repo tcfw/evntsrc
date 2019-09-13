@@ -12,6 +12,7 @@ import (
 
 //Worker primary ttl worker
 type Worker struct {
+	grpcPort      int
 	schedulerConn *grpc.ClientConn
 	schedulerCli  ttlschedulerPB.TTLSchedulerClient
 	storerConn    *grpc.ClientConn

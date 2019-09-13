@@ -36,15 +36,18 @@ type APIClient struct {
 	acks                       map[string]*ackCT
 	subscriptions              map[string][]*subscription
 
-	ReadPipe   chan []byte
-	writePipe  chan *websocks.PublishEventCommand
-	replayPipe chan *websocks.ReplayCommand
-	subPipe    chan *websocks.SubscribeCommand
-	close      chan bool
-	errCh      chan error
-	AcksCh     chan *websocks.AckCommand
-	ackL       sync.RWMutex
-	ackC       *sync.Cond
+	ReadPipe     chan []byte
+	writePipe    chan *websocks.PublishEventCommand
+	replayPipe   chan *websocks.ReplayCommand
+	subPipe      chan *websocks.SubscribeCommand
+	close        chan bool
+	errCh        chan error
+	AcksCh       chan *websocks.AckCommand
+	ackL         sync.RWMutex
+	ackC         *sync.Cond
+	pongCond     *sync.Cond
+	lastEvent    time.Time
+	recentEvents sync.Map
 
 	//Config options
 	options *ClientOptions
@@ -69,6 +72,8 @@ func NewClient(auth string, streamID int32, options ...ClientOption) (*APIClient
 		subscriptions:              map[string][]*subscription{},
 		Debug:                      false,
 		WaitForPublishConfirmation: true,
+		lastEvent:                  time.Now(),
+		recentEvents:               sync.Map{},
 	}
 
 	if auth == "" {
@@ -89,8 +94,10 @@ func NewClient(auth string, streamID int32, options ...ClientOption) (*APIClient
 	api.options = defaultOptions
 
 	api.ackC = sync.NewCond(api.ackL.RLocker())
+	api.pongCond = sync.NewCond(&sync.Mutex{})
 
 	go api.watchAcks()
+	go api.gcRecentEvents()
 
 	return api, nil
 }
@@ -164,6 +171,22 @@ func (api *APIClient) gcAcks() {
 		if act.ts.Before(tmo) {
 			delete(api.acks, ref)
 		}
+	}
+}
+
+//gcRecentEvents cleans up recent events for events older than 2 minutes
+func (api *APIClient) gcRecentEvents() {
+	ticker := time.NewTicker(30 * time.Second)
+	for {
+		<-ticker.C
+		api.recentEvents.Range(func(k interface{}, v interface{}) bool {
+			id := k.(string)
+			t := v.(event.ZeroableTime)
+			if t.Time.Before(time.Now().Add(-2 * time.Minute)) {
+				api.recentEvents.Delete(id)
+			}
+			return true
+		})
 	}
 }
 

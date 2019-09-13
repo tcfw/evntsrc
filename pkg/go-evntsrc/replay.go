@@ -2,6 +2,7 @@ package evntsrc
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/google/uuid"
 	"github.com/tcfw/evntsrc/internal/websocks"
@@ -24,6 +25,9 @@ func (api *APIClient) Replay(subject string, query ReplayQuery, justme bool) err
 	if _, err := api.waitForResponse(cmd.Ref); err != nil && err.Error() != "OK" {
 		return fmt.Errorf("Failed to start replay: %s", err.Error())
 	}
+
+	//Clear recentEvents for replay
+	api.recentEvents = sync.Map{}
 
 	return nil
 }

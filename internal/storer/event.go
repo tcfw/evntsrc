@@ -19,7 +19,7 @@ func storeEvent(event *pbEvent.Event, db *sql.DB) error {
 		return fmt.Errorf("Cannot store forwarded event")
 	}
 
-	if isNonPersistent, ok := event.Metadata["non-persistent"]; ok && isNonPersistent == "true" {
+	if isNonPersistent(event) {
 		return fmt.Errorf("Refusing to store non-persistent event")
 	}
 
@@ -63,6 +63,18 @@ func storeEvent(event *pbEvent.Event, db *sql.DB) error {
 
 	storeCount.With(prometheus.Labels{"stream": fmt.Sprintf("%d", event.Stream)}).Inc()
 	return nil
+}
+
+func isNonPersistent(event *pbEvent.Event) bool {
+	if isNonPersistent, ok := event.Metadata["non-persistent"]; ok && isNonPersistent == "true" {
+		return true
+	}
+
+	if isNonPersistent, ok := event.Metadata["persistent"]; ok && isNonPersistent == "false" {
+		return true
+	}
+
+	return false
 }
 
 func setMD(tx *sql.Tx, id string, mdField string, data string) error {

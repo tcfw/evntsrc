@@ -38,7 +38,7 @@ func (a *Acks) GC() {
 		case <-ticker.C:
 			a.acks.Range(func(k interface{}, v interface{}) bool {
 				ack := v.(*Ack)
-				if time.Now().Add(-5 * time.Minute).Before(ack.at) {
+				if ack.at.Before(time.Now().Add(-5 * time.Minute)) {
 					a.acks.Delete(k)
 				}
 				return true

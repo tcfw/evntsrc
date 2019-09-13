@@ -23,7 +23,6 @@ message Stream {
 	string Owner = 4;
 	string Icon = 5;
 	string Color = 6;
-	string saveId = 7;
 }
 
 message SearchRequest {

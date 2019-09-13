@@ -323,7 +323,7 @@ func (c *Client) writePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
-		c.close()
+		// c.close()
 	}()
 
 	for {

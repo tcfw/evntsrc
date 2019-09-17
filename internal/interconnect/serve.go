@@ -10,6 +10,9 @@ import (
 	pb "github.com/tcfw/evntsrc/internal/interconnect/protos"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+
+	//Compressor encoding between client/server
+	_ "google.golang.org/grpc/encoding/gzip"
 )
 
 //RunGRPC starts GRPC endpoint

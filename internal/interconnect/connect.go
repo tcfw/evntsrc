@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/encoding/gzip"
 
 	nats "github.com/nats-io/nats.go"
 	"github.com/spf13/viper"
@@ -36,7 +37,7 @@ func Connect(endpoint string, nats string) error {
 	}
 
 	client := pb.NewInterconnectServiceClient(conn)
-	stream, err := client.Relay(context.Background())
+	stream, err := client.Relay(context.Background(), grpc.UseCompressor(gzip.Name))
 	if err != nil {
 		return fmt.Errorf("Failed to start relay: %s", err.Error())
 	}
@@ -54,9 +55,9 @@ func startRelay(stream pb.InterconnectService_RelayClient, natsEndpoint string) 
 		return fmt.Errorf("Failed to connect to NATS: %s", err.Error())
 	}
 
-	relay := &relay{natsConn: nc}
+	rl := &relay{natsConn: nc}
 
-	writeClose, err := relay.WritePipe(toRelay)
+	writeClose, err := rl.WritePipe(toRelay)
 	if err != nil {
 		return err
 	}
@@ -89,7 +90,7 @@ func startRelay(stream pb.InterconnectService_RelayClient, natsEndpoint string) 
 			return err
 		}
 
-		if err := relay.publishedForwarded(forwardedEventReq); err != nil {
+		if err := rl.publishedForwarded(forwardedEventReq); err != nil {
 			close(writeClose)
 			return err
 		}

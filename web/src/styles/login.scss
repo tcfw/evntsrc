@@ -1,0 +1,49 @@
+.pg-login {
+	&:after {
+		//bg
+		content: "";
+		display: block;
+		position: fixed;
+		top: -10px;
+		left: -10px;
+		height: calc(100% + 20px);
+		width: calc(100% + 20px);
+		background: url('../assets/login_bg.jpg') no-repeat center;
+		background-size: cover;
+
+		@media(min-width:1280px) {
+			background: url('../assets/login_bg_x4.jpg') no-repeat center;
+			background-size: cover;
+		}
+	}
+
+	#profile-knowledge {
+		margin-top: -5px;
+	}
+
+	#profile-knowledge,
+	#not-you {
+		font-size: 12px;
+		color: #515151;
+		font-weight: 100;
+	}
+
+	#not-you {
+		margin-top: 5px;
+		margin-bottom: 25px;
+		cursor: pointer;
+	}
+
+	#social-btns {
+		@apply text-sm;
+
+		.social-acc {
+			@apply text-ev-100 font-bold pl-4 cursor-pointer;
+		}
+
+		@media (max-width: 768px) {
+			text-align: center;
+			margin-top: 35px;
+		}
+	}
+}

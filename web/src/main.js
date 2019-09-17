@@ -17,6 +17,7 @@ router.afterEach(route => {
 });
 
 Vue.config.productionTip = false;
+
 window.app = new Vue({
   router,
   render: h => h(App),

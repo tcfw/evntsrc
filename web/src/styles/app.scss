@@ -1,21 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @import url('https://use.typekit.net/qdo5nud.css');
 
 body, html, #app {
-	padding: 0px;
-	margin: 0px;
-	height: 100vh;
-	min-height: 100%;
+	@apply absolute top-0 left-0 p-0 m-0 h-screen min-h-full w-full font-proxima overflow-hidden font-proxima antialiased text-text-300;
 	background: #F4F8FB;
-	font-family: "proxima-nova", sans-serif;
-	overflow: hidden;
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
 }
 
 button, input {
-	font-family: "proxima-nova", sans-serif;
+	@apply font-proxima;
 }
 
 .el-header {
@@ -60,3 +55,7 @@ label.el-form-item__label {
 	padding: 0 13px !important;
 	font-size: 12px !important;
 }
+
+@import "./inputs.scss";
+
+@import "./login.scss";

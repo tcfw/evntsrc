@@ -6,9 +6,35 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
     <title>EvntSrc.io</title>
+    <link rel="shortcut icon" type="image/png" href="/static/favicon.png"/>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
     <script src="https://js.stripe.com/v3/"></script>
     <style>
+      .ns-wrapper {
+        background: #DDDDEE;
+        border-radius: 4px;
+        max-width: 350px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: calc(100% - 10px);
+        transform: translate(-50%, -50%);
+        padding: 16px;
+        z-index: 999;
+        color: #445;
+        font-family: 'proxima-nova', sans-serif;
+        font-size: 13px;
+      }
+
+      .ns-wrapper .header {
+        background: #5F539B;
+        color: white;
+        padding: 8px 16px;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+        margin: -16px -16px 0 -16px;
+      }
+
       .app__loading {
         position: absolute;
         top: 0px;
@@ -30,7 +56,7 @@
       }
 
       .app__loading_logo img {
-        height: 25px;
+        height: 45px;
         width: auto;
         margin-bottom: 25px;
       }
@@ -54,13 +80,21 @@
   </head>
   <body>
     <noscript>
-      <strong>We're sorry, but Evntsrc.io doesn't work without JavaScript enabled. Please enable it to continue.</strong>
+      <div class="ns-wrapper">
+        <div class="header">
+          <p><b>Javascript required</b></p>
+        </div>
+        <p>We're sorry, but Evntsrc.io doesn't work without JavaScript enabled.</p>
+        <p>Please enable it to continue...</p>
+      </div>
     </noscript>
-    <div id="app">
+    <div id="app" style="display:none">
       <div class="app__loading">
         <div class="app__loading_wrapper">
           <div class="app__loading_logo">
-            <img src="data:image/png;base64,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" height="25px" width="auto" />
+            <img
+              src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAMAAACfWMssAAABAlBMVEUAAABgUJ9gUJteU5pfU5xfUptfU5pfU5tfU5tfU5pgUJxfU5teU5xeUptfVJxfU5xgUJhfU5tcU5xfU5xfUptfUptgUJdfUptdUpqPhrmZksCim8VvZaVgU5y/utfa1+jr6fPl4+9fU5v19PleUpmuqMxfU5teU5tdVJvDv9pfU5vg3uy/uthgVJtdUpnf3OuDerFdUpje3Ovv7vX19fnw7/b6+vz7+/3h3+3y8fe5s9NxZqbm5fBfU5vX1ObSzuNeUZleU5q9uNbj4e27tdRrYKLGwtuzrc9hU5xgVJtfU5rQzOFlWp9eU5xgU5xfU5tgUppeU5tfU5pgU5pfU5thU5rwIZiYAAAAVnRSTlMAEEBvn8/f/7+vUO9ff9+eIP5Q3o+OIM5g/////1D/////3v+A/+6gT/++//9AcP//cP//////////////z///oK////////9fgN7//4+PzmCfrm+fb3o2jRgAAAHsSURBVHgBnNbVYqMhEIbhmdgkG6Xu7u7u7nb/F7NQmRb6kbD7nj+/YoTiTDaXL4itUCxlM5QW/ymWxatcqiSwallAtXojiYFMtQltQ0xrjz0wd0iLOhm5rry0rL0BXEFAQEKXLrFLl4wdrJt/wPj3BHWS1iPf9br6+sMGRDOD8AWHXMMjo3798qMx/oRV+QXHR+JOzMTnDQVAT06K3xSTaxpCJ7HTWxYwtBI6vWWPQKgSODEzFpbEa1ahldjZ5iwsi9f8rEInsXPPmhG/USsVji8IzizSUgitVLg8tBKBq1QKoZPDX24oJutUDKGTa+pispsKAI6ub6iLyHYSBDe3NtRhaSJwe2tHHZRRuDs/q25vPx3uum8LncICggejoyqhk3Y6BPDoeFQldjJHJyG0bsjCTxlxcvp7yFln4ac8248OucUQWqfw/OIyOsi5LF7WKTy/GrrGcoooHKxDCp0bishTCwcRVIelubGQywiqg7KdXBMQqkOyTi4uA6gOSdMgvWUA1SFpbukjvgvhvTqVaG/1Puwl7sH7pNqj/ENP9B0/pxndHbXG3f8dHuISu3SJXbp8bhCIH02r78mEe7lrRtsHKVrjNirLtwyJ0tc7k8RAL29TxniqOMh/x0Ac0A0O0gIHMpttSKguVl0A/DyfoLLNmcgAAAAASUVORK5CYII="
+              height="64px" width="auto" />
           </div>
           <div class="app__loading_spinner">
             <img src="data:image/svg+xml;base64,PHN2ZyBhcmlhLWhpZGRlbj0idHJ1ZSIgZGF0YS1wcmVmaXg9ImZhcyIgZGF0YS1pY29uPSJzeW5jIiBjbGFzcz0ic3ZnLWlubGluZS0tZmEgZmEtc3luYyBmYS13LTE2IiByb2xlPSJpbWciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDUxMiA1MTIiPjxwYXRoIGZpbGw9ImN1cnJlbnRDb2xvciIgZD0iTTQ0MC45MzUgMTIuNTc0bDMuOTY2IDgyLjc2NkMzOTkuNDE2IDQxLjkwNCAzMzEuNjc0IDggMjU2IDggMTM0LjgxMyA4IDMzLjkzMyA5NC45MjQgMTIuMjk2IDIwOS44MjQgMTAuOTA4IDIxNy4xOTMgMTYuNjA0IDIyNCAyNC4xMDMgMjI0aDQ5LjA4NGM1LjU3IDAgMTAuMzc3LTMuODQyIDExLjY3Ni05LjI1OUMxMDMuNDA3IDEzNy40MDggMTcyLjkzMSA4MCAyNTYgODBjNjAuODkzIDAgMTE0LjUxMiAzMC44NTYgMTQ2LjEwNCA3Ny44MDFsLTEwMS41My00Ljg2NWMtNi44NDUtLjMyOC0xMi41NzQgNS4xMzMtMTIuNTc0IDExLjk4NnY0Ny40MTFjMCA2LjYyNyA1LjM3MyAxMiAxMiAxMmgyMDAuMzMzYzYuNjI3IDAgMTItNS4zNzMgMTItMTJWMTJjMC02LjYyNy01LjM3My0xMi0xMi0xMmgtNDcuNDExYy02Ljg1MyAwLTEyLjMxNSA1LjcyOS0xMS45ODcgMTIuNTc0ek0yNTYgNDMyYy02MC44OTUgMC0xMTQuNTE3LTMwLjg1OC0xNDYuMTA5LTc3LjgwNWwxMDEuODY4IDQuODcxYzYuODQ1LjMyNyAxMi41NzMtNS4xMzQgMTIuNTczLTExLjk4NnYtNDcuNDEyYzAtNi42MjctNS4zNzMtMTItMTItMTJIMTJjLTYuNjI3IDAtMTIgNS4zNzMtMTIgMTJWNTAwYzAgNi42MjcgNS4zNzMgMTIgMTIgMTJoNDcuMzg1YzYuODYzIDAgMTIuMzI4LTUuNzQ1IDExLjk4NS0xMi41OTlsLTQuMTI5LTgyLjU3NUMxMTIuNzI1IDQ3MC4xNjYgMTgwLjQwNSA1MDQgMjU2IDUwNGMxMjEuMTg3IDAgMjIyLjA2Ny04Ni45MjQgMjQzLjcwNC0yMDEuODI0IDEuMzg4LTcuMzY5LTQuMzA4LTE0LjE3Ni0xMS44MDctMTQuMTc2aC00OS4wODRjLTUuNTcgMC0xMC4zNzcgMy44NDItMTEuNjc2IDkuMjU5QzQwOC41OTMgMzc0LjU5MiAzMzkuMDY5IDQzMiAyNTYgNDMyeiI+PC9wYXRoPjwvc3ZnPg==" height="20px" width="auto" />
@@ -68,6 +102,7 @@
         </div>
       </div>
     </div>
+    <script>document.getElementById("app").style.display = "inherit";</script>
     <!-- built files will be auto injected -->
   </body>
 </html>

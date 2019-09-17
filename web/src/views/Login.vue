@@ -1,119 +1,66 @@
 <template>
-  <el-row
-    type="flex"
-    justify="center"
-    align="middle"
-    :style="{ height: '100vh' }"
-  >
-    <el-col :md="10" :lg="7" :xs="24" :xlg="5">
-      <el-card :style="{ padding: '25px' }" id="login-wrapper">
-        <div
-          :style="{
-            textAlign: 'center',
-            marginBottom: '45px',
-            marginTop: '5px'
-          }"
-        >
-          <img src="../assets/logo_b.png" :style="{ height: '25px' }" />
-        </div>
-        <el-form
-          ref="loginForm"
-          :model="loginForm"
-          :rules="loginFormValidationRules"
-          @submit.native.prevent.stop="login"
-        >
-          <div v-if="hasPriorKnowledge">
-            <el-row>
-              <el-col :span="5" :offset="5">
-                <Avatar :src="profileKnowledge.photo" size="large">{{
-                  profileKnowledge.name
-                }}</Avatar>
-              </el-col>
-              <el-col :span="12" :offset="1">
-                <div id="welcome-back">Welcome Back</div>
+  <div class="h-screen bg-white shadow-lg p-6 xl:ml-64 xl:w-1/3 xl:p-20 md:ml-12 md:w-2/3 md:p-16 lg:w-3/6 lg:ml-12 xxl:w-1/3 xxl:ml-64 xxl:px-32 xxl:pt-32" style="max-width: 700px;">
+    <div class="logo text-center">
+        <img src="../assets/logo.png" class="h-20 -ml-2 sm:ml-0" />
+      </div>
+      <form action="#" @submit.prevent.stop="login">
+        <h2 class="font-bold text-xl text-text-100 pt-8 pb-6">Login to your account</h2>
+        <div v-if="hasPriorKnowledge">
+            <div class="flex mt-1 -mb-2">
+              <div class="w-20">
+                <Avatar :src="profileKnowledge.photo" size="large">
+                  {{profileKnowledge.name}}
+                </Avatar>
+              </div>
+              <div>
+                <div class="font-bold">Welcome Back</div>
                 <div id="profile-knowledge">
-                  <i
-                    class="fab fa-google"
-                    v-if="profileKnowledge.provider == 'google'"
-                    :style="{ marginRight: '5px' }"
-                  ></i>
-                  <i
-                    class="fab fa-facebook"
-                    v-if="profileKnowledge.provider == 'facebook'"
-                    :style="{ marginRight: '5px' }"
-                  ></i>
+                  <i class="fab fa-google" v-if="profileKnowledge.provider == 'google'" :style="{ marginRight: '5px' }"></i>
                   {{ profileKnowledge.email }}
                 </div>
                 <div id="not-you" @click="clearKnowledge">Not you?</div>
-              </el-col>
-            </el-row>
-          </div>
-          <el-form-item prop="email" v-if="!hasPriorKnowledge">
-            <el-input
-              type="text"
-              v-model="loginForm.email"
-              placeholder="Email"
-              @keydown.enter.stop.prevent.native="login"
-            />
-          </el-form-item>
-          <el-form-item
-            prop="password"
-            v-if="!hasPriorKnowledge || profileKnowledge.provider == 'storage'"
-          >
-            <el-input
-              type="password"
-              v-model="loginForm.password"
-              placeholder="Password"
-              @keydown.enter.stop.prevent.native="login"
-            />
-          </el-form-item>
-          <el-form-item>
-            <el-button
-              :loading="submitting"
-              size="medium"
-              ref="loginSubmitBtn"
-              type="primary"
-              @click="login()"
-              id="login-btn"
-              >Log in</el-button
-            >
-            <router-link
-              to="/forgot"
-              id="forgot-btn"
-              v-if="
-                !hasPriorKnowledge || profileKnowledge.provider == 'storage'
-              "
-              >Forgot your password?</router-link
-            >
-          </el-form-item>
-        </el-form>
-        <div
-          v-show="profileKnowledge.provider == 'storage' || !hasPriorKnowledge"
-        >
-          <div class="login-divider"></div>
-          <div id="social-btns">
-            <div class="gapi-wrapper" @click="googleClick">
-              <div id="gapi-signin2"></div>
             </div>
-
-            <div id="create-btn">
-              <router-link to="/signup">Create an account...</router-link>
             </div>
-          </div>
         </div>
-        <div v-if="loading">
-          <Spin size="large" fix>
-            <Icon
-              type="load-c"
-              size="18"
-              :style="{ animation: 'ani-demo-spin 1s linear infinite' }"
-            ></Icon>
-            <div>Loading...</div>
-          </Spin>
+        <div v-if="!hasPriorKnowledge">
+          <label class="block">Email</label>
+          <input type="text" tabindex="1" v-model="loginForm.email" @keydown.enter.stop.prevent.native="login" class="input-text" />
         </div>
-      </el-card>
-    </el-col>
-  </el-row>
+        <div v-if="!hasPriorKnowledge || profileKnowledge.provider == 'storage'" class="mt-3">
+          <router-link tabindex="4" class="float-right text-sm pt-1 text-text-800" to="/forgot" v-if="!hasPriorKnowledge || profileKnowledge.provider == 'storage'">
+            Forgot your password?
+          </router-link>
+          <label class="block">Password</label>
+          <input type="password" tabindex="2" v-model="loginForm.password" @keydown.enter.stop.prevent.native="login" class="input-text" />
+        </div>
+        <div>
+          <button tabindex="3" ref="loginSubmitBtn" :disabled="submitting" @click="login()" id="login-btn" class="input-button-huge mt-10 mb-6">
+            {{loginBtn}}
+          </button>
+        </div>
+      </form>
+      <div v-show="profileKnowledge.provider == 'storage' || !hasPriorKnowledge">
+        <div id="social-btns">
+          Or login using
+          <span class="social-acc" @click="googleClick">Google</span>
+          <span class="social-acc">Github</span>
+        </div>
+      </div>
+      <div class="mt-16 lg:mt-32 xxl:mt-48">
+        <div class="mb-3 text-text-300 text-sm">Don't have an account yet?</div>
+        <router-link to="/signup" class="input-button-huge clear ">Create an account</router-link>
+      </div>
+      <div v-if="loading">
+        <Spin size="large" fix>
+          <Icon
+            type="load-c"
+            size="18"
+            :style="{ animation: 'ani-demo-spin 1s linear infinite' }"
+          ></Icon>
+          <div>Loading...</div>
+        </Spin>
+      </div>
+  </div>
 </template>
 <script>
 import errorReader from "@/protos/error.js";
@@ -143,6 +90,7 @@ export default {
         email: "",
         password: ""
       },
+      loginBtn: "Login",
       loginFormValidationRules: {
         email: [
           {
@@ -302,6 +250,7 @@ export default {
         })
         .catch(e => {
           this.loading = false;
+          this.loginBtn = "Login";
           this.$Message.error({
             content: "Unable to log you in. Please try again.",
             duration: 10
@@ -334,17 +283,23 @@ export default {
           .getSeconds()
       );
 
-      this.$cookie.set("session", authResponse.getTokens().getToken(), {
+      var token = authResponse.getTokens().getToken()
+
+      var cookieSettings = {
         expires: expires,
-        path: "/",
-        secure: process.env.VUE_APP_SEC_COOKIE
-      });
+        secure: process.env.VUE_APP_SEC_COOKIE == "true",
+      }
+
+      if (process.env.VUE_APP_SEC_DOMAIN != "") {
+        cookieSettings = process.env.VUE_APP_SEC_DOMAIN
+      }
+
+      this.$cookie.set("session", token, cookieSettings);
       this.$root.applySession();
 
       if (setProfileKnowledge) {
         this.applyProfileKnowledgeFromStandard();
       }
-
 
       this.$root.fetchMe();
       this.$router.push("/");
@@ -355,14 +310,15 @@ export default {
         this.profileKnowledge.provider != "storage"
       ) {
         this.loading = true;
+        this.loginBtn = "...";
         this.socialLogin();
       } else {
-        this.$refs["loginForm"].validate(valid => {
-          if (!valid) {
-            this.$Message.error("Failed to login");
-          } else {
+        // this.$refs["loginForm"].validate(valid => {
+        //   if (!valid) {
+        //     this.$Message.error("Failed to login");
+        //   } else {
             this.submitting = true;
-
+            this.loginBtn = "...";
             var userCreds = new proto.UserCreds();
             userCreds.setPassword(this.loginForm.password);
             userCreds.setUsername(this.loginForm.email);
@@ -385,10 +341,12 @@ export default {
               )
               .then(d => {
                 this.submitting = false;
+                this.loginBtn = "Login";
                 this.readinAuthResponse(d, true);
               })
               .catch(de => {
                 this.submitting = false;
+                this.loginBtn = "Login";
                 var msg = "Incorrect login details";
                 if ("response" in de) {
                   var error = JSON.parse(
@@ -413,152 +371,10 @@ export default {
                   }
                 }
               });
-          }
-        });
+          // }
+        // });
       }
     }
   }
 };
 </script>
-<style lang="scss">
-.pg-login {
-  &:after {
-    //bg
-    content: "";
-    display: block;
-    position: fixed;
-    top: -10px;
-    left: -10px;
-    height: calc(100% + 20px);
-    width: calc(100% + 20px);
-    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(255, 255, 255, 0.1)),
-      url("https://images.unsplash.com/photo-1515524738708-327f6b0037a7?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=ff90e72db15176afc516fac82d04f14f&auto=format&fit=crop&w=1950&q=80")
-        no-repeat center;
-    background-size: cover;
-    filter: blur(3px);
-  }
-
-  #login-btn {
-    float: right;
-    background: #1a1e30;
-    border-color: #1a1e30;
-    font-weight: 100;
-
-    @media (max-width: 768px) {
-      width: 100%;
-    }
-  }
-
-  #forgot-btn {
-    float: left;
-    font-size: 11px;
-
-    @media (max-width: 768px) {
-      padding-top: 75px;
-      display: block;
-      text-align: center;
-      float: inherit;
-      color: white;
-    }
-  }
-
-  #create-btn {
-    margin-top: 20px;
-    font-size: 14px;
-
-    @media (max-width: 768px) {
-      margin-top: 35px;
-
-      > a {
-        color: white;
-      }
-    }
-  }
-
-  #welcome-back {
-    font-size: 18px;
-    color: #515151;
-    font-weight: 500;
-  }
-
-  #profile-knowledge {
-    margin-top: -5px;
-  }
-
-  #profile-knowledge,
-  #not-you {
-    font-size: 12px;
-    color: #515151;
-    font-weight: 100;
-  }
-
-  #not-you {
-    margin-top: 5px;
-    margin-bottom: 25px;
-    cursor: pointer;
-  }
-
-  #social-btns {
-    text-align: center;
-
-    @media (max-width: 768px) {
-      margin-top: 35px;
-    }
-
-    .gapi-wrapper {
-      display: block;
-
-      #gapi-signin2 {
-        display: inline-block;
-        margin-left: -5px;
-        margin-top: 15px;
-        height: 28px;
-      }
-    }
-  }
-
-  .login-divider {
-    background-image: linear-gradient(to right, transparent 50%, #e5e5e5 50%);
-    background-size: 9px 100%;
-    height: 1px;
-    position: relative;
-    margin-bottom: 30px;
-
-    @media (max-width: 768px) {
-      display: none;
-    }
-
-    &:after {
-      content: "or";
-      display: block;
-      position: absolute;
-      top: -9px;
-      left: 50%;
-      background: white;
-      padding: 0px 14px;
-      color: #bbbbbb;
-      font-size: 12px;
-      transform: translateX(-50%);
-    }
-  }
-
-  .el-avatar-large {
-    width: 60px;
-    height: 60px;
-    border-radius: 60px;
-    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2);
-  }
-
-  @media (max-width: 768px) {
-    .el-card {
-      background: transparent;
-      border: none;
-      box-shadow: none;
-    }
-
-    .el-input {
-      box-shadow: none;
-    }
-  }
-}
-</style>

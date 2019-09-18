@@ -15,7 +15,7 @@ import (
 	pbEvent "github.com/tcfw/evntsrc/internal/event/protos"
 
 	"github.com/cockroachdb/cockroach-go/testserver"
-	natsTest "github.com/nats-io/nats-server/test"
+	natsTest "github.com/nats-io/nats-server/v2/test"
 )
 
 func setupTestDB(t *testing.T) (func(), error) {
@@ -39,7 +39,7 @@ func TestStartMonitor(t *testing.T) {
 
 	time.Sleep(100 * time.Millisecond)
 
-	assert.Equal(t, uint32(2), s.NumSubscriptions())
+	assert.Equal(t, uint32(3), s.NumSubscriptions())
 }
 
 func TestMonitorUserStreams(t *testing.T) {
@@ -115,7 +115,7 @@ func TestDoReply(t *testing.T) {
 	proc := &eventProcessor{}
 	proc.Handle(event)
 
-	command := &websocks.ReplayCommand{Stream: 1, SubscribeCommand: &websocks.SubscribeCommand{Subject: "test"}}
+	command := &websocks.ReplayCommand{Stream: 1, SubscribeCommand: &websocks.SubscribeCommand{Subject: "test", InboundCommand: &websocks.InboundCommand{Ref: "test"}}}
 
 	doReplay(command, reply, errCh)
 

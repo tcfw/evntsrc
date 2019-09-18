@@ -14,7 +14,7 @@ SHELL=/bin/bash
 
 .DEFAULT_GOAL := changed
 .PHONY: all
-all: storer websocks stsmetrics streams passport users apigw bridge streamauth ingress billing wui emails metrics interconnect ttlscheduler ttlworker adapter push
+all: storer websocks stsmetrics streams passport users apigw bridge streamauth ingress billing wui emails metrics interconnect ttlscheduler ttlworker push
 
 storer:
 	docker build -f ./build/storer/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/storer:latest .
@@ -52,9 +52,6 @@ billing:
 wui:
 	docker build -f ./build/wui/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/wui:latest .
 
-adapter:
-	docker build -f ./build/adapter/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/adapter:latest .
-
 emails:
 	docker build -f ./build/emails/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/emails:latest .
 
@@ -84,7 +81,6 @@ push:
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/ingress:latest
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/billing:latest
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/wui:latest
-	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/adapter:latest
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/emails:latest
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/metrics:latest
 	docker push ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/interconnect:latest

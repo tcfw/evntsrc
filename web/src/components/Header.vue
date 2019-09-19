@@ -3,9 +3,7 @@
     <div id="profile">
       <el-dropdown trigger="click" size="medium">
         <span class="el-dropdown-link">
-          <Avatar size="small">{{ $root.me.name }}</Avatar> &nbsp;<i
-            class="el-icon-arrow-down el-icon--right"
-          ></i>
+          <Avatar size="small">{{ $root.me.name }}</Avatar>
         </span>
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item disabled>{{ $root.me.name }}</el-dropdown-item>

@@ -1,40 +1,43 @@
 <template>
   <div class="side-menu">
-    <router-link to="/"><img src="@/assets/logo.png"/></router-link>
+    <router-link to="/"><img src="@/assets/round-reverse.png"/></router-link>
     <div class="menu">
-      <router-link to="/dashboard"
-        ><i class="fas fa-tachometer-alt"></i> Dashboard</router-link
-      >
-      <router-link to="/streams"
-        ><i class="fas fa-stream"></i> Streams</router-link
-      >
+      <router-link title="Dashboard" to="/dashboard"><i class="fas fa-tachometer-alt"></i></router-link>
+      <router-link title="Streams" to="/streams"><i class="fas fa-stream"></i></router-link>
     </div>
-    <div class="info">
-      &copy; 2018 EvntSrc.io
-      <p>
-        <router-link to="/about">About</router-link> |
-        <router-link to="/terms">Terms</router-link> |
-        <router-link to="/privacy">Privacy</router-link> |
-        <router-link to="/help">Help</router-link>
-      </p>
+    <div class="avatar">
+      <el-dropdown trigger="click" size="medium">
+        <span class="el-dropdown-link">
+          <Avatar size="small">{{ $root.me.name }}</Avatar>
+        </span>
+        <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item disabled>{{ $root.me.name }}</el-dropdown-item>
+          <router-link :to="{ name: 'settings' }"
+            ><el-dropdown-item>Settings</el-dropdown-item></router-link
+          >
+          <el-dropdown-item @click.native="$root.logout()" divided
+            >Logout</el-dropdown-item
+          >
+        </el-dropdown-menu>
+      </el-dropdown>
     </div>
   </div>
 </template>
 <script>
-export default {};
+import Avatar from "@/components/Avatar.vue";
+
+export default {
+  components: {
+    Avatar
+  }
+};
 </script>
 <style lang="scss" scoped>
 .side-menu {
-  background: #1a1e30;
-  height: 100%;
-  box-shadow: 2px 2px 4px 0 rgba(0, 0, 0, 0.1);
-  z-index: 100;
-  position: absolute;
-  width: 220px;
+  @apply absolute bg-ev-100 h-full shadow-lg w-16;
 
   img {
-    height: 18px;
-    padding: 25px 15px 20px;
+    padding: 1rem 0.75rem;
   }
 
   .menu {
@@ -42,37 +45,26 @@ export default {};
       color: white;
       padding: 15px;
       font-weight: 100;
-      font-size: 12px;
+      font-size: 16px;
       text-decoration: none;
       display: block;
 
       .fas {
-        padding: 0px 10px;
+        padding: 0px 8px;
         display: inline-block;
       }
 
       &.router-link-active {
-        background: rgba(255, 255, 255, 0.12);
-        border-left: 4px solid #636d97;
-        padding-left: 11px;
+        @apply bg-ev-50 shadow-inner;
       }
     }
   }
 
-  .info {
+  .avatar {
     color: white;
     position: absolute;
-    bottom: 5px;
-    left: 15px;
-    font-size: 10px;
-
-    a {
-      color: #eee;
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
+    bottom: 0.3rem;
+    left: 0.5rem;
   }
 }
 </style>

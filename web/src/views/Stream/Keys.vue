@@ -1,6 +1,11 @@
 <template>
-  <div>
-    <table>
+  <div class="panel">
+    <div class="d-head rounded-t clearfix">
+      <div class="float-right">
+        <button>Create key</button>
+      </div>
+    </div>
+    <table class="d-table">
       <thead>
         <tr>
           <th>Label</th>
@@ -10,7 +15,7 @@
       </thead>
       <tbody>
         <tr v-for="key in keys" :key="key.id">
-          <td>{{ key.label }}</td>
+          <td class="w-2/3">{{ key.label }}</td>
           <td>{{ key.key }}</td>
           <td>•••••••••••••</td>
         </tr>

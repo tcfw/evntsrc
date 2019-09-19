@@ -6,15 +6,8 @@
         type="text"
         placeholder="Search..."
         v-model="searchInput"
-        @keyup.enter="load"
         @keyup.esc="clearSearch"
       />
-      <i class="fas fa-search" @click="load"></i>
-      <i
-        class="fas fa-times clear-search"
-        v-if="isSearchResults"
-        @click="clearSearch"
-      ></i>
     </div>
     <div class="stream-list" v-if="!loading">
       <router-link
@@ -129,27 +122,22 @@ export default {
 
 <style lang="scss" scoped>
 .stream-side-menu {
-  background: #50566f;
-  width: 100%;
-  height: 100%;
-  box-shadow: 2px 0 4px 0 rgba(0, 0, 0, 0.1);
-  position: relative;
+  @apply bg-white w-full h-full shadow-lg relative;
 }
 
 .search-container {
+  @apply absolute shadow-inner rounded border;
+  border-color: #eee;
   margin: 15px;
   width: calc(100% - 30px);
   height: 36px;
-  border-radius: 3px;
-  background: #787e99;
-  position: absolute;
-  box-shadow: inset 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  background: #fafafa;
   z-index: 2;
 
   input[type="text"] {
     background: none;
     border: none;
-    color: white;
+    color: #334;
     height: calc(100% - 2px);
     margin-left: 10px;
     outline: none;
@@ -158,28 +146,27 @@ export default {
 
     &::placeholder {
       font-weight: 100;
-      color: #bbb;
+      color: #bbc;
     }
   }
   .fas {
-    position: absolute;
-    right: 15px;
-    top: 12px;
-    font-size: 10px;
-    color: white;
-    cursor: pointer;
+    @apply absolute text-ev-100 cursor-pointer;
+    right: 12px;
+    top: 10px;
+    font-size: 14px;
   }
+
   .clear-search {
     right: 35px;
   }
 }
 
 .searching-loader {
+  @apply absolute text-ev-100;
   position: absolute;
   left: 50%;
   top: 80px;
   transform: translateX(-10px);
-  color: white;
   font-size: 14px;
 }
 
@@ -198,30 +185,16 @@ export default {
   width: 100%;
 
   .stream {
+    @apply relative cursor-pointer block w-full;
     padding: 10px 15px;
-    width: calc(100% - 30px);
-    position: relative;
-    cursor: pointer;
-    display: block;
 
     &:hover,
     &.router-link-active {
-      background: -moz-linear-gradient(
-        left,
-        rgba(255, 255, 255, 0.15) 0%,
-        rgba(255, 255, 255, 0.06) 100%
-      );
-      background: -webkit-linear-gradient(
-        left,
-        rgba(255, 255, 255, 0.15) 0%,
-        rgba(255, 255, 255, 0.06) 100%
-      );
-      background: linear-gradient(
-        to right,
-        rgba(255, 255, 255, 0.15) 0%,
-        rgba(255, 255, 255, 0.06) 100%
-      );
-      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#26ffffff', endColorstr='#0fffffff',GradientType=1 );
+      @apply bg-ev-900 border border-0 border-r-4 border-ev-700;
+
+      .fas.config {
+        right: 11px;
+      }
     }
 
     .icon,
@@ -231,18 +204,14 @@ export default {
     }
 
     .icon {
+      @apply bg-ev-40 rounded;
       height: 42px;
       width: 42px;
-      background: #f4f8fb;
-      border-radius: 3px;
 
       .fas {
-        height: 100%;
-        width: 100%;
-        text-align: center;
+        @apply text-ev-900 w-full h-full text-center;
         line-height: 42px;
         font-size: 16px;
-        color: #1a1e30;
       }
     }
 
@@ -250,29 +219,26 @@ export default {
       margin-left: 10px;
 
       .name {
-        color: white;
+        @apply text-text-200;
         font-size: 12px;
         font-weight: 300;
       }
 
       .cluster {
-        color: #c2c2c2;
+        @apply text-text-400 uppercase;
         font-size: 9px;
         margin-top: -1px;
-        text-transform: uppercase;
       }
     }
 
     .fas.config {
-      position: absolute;
+      @apply text-ev-100 absolute cursor-pointer;
       top: 50%;
       transform: translateY(-50%);
       right: 15px;
-      color: rgba(255, 255, 255, 0.3);
-      cursor: pointer;
 
       &:hover {
-        color: white;
+        @apply text-white;
       }
     }
   }

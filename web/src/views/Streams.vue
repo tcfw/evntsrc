@@ -1,16 +1,12 @@
 <template>
-  <el-container
-    :style="{ height: '100%', width: '100%', position: 'absolute' }"
-  >
-    <el-aside width="220px">
+  <div class="flex h-full">
+    <div class="w-64">
       <stream-side-menu></stream-side-menu>
-    </el-aside>
-    <el-container>
-      <el-main>
-        <router-view></router-view>
-      </el-main>
-    </el-container>
-  </el-container>
+    </div>
+    <div class="w-full">
+      <router-view></router-view>
+    </div>
+  </div>
 </template>
 <script>
 import streamSideMenu from "@/components/StreamSideMenu.vue";

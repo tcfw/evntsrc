@@ -8673,7 +8673,7 @@ vue-config@^1.0.0:
   resolved "https://registry.yarnpkg.com/vue-config/-/vue-config-1.0.0.tgz#f6e6704845808fbfa3b17300fc7ffd624c2ca42e"
   integrity sha1-9uZwSEWAj7+jsXMA/H/9YkwspC4=
 
-vue-cookie@^1.5.13:
+vue-cookie@^1.1.0:
   version "1.1.4"
   resolved "https://registry.yarnpkg.com/vue-cookie/-/vue-cookie-1.1.4.tgz#b8b46d112bda9f93a2f47017c2ed5282d2064fda"
   integrity sha1-uLRtESvan5Oi9HAXwu1SgtIGT9o=

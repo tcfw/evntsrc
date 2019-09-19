@@ -11,6 +11,8 @@ import SettingsAccount from "./views/Settings/Account.vue";
 import SettingsSecurity from "./views/Settings/Security.vue";
 import SettingsSessions from "./views/Settings/Sessions.vue";
 
+import e404 from "./views/errors/404.vue";
+
 Vue.use(Router);
 
 export default new Router({
@@ -97,6 +99,11 @@ export default new Router({
           component: SettingsSessions
         }
       ]
+    },
+    {
+      path: '*',
+      name: '404',
+      component: e404
     }
   ]
 });

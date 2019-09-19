@@ -1,16 +1,12 @@
 <template>
-  <el-container
-    :style="{ height: '100%', width: '100%', position: 'absolute' }"
-  >
-    <el-aside width="220px">
-      <settings-side-menu></settings-side-menu>
-    </el-aside>
-    <el-container>
-      <el-main>
+  <div class="w-full h-full absolute flex">
+    <settings-side-menu style="width: 220px"></settings-side-menu>
+    <div class="flex w-full h-full">
+      <div class="w-full">
         <router-view></router-view>
-      </el-main>
-    </el-container>
-  </el-container>
+      </div>
+    </div>
+  </div>
 </template>
 <script>
 import settingsSideMenu from "@/components/SettingsSideMenu.vue";

@@ -5,8 +5,7 @@
 @import url('https://use.typekit.net/qdo5nud.css');
 
 body, html, #app {
-	@apply absolute top-0 left-0 p-0 m-0 h-screen min-h-full w-full font-proxima overflow-hidden font-proxima antialiased text-text-300;
-	background: #F4F8FB;
+	@apply bg-ev-999 absolute top-0 left-0 p-0 m-0 h-screen min-h-full w-full font-proxima overflow-hidden font-proxima antialiased text-text-300;
 }
 
 button, input {
@@ -14,10 +13,7 @@ button, input {
 }
 
 .el-header {
-	height: 60px;
-	width: 100%;
-	background: white;
-	box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.10);
+	@apply w-full;
 }
 
 .el-main {
@@ -54,6 +50,43 @@ label.el-form-item__label {
 	line-height: 36px !important;
 	padding: 0 13px !important;
 	font-size: 12px !important;
+}
+
+.el-aside {
+	overflow: initial;
+}
+
+.panel {
+	@apply bg-white rounded shadow-2xl m-6;
+}
+
+.d-table {
+	@apply w-full text-left;
+
+	thead {
+		@apply border border-t-0 border-l-0 border-r-0 border-ev-800;
+		background: #f5f5f5;
+
+		th {
+			@apply px-3 py-1 text-sm font-medium;
+		}
+	}
+
+	td {
+		@apply px-3 py-2;
+	}
+}
+
+.d-head {
+	@apply bg-ev-500 text-sm text-white;
+
+	button, a {
+		@apply bg-ev-700 px-2 py-1 m-2 rounded text-white;
+
+		&:hover {
+			@apply bg-ev-100;
+		}
+	}
 }
 
 @import "./inputs.scss";

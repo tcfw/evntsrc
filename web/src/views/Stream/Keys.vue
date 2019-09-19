@@ -11,13 +11,18 @@
           <th>Label</th>
           <th>Key</th>
           <th>Secret</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="key in keys" :key="key.id">
-          <td class="w-2/3">{{ key.label }}</td>
+          <td class="w-1/2">{{ key.label }}</td>
           <td>{{ key.key }}</td>
           <td>•••••••••••••</td>
+          <td class="w-1 actions">
+            <button>Edit</button>
+            <button>Remove</button>
+          </td>
         </tr>
       </tbody>
     </table>

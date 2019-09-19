@@ -74,6 +74,18 @@ label.el-form-item__label {
 
 	td {
 		@apply px-3 py-2;
+
+		&.actions {
+			white-space: nowrap;
+
+			button {
+				@apply text-ev-100 text-sm inline ml-2;
+
+				&:hover {
+					@apply text-ev-700;
+				}
+			}
+		}
 	}
 }
 

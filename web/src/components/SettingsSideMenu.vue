@@ -18,39 +18,26 @@ export default {
 </script>
 <style lang="scss" scoped>
 .settings-side-menu {
-  background: white;
-  box-shadow: 2px 0 4px 0 rgba(0, 0, 0, 0.1);
-  position: relative;
-  height: 100%;
-  background: #50566f;
+  @apply h-full relative shadow-lg bg-ev-999;
 
   .header {
-    box-shadow: inset 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-    width: calc(100% - 20px);
-    color: white;
-    padding: 10px;
-    margin-top: -1px;
-    font-size: 12px;
+    @apply text-text-100 p-3 text-xs;
   }
 
   .links {
     margin-top: 15px;
 
     a {
-      display: block;
-      font-size: 13px;
-      padding: 15px;
-      color: #ddd;
+      @apply block text-text-100 block text-sm p-4;
 
       &.router-link-active {
+        @apply text-white;
         background: lighten(#50566f, 10%);
-        color: white;
-        font-weight: bold;
       }
 
       &:hover {
+        @apply text-white;
         background: lighten(#50566f, 20%);
-        color: white;
       }
     }
   }

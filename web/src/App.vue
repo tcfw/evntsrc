@@ -4,19 +4,18 @@
       <div class="w-16" width="" v-if="$root.loggedIn()">
         <side-menu></side-menu>
       </div>
-      <div>
-        <div :style="
-            $root.loggedIn()
-              ? {
-                  position: 'absolute',
-                  top: '0px',
-                  width: 'calc(100% - 4rem)',
-                  height: '100%'
-                }
-              : { zIndex: 1 }
-          ">
-          <router-view></router-view>
-        </div>
+      <div :style="
+          $root.loggedIn()
+            ? {
+                position: 'absolute',
+                top: '0px',
+                width: 'calc(100% - 4rem)',
+                height: '100%',
+                marginLeft: '4rem',
+              }
+            : { zIndex: 1, position: 'relative' }
+        ">
+        <router-view></router-view>
       </div>
     </div>
     <div class="c-info">

@@ -1,5 +1,5 @@
 <template>
-  <div class="h-screen bg-white shadow-lg p-6 xl:ml-64 xl:w-1/3 xl:p-20 md:ml-12 md:w-2/3 md:p-16 lg:w-3/6 lg:ml-12 xxl:w-1/3 xxl:ml-64 xxl:px-32 xxl:pt-32" style="max-width: 700px;">
+  <div class="h-screen bg-white shadow-lg p-6 xl:ml-64 xl:w-5/6 xl:p-20 md:ml-12 md:w-2/3 md:p-16 lg:w-3/6 lg:ml-12 xxl:w-1/3 xxl:ml-64 xxl:px-32 xxl:pt-32" style="max-width: 700px;">
     <div class="logo text-center">
         <img src="../assets/logo.png" class="h-20 -ml-2 sm:ml-0" />
       </div>

@@ -18,7 +18,15 @@ router.afterEach(route => {
 
 Vue.config.productionTip = false;
 
-window.app = new Vue({
+const publicRoutes = [
+  'login',
+  'signup',
+  'signup-thanks',
+  'terms',
+  'privacy'
+];
+
+let app = new Vue({
   router,
   render: h => h(App),
   data() {
@@ -28,8 +36,8 @@ window.app = new Vue({
     };
   },
   mounted() {
-    if (!this.$root.loggedIn() && this.$route.name != "login") {
-      this.$router.push("login");
+    if (!this.$root.loggedIn() && publicRoutes.indexOf(this.$route.name) < 0) {
+      this.$router.push("/login");
     } else {
       this.fetchMe();
     }

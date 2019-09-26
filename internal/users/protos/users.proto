@@ -20,12 +20,18 @@ message User {
     string id = 1 [(gogoproto.moretags) = "bson:\"_id\""];
     string name = 2;
     string email = 3;
-    google.protobuf.Timestamp createdAt = 4 [(gogoproto.stdtime) = true];
+    google.protobuf.Timestamp createdAt = 4;
     string password = 5;
     map<string, bytes> metadata = 6;
     string picture = 7;
     string company = 8;
     MFA mfa = 9;
+    enum Status {
+        PENDING = 0;
+        ACTIVE = 1;
+        DELETED = 2;
+    };
+    Status status = 10;
 }
 
 message UserRequest {
@@ -33,6 +39,13 @@ message UserRequest {
         string id = 1 [(gogoproto.moretags) = "bson:\"_id\""];
         string email = 2;
     }
+    enum Status {
+        ACTIVE = 0;
+        PENDING = 1;
+        DELETED = 2;
+        ANY = 99;
+    }
+    Status status = 3;
 }
 
 message UserList {
@@ -82,7 +95,12 @@ message MFA {
 message Empty {}
 
 service UserService {
-    rpc Create(User) returns (User) {};
+    rpc Create(User) returns (User) {
+        option (google.api.http) = {
+            post: "/v1/auth/register"
+            body: "*"
+        };
+    };
     rpc Delete(UserRequest) returns (Empty) {};
     rpc Get(UserRequest) returns (User) {
         option (google.api.http) = {

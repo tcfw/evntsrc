@@ -1,10 +1,10 @@
 <template>
-  <div class="h-screen bg-white shadow-lg p-6 xl:ml-64 xl:w-5/6 xl:p-20 md:ml-12 md:w-2/3 md:p-16 lg:w-3/6 lg:ml-12 xxl:w-1/3 xxl:ml-64 xxl:px-32 xxl:pt-32" style="max-width: 700px;">
+  <div class="h-screen bg-white shadow-lg p-6 xl:ml-64 xl:w-5/6 xl:p-20 md:ml-12 md:w-2/3 md:p-16 lg:w-3/6 lg:ml-12 xxl:w-1/3 xxl:ml-64 xxl:px-32 xxl:pt-32 overflow-auto" style="max-width: 600px;">
     <div class="logo text-center">
-        <img src="../assets/logo.png" class="h-20 -ml-2 sm:ml-0" />
+        <img src="@/assets/logo.png" class="h-20 -ml-2 sm:ml-0" />
       </div>
+      <h2 class="font-bold text-xl text-text-100 pt-8 pb-6">Login to your account</h2>
       <form action="#" @submit.prevent.stop="login">
-        <h2 class="font-bold text-xl text-text-100 pt-8 pb-6">Login to your account</h2>
         <div v-if="hasPriorKnowledge">
             <div class="flex mt-1 -mb-2">
               <div class="w-20">
@@ -24,17 +24,17 @@
         </div>
         <div v-if="!hasPriorKnowledge">
           <label class="block">Email</label>
-          <input type="text" tabindex="1" v-model="loginForm.email" @keydown.enter.stop.prevent.native="login" class="input-text" />
+          <input type="email" name="email" tabindex="1" v-model="loginForm.email" @keydown.enter.stop.prevent.native="login" class="input-text" />
         </div>
         <div v-if="!hasPriorKnowledge || profileKnowledge.provider == 'storage'" class="mt-3">
           <router-link tabindex="4" class="float-right text-sm pt-1 text-text-800" to="/forgot" v-if="!hasPriorKnowledge || profileKnowledge.provider == 'storage'">
             Forgot your password?
           </router-link>
           <label class="block">Password</label>
-          <input type="password" tabindex="2" v-model="loginForm.password" @keydown.enter.stop.prevent.native="login" class="input-text" />
+          <input type="password" name="password" tabindex="2" v-model="loginForm.password" @keydown.enter.stop.prevent.native="login" class="input-text" />
         </div>
         <div>
-          <button tabindex="3" ref="loginSubmitBtn" :disabled="submitting" @click="login()" id="login-btn" class="input-button-huge mt-10 mb-6">
+          <button tabindex="3" ref="loginSubmitBtn" :disabled="submitting" @click.stop.prevent="login()" id="login-btn" class="input-button-huge mt-10 mb-6">
             {{loginBtn}}
           </button>
         </div>
@@ -116,6 +116,7 @@ export default {
     };
   },
   mounted() {
+    //This is usually done by the router, except for landing pages
     this.$root.$refs.App.appClass = "pg-login";
     this.$root.$on("gapi.loaded", () => {
       gapi.signin2.render("gapi-signin2", {

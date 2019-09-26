@@ -20,7 +20,6 @@ var (
 )
 
 func newUserClient(ctx context.Context) (userSvc.UserServiceClient, error) {
-
 	if userConn == nil {
 		userEndpoint, envExists := os.LookupEnv("USER_HOST")
 		if envExists != true {

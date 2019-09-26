@@ -1,6 +1,8 @@
 import Vue from "vue";
 import Router from "vue-router";
-import Login from "./views/Login.vue";
+import Login from "./views/auth/Login.vue";
+import Signup from "./views/auth/Signup.vue";
+import SignupComplete from "./views/auth/SignupComplete.vue";
 import Dashboard from "./views/Dashboard.vue";
 import Streams from "./views/Streams.vue";
 import Stream from "./views/Stream.vue";
@@ -27,6 +29,16 @@ export default new Router({
       path: "/login",
       name: "login",
       component: Login
+    },
+    {
+      path: "/signup",
+      name: "signup",
+      component: Signup
+    },
+    {
+      path: "/signup/thanks",
+      name: "signup-thanks",
+      component: SignupComplete
     },
     {
       path: "/dashboard",

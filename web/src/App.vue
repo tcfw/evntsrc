@@ -13,7 +13,7 @@
                 height: '100%',
                 marginLeft: '4rem',
               }
-            : { zIndex: 1, position: 'relative' }
+            : { zIndex: 1, position: 'relative', width: '100%' }
         ">
         <router-view></router-view>
       </div>

@@ -9,6 +9,8 @@ BINDIR    := $(CURDIR)/bin
 # Required for globs to work correctly
 SHELL=/bin/bash
 
+DOCKER=docker build --compress
+
 .PHONY: bootstrap
 	GO111MODULE=on go get
 
@@ -17,55 +19,55 @@ SHELL=/bin/bash
 all: storer websocks stsmetrics streams passport users apigw bridge streamauth ingress billing wui emails metrics interconnect ttlscheduler ttlworker push
 
 storer:
-	docker build -f ./build/storer/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/storer:latest .
+	${DOCKER} -f ./build/storer/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/storer:latest .
 
 websocks:
-	docker build -f ./build/websocks/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/websocks:latest .
+	${DOCKER} -f ./build/websocks/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/websocks:latest .
 
 stsmetrics:
-	docker build -f ./build/stsmetrics/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/stsmetrics:latest .
+	${DOCKER} -f ./build/stsmetrics/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/stsmetrics:latest .
 
 apigw:
-	docker build -f ./build/apigw/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/apigw:latest .
+	${DOCKER} -f ./build/apigw/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/apigw:latest .
 
 streams:
-	docker build -f ./build/streams/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/streams:latest .
+	${DOCKER} -f ./build/streams/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/streams:latest .
 
 passport:
-	docker build -f ./build/passport/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/passport:latest .
+	${DOCKER} -f ./build/passport/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/passport:latest .
 
 users:
-	docker build -f ./build/users/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/users:latest .
+	${DOCKER} -f ./build/users/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/users:latest .
 
 bridge:
-	docker build -f ./build/bridge/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/bridge:latest .
+	${DOCKER} -f ./build/bridge/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/bridge:latest .
 
 streamauth:
-	docker build -f ./build/streamauth/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/streamauth:latest .
+	${DOCKER} -f ./build/streamauth/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/streamauth:latest .
 
 ingress:
-	docker build -f ./build/ingress/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/ingress:latest .
+	${DOCKER} -f ./build/ingress/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/ingress:latest .
 
 billing:
-	docker build -f ./build/billing/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/billing:latest .
+	${DOCKER} -f ./build/billing/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/billing:latest .
 
 wui:
-	docker build -f ./build/wui/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/wui:latest .
+	${DOCKER} -f ./build/wui/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/wui:latest .
 
 emails:
-	docker build -f ./build/emails/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/emails:latest .
+	${DOCKER} -f ./build/emails/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/emails:latest .
 
 metrics:
-	docker build -f ./build/metrics/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/metrics:latest .
+	${DOCKER} -f ./build/metrics/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/metrics:latest .
 
 interconnect:
-	docker build -f ./build/interconnect/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/interconnect:latest .
+	${DOCKER} -f ./build/interconnect/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/interconnect:latest .
 
 ttlscheduler:
-	docker build -f ./build/ttlscheduler/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/ttlscheduler:latest .
+	${DOCKER} -f ./build/ttlscheduler/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/ttlscheduler:latest .
 
 ttlworker:
-	docker build -f ./build/ttlworker/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/ttlworker:latest .
+	${DOCKER} -f ./build/ttlworker/Dockerfile -t ${DOCKER_REGISTRY}/${IMAGE_PREFIX}/ttlworker:latest .
 
 .PHONY: push
 push: 

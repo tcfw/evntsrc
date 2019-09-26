@@ -7,7 +7,7 @@ import (
 	stripe "github.com/stripe/stripe-go"
 )
 
-func init() {
+func setupStripe() {
 	stripeKey, ok := os.LookupEnv("STRIPE_KEY")
 	if !ok {
 		panic("No stripe key provided")

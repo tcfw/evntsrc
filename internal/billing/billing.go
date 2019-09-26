@@ -17,7 +17,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-const userMetadataCustomerID = "stripe_customer_id"
+//UserMetadataCustomerID metadata key for stripe customer id
+const UserMetadataCustomerID = "stripe_customer_id"
 
 //Server core struct
 type Server struct {
@@ -26,12 +27,15 @@ type Server struct {
 
 //NewServer creates a new struct to interface the streams server
 func NewServer() *Server {
-	return &Server{}
+	svr := &Server{}
+
+	go svr.listenLoop()
+
+	return svr
 }
 
 //GetPlans queries stripe for all available plans
 func (s *Server) GetPlans(ctx context.Context, _ *pb.Empty) (*pb.PlanList, error) {
-
 	plans := []*pb.Plan{}
 
 	params := &stripe.PlanListParams{Active: stripe.Bool(true)}
@@ -77,9 +81,8 @@ func (s *Server) GetPlans(ctx context.Context, _ *pb.Empty) (*pb.PlanList, error
 
 //CreateCustomerFromUser creates a new stripe customer given a user
 func (s *Server) CreateCustomerFromUser(ctx context.Context, request *pb.CreateRequest) (*pb.CreateResponse, error) {
-
-	if request.CardToken == "" || request.UserId == "" {
-		return nil, errors.New("All params required")
+	if request.UserId == "" {
+		return nil, errors.New("user id is required")
 	}
 
 	users, err := newUserClient(ctx)
@@ -92,26 +95,28 @@ func (s *Server) CreateCustomerFromUser(ctx context.Context, request *pb.CreateR
 		return nil, err
 	}
 
-	stripeParams := &stripe.CustomerParams{
-		Description: &user.Name,
-		Email:       &user.Email,
-	}
-	if request.CardToken != "" {
-		stripeParams.SetSource(request.CardToken)
-	}
+	customer, err := s.createCustomer(user, request.CardToken)
 
-	customer, err := customer.New(stripeParams)
-	if err != nil {
-		return nil, err
-	}
-
-	user.Metadata[userMetadataCustomerID] = []byte(customer.ID)
+	user.Metadata[UserMetadataCustomerID] = []byte(customer.ID)
 	_, err = users.Update(ctx, &evntsrc_users.UserUpdateRequest{Id: user.Id, User: user})
 	if err != nil {
 		return nil, fmt.Errorf("Failed to set customer id to user (%s => %s)", user.Id, customer.ID)
 	}
 
 	return &pb.CreateResponse{CustomerId: customer.ID}, nil
+}
+
+func (s *Server) createCustomer(user *evntsrc_users.User, cardToken string) (*stripe.Customer, error) {
+	stripeParams := &stripe.CustomerParams{
+		Name:  &user.Name,
+		Email: &user.Email,
+	}
+
+	if cardToken != "" {
+		stripeParams.SetSource(cardToken)
+	}
+
+	return customer.New(stripeParams)
 }
 
 //AttachPaymentMethod attaches a payment method to the stripe customer such as a credit card token
@@ -130,7 +135,7 @@ func (s *Server) AttachPaymentMethod(ctx context.Context, request *pb.CreateRequ
 		return nil, err
 	}
 
-	customerID, ok := user.Metadata[userMetadataCustomerID]
+	customerID, ok := user.Metadata[UserMetadataCustomerID]
 	if !ok {
 		_, err := s.CreateCustomerFromUser(ctx, request)
 		return nil, err
@@ -160,7 +165,7 @@ func (s *Server) GetUserInfo(ctx context.Context, request *pb.InfoRequest) (*pb.
 		return nil, err
 	}
 
-	customerID, ok := user.Metadata[userMetadataCustomerID]
+	customerID, ok := user.Metadata[UserMetadataCustomerID]
 	if !ok {
 		createResp, err := s.CreateCustomerFromUser(ctx, &pb.CreateRequest{UserId: request.UserId})
 		if err != nil {

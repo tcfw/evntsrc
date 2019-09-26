@@ -87,6 +87,14 @@ type AuthenticateEvent struct {
 	Err      string `json:"error,omitempty"`
 }
 
+const (
+	//InternalPrefix prefix to all internal channels
+	InternalPrefix = "_INTERNAL."
+
+	//InternalChannelPrefix Default channel prefix
+	InternalChannelPrefix = "io.evntsrc."
+)
+
 //BroadcastEvent attempts to connect to nats server to pub any event and saves to stream
 func BroadcastEvent(ctx context.Context, event EventInterface) error {
 	hostname, _ := os.Hostname()
@@ -102,8 +110,10 @@ func BroadcastEvent(ctx context.Context, event EventInterface) error {
 	event.SetTime(time.Now())
 
 	if event.GetChannel() == "" {
-		event.SetChannel("broadcast")
+		event.SetChannel(InternalChannelPrefix + "broadcast")
 	}
+
+	channel := InternalPrefix + event.GetChannel()
 
 	event = appendContextUserInfo(ctx, event)
 
@@ -112,13 +122,69 @@ func BroadcastEvent(ctx context.Context, event EventInterface) error {
 		return err
 	}
 
-	return nc.Publish("_INTERNAL.io.evntsrc."+event.GetChannel(), buf)
+	return nc.Publish(channel, buf)
 }
 
-//UserEvent used for broadcasting general user svc events
-type UserEvent struct {
-	*Event
-	UserID string `json:"id"`
+//ListenForBroadcast creates a new NATS connection and watches for internal events
+//based on a channel & type using ListenForBroadcastOnNC
+func ListenForBroadcast(serviceName string, eventType string, channel string) (chan []byte, func(), error) {
+	nc, err := nats.Connect(os.Getenv("NATS_HOST"))
+	if err != nil {
+		log.Printf("Failed to connect to nats: %s", err)
+		return nil, func() {}, err
+	}
+
+	out, subCloseFunc, err := ListenForBroadcastOnNC(nc, serviceName, eventType, channel)
+	if err != nil {
+		return out, subCloseFunc, err
+	}
+
+	closeFunc := func() {
+		subCloseFunc()
+		nc.Close()
+	}
+
+	return out, closeFunc, err
+}
+
+//ListenForBroadcastOnNC is the same as ListenForBroadcast but on an existing nats connection
+func ListenForBroadcastOnNC(nc *nats.Conn, serviceName string, eventType, channel string) (chan []byte, func(), error) {
+	if channel == "" {
+		channel = InternalChannelPrefix + "broadcast"
+	}
+	channel = InternalPrefix + channel
+
+	inbound := make(chan *nats.Msg, 64)
+	outbound := make(chan []byte, 64)
+	closeCh := make(chan struct{})
+
+	closeFunc := func() {
+		close(closeCh)
+	}
+
+	sub, err := nc.ChanQueueSubscribe(channel, serviceName, inbound)
+	if err != nil {
+		return nil, func() {}, err
+	}
+
+	go func() {
+		for {
+			select {
+			case msg := <-inbound:
+				ev := &Event{}
+				json.Unmarshal(msg.Data, ev)
+				if ev.Type == eventType {
+					outbound <- msg.Data
+				}
+			case <-closeCh:
+				//assume closed
+				sub.Unsubscribe()
+				return
+			}
+		}
+	}()
+
+	return outbound, closeFunc, nil
 }
 
 //BroadcastNonStreamingEvent broadcasts an event like BroadcastEvent but uses the non-streaming engine

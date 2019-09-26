@@ -1,9 +1,11 @@
 package emails
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"log"
 	"mime"
@@ -32,7 +34,11 @@ func (p *emailProcessor) Handle(job interface{}) {
 	if err != nil {
 		log.Printf("Failed to send: %v ~ %e", msg, err)
 	} else {
-		log.Printf("Sent email (%s)\n", resp.Headers["X-Message-Id"])
+		if resp.StatusCode == 400 {
+			log.Printf("Failed to send email: %v :: %v", msg, resp)
+			return
+		}
+		log.Printf("Sent email %d (%s)\n", resp.StatusCode, resp.Headers["X-Message-Id"])
 	}
 }
 
@@ -48,17 +54,37 @@ func NewServer() *Server {
 	return &Server{}
 }
 
-//Send turns a call into an email
+//Send triggers an email with templating
+//Plain text is not modified by the template
 func (s *Server) Send(ctx context.Context, request *pb.Email) (*pb.EmailResponse, error) {
+	tmpl, err := template.New("email").Parse(globalTemplate)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to init global template: %s", err)
+	}
 
+	buf := &bytes.Buffer{}
+	if err = tmpl.Execute(buf, template.HTML(request.Html)); err != nil {
+		return nil, fmt.Errorf("Failed to execute global template: %s", err)
+	}
+	request.Html = buf.String()
+
+	return s.SendRaw(ctx, request)
+}
+
+//SendRaw triggers a raw email without templating
+func (s *Server) SendRaw(ctx context.Context, request *pb.Email) (*pb.EmailResponse, error) {
 	from := mail.NewEmail("EvntSrc.io", "no-reply@evntsrc.io")
 
 	if len(request.To) == 0 {
 		return nil, fmt.Errorf("Can't send to no one")
 	}
 
-	for _, email := range request.To {
-		to := mail.NewEmail("", email)
+	if request.PlainText == "" {
+		request.PlainText = stripHTML(request.Html)
+	}
+
+	for _, recipt := range request.To {
+		to := mail.NewEmail(recipt.Name, recipt.Email)
 		message := mail.NewSingleEmail(from, request.Subject, to, request.PlainText, request.Html)
 
 		addHeaders(message, request.Headers)

@@ -242,8 +242,7 @@ proto.evntsrc.storer.AcknowledgeResponse.prototype.toObject = function(opt_inclu
  */
 proto.evntsrc.storer.AcknowledgeResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
-    time: (f = msg.getTime()) && github_com_golang_protobuf_ptypes_timestamp_timestamp_pb.Timestamp.toObject(includeInstance, f),
-    eventid: jspb.Message.getFieldWithDefault(msg, 2, "")
+    time: (f = msg.getTime()) && github_com_golang_protobuf_ptypes_timestamp_timestamp_pb.Timestamp.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -285,10 +284,6 @@ proto.evntsrc.storer.AcknowledgeResponse.deserializeBinaryFromReader = function(
       reader.readMessage(value,github_com_golang_protobuf_ptypes_timestamp_timestamp_pb.Timestamp.deserializeBinaryFromReader);
       msg.setTime(value);
       break;
-    case 2:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setEventid(value);
-      break;
     default:
       reader.skipField();
       break;
@@ -326,13 +321,6 @@ proto.evntsrc.storer.AcknowledgeResponse.serializeBinaryToWriter = function(mess
       github_com_golang_protobuf_ptypes_timestamp_timestamp_pb.Timestamp.serializeBinaryToWriter
     );
   }
-  f = message.getEventid();
-  if (f.length > 0) {
-    writer.writeString(
-      2,
-      f
-    );
-  }
 };
 
 
@@ -363,21 +351,6 @@ proto.evntsrc.storer.AcknowledgeResponse.prototype.clearTime = function() {
  */
 proto.evntsrc.storer.AcknowledgeResponse.prototype.hasTime = function() {
   return jspb.Message.getField(this, 1) != null;
-};
-
-
-/**
- * optional string EventID = 2;
- * @return {string}
- */
-proto.evntsrc.storer.AcknowledgeResponse.prototype.getEventid = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
-};
-
-
-/** @param {string} value */
-proto.evntsrc.storer.AcknowledgeResponse.prototype.setEventid = function(value) {
-  jspb.Message.setProto3StringField(this, 2, value);
 };
 
 

@@ -10,6 +10,7 @@
   "dependencies": {},
   "devDependencies": {
     "@cnamts/vue-cli-plugin-proxy": "^2.2.1",
+    "@fullhuman/postcss-purgecss": "fullhuman/postcss-purgecss",
     "@vue/cli-plugin-babel": "^3.7.0",
     "@vue/cli-plugin-eslint": "^3.7.0",
     "@vue/cli-service": "^3.7.0",

@@ -17,6 +17,7 @@ import (
 	pbEvent "github.com/tcfw/evntsrc/internal/event/protos"
 	pbStorer "github.com/tcfw/evntsrc/internal/storer/protos"
 	"github.com/tcfw/evntsrc/internal/tracing"
+	"github.com/tcfw/evntsrc/internal/utils/sysevents"
 	"github.com/tcfw/go-queue"
 	"google.golang.org/grpc"
 )
@@ -189,7 +190,7 @@ func monitorInternalStreams() {
 		}
 	}()
 
-	natsConn.QueueSubscribe("_INTERNAL.>", "storers", func(m *nats.Msg) {
+	natsConn.QueueSubscribe(sysevents.InternalPrefix+">", "storers", func(m *nats.Msg) {
 		event := &pbEvent.Event{}
 		err := proto.Unmarshal(m.Data, event)
 		if err != nil {

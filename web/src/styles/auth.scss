@@ -47,3 +47,9 @@
 		}
 	}
 }
+
+.pg-signup, .pg-signup-thanks {
+	&:after {
+		@extend .pg-login:after;
+	}
+}

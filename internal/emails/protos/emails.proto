@@ -10,9 +10,14 @@ option (gogoproto.sizer_all) = true;
 option (gogoproto.goproto_registration) = true;
 option (gogoproto.messagename_all) = true;
 
+message Recipient {
+  string email = 1;
+  string name = 2;
+}
+
 message Email {
   string from = 1;
-  repeated string to = 2;
+  repeated Recipient to = 2;
   string subject = 3;
 
   string plain_text = 4;
@@ -36,4 +41,5 @@ message EmailResponse {}
 
 service EmailService {
 	rpc Send(Email) returns (EmailResponse) {}
+	rpc SendRaw(Email) returns (EmailResponse) {}
 }

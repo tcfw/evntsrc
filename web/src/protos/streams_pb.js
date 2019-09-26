@@ -71,8 +71,7 @@ proto.evntsrc.streams.Stream.toObject = function(includeInstance, msg) {
     name: jspb.Message.getFieldWithDefault(msg, 3, ""),
     owner: jspb.Message.getFieldWithDefault(msg, 4, ""),
     icon: jspb.Message.getFieldWithDefault(msg, 5, ""),
-    color: jspb.Message.getFieldWithDefault(msg, 6, ""),
-    saveid: jspb.Message.getFieldWithDefault(msg, 7, "")
+    color: jspb.Message.getFieldWithDefault(msg, 6, "")
   };
 
   if (includeInstance) {
@@ -132,10 +131,6 @@ proto.evntsrc.streams.Stream.deserializeBinaryFromReader = function(msg, reader)
     case 6:
       var value = /** @type {string} */ (reader.readString());
       msg.setColor(value);
-      break;
-    case 7:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setSaveid(value);
       break;
     default:
       reader.skipField();
@@ -205,13 +200,6 @@ proto.evntsrc.streams.Stream.serializeBinaryToWriter = function(message, writer)
   if (f.length > 0) {
     writer.writeString(
       6,
-      f
-    );
-  }
-  f = message.getSaveid();
-  if (f.length > 0) {
-    writer.writeString(
-      7,
       f
     );
   }
@@ -305,21 +293,6 @@ proto.evntsrc.streams.Stream.prototype.getColor = function() {
 /** @param {string} value */
 proto.evntsrc.streams.Stream.prototype.setColor = function(value) {
   jspb.Message.setProto3StringField(this, 6, value);
-};
-
-
-/**
- * optional string saveId = 7;
- * @return {string}
- */
-proto.evntsrc.streams.Stream.prototype.getSaveid = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 7, ""));
-};
-
-
-/** @param {string} value */
-proto.evntsrc.streams.Stream.prototype.setSaveid = function(value) {
-  jspb.Message.setProto3StringField(this, 7, value);
 };
 
 

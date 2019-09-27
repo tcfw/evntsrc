@@ -25,6 +25,7 @@ func tracingWrapper(h http.Handler) http.Handler {
 			}
 			serverSpan.SetTag("http.path", r.RequestURI)
 			serverSpan.SetTag("http.method", r.Method)
+			serverSpan.SetTag("remote.ip", r.Header.Get("x-forwarded-for"))
 			r = r.WithContext(opentracing.ContextWithSpan(r.Context(), serverSpan))
 			defer serverSpan.Finish()
 		}

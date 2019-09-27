@@ -39,7 +39,7 @@ func (s *Server) handleNewUser(ev *userEvents.Event) {
 		log.Printf("Failed to open cli to users: %s", err)
 		return
 	}
-	user, err := userCli.Find(ctx, &evntsrc_users.UserRequest{Query: &evntsrc_users.UserRequest_Id{Id: ev.UserID}})
+	user, err := userCli.Find(ctx, &evntsrc_users.UserRequest{Status: evntsrc_users.UserRequest_PENDING, Query: &evntsrc_users.UserRequest_Id{Id: ev.UserID}})
 	if err != nil {
 		log.Printf("Failed to find user: %s", err)
 		return

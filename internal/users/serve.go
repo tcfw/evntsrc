@@ -30,6 +30,8 @@ import (
 const (
 	dbName       = "users"
 	dbCollection = "users"
+
+	mdValidationtoken = "validation_token"
 )
 
 type server struct {
@@ -81,7 +83,9 @@ func (s *server) Create(ctx context.Context, request *protos.User) (*protos.User
 	request.Id = id
 
 	//Clear anything that was sent in reqest
-	request.Metadata = map[string][]byte{}
+	request.Metadata = map[string][]byte{
+		mdValidationtoken: []byte(genValidationToken()),
+	}
 	request.Mfa = nil
 	request.Status = protos.User_PENDING
 
@@ -89,14 +93,14 @@ func (s *server) Create(ctx context.Context, request *protos.User) (*protos.User
 	if existingUser, err := s.Find(ctx, &protos.UserRequest{Status: protos.UserRequest_ANY, Query: &protos.UserRequest_Email{Email: request.Email}}); err == nil {
 		sysevents.BroadcastEvent(ctx, &events.Event{Event: &sysevents.Event{Type: events.BroadcastTypeRecreation}, UserID: existingUser.Id})
 
-		if err := s.sendRecreationEmail(existingUser); err != nil {
+		if err := s.sendRecreationEmail(ctx, existingUser); err != nil {
 			log.Printf("Failed to send recreation email: %s", err)
 			return nil, err
 		}
 
 		//Return with request to avoid account enumeration
 		request.Metadata = map[string][]byte{}
-		return s.cleanUserForResponse(request), nil
+		return s.sanatiseUserForResponse(request), nil
 	}
 
 	if err = collection.Insert(request); err != nil {
@@ -113,14 +117,18 @@ func (s *server) Create(ctx context.Context, request *protos.User) (*protos.User
 	q.One(&user)
 
 	sysevents.BroadcastEvent(ctx, &events.Event{Event: &sysevents.Event{Type: events.BroadcastTypeCreated}, UserID: id})
+	if err := s.sendValidationEmail(ctx, &user); err != nil {
+		log.Printf("Failed to send validation email: %s", err)
+		return nil, err
+	}
 
 	user.Metadata = map[string][]byte{}
-	return s.cleanUserForResponse(&user), nil
+	return s.sanatiseUserForResponse(&user), nil
 }
 
-//cleanUserForResponse removes sensitive information from the user struct
+//sanatiseUserForResponse removes sensitive information from the user struct
 //before sending back as response
-func (s *server) cleanUserForResponse(user *protos.User) *protos.User {
+func (s *server) sanatiseUserForResponse(user *protos.User) *protos.User {
 	user.Password = ""
 	return user
 }
@@ -145,6 +153,30 @@ func (s *server) validateUserRequest(request *protos.User, checkPassword bool) e
 	}
 
 	return nil
+}
+
+func (s *server) ValidateAccount(ctx context.Context, request *protos.ValidateRequest) (*protos.Empty, error) {
+	notFound := fmt.Errorf("Unable to find matching token")
+
+	user, err := s.Find(ctx, &protos.UserRequest{Status: protos.UserRequest_PENDING, Query: &protos.UserRequest_Email{Email: request.Email}})
+	if err != nil {
+		return nil, notFound
+	}
+
+	token, ok := user.Metadata[mdValidationtoken]
+	if !ok {
+		return nil, notFound
+	}
+	if string(token) == request.Token {
+		user.Status = protos.User_ACTIVE
+		delete(user.Metadata, mdValidationtoken)
+	} else {
+		return nil, notFound
+	}
+
+	err = s.updateUser(user)
+
+	return &protos.Empty{}, err
 }
 
 //Delete deletes a user
@@ -236,7 +268,10 @@ func (s *server) Find(ctx context.Context, request *protos.UserRequest) (*protos
 	user := protos.User{}
 	query.One(&user)
 
-	return s.cleanUserForResponse(&user), nil
+	tracing.ActiveSpan(ctx).LogKV("user_id", user.Id)
+
+	//Cannot sanatise output as password is required for passport svr
+	return &user, nil
 }
 
 //FindUsers finds multiple users
@@ -394,6 +429,28 @@ func (s *server) Update(ctx context.Context, request *protos.UserUpdateRequest) 
 	return s.Get(ctx, &protos.UserRequest{Query: &protos.UserRequest_Id{Id: request.GetId()}})
 }
 
+func (s *server) updateUser(user *protos.User) error {
+	dbConn, err := db.NewMongoDBSession()
+	if err != nil {
+		return err
+	}
+	defer dbConn.Close()
+
+	collection := dbConn.DB(dbName).C(dbCollection)
+	query := collection.FindId(user.Id)
+
+	if c, err := query.Count(); c == 0 || err != nil {
+		return fmt.Errorf("Failed to find user %s: %v", user.Id, err)
+	}
+
+	//restore password
+	origUser := &protos.User{}
+	query.One(origUser)
+	user.Password = origUser.Password
+
+	return collection.UpdateId(user.Id, user)
+}
+
 //Me returns the user information based on the uid from a gwt token provided in the authorization metadata
 func (s *server) Me(ctx context.Context, request *protos.Empty) (*protos.User, error) {
 	claims, err := utils.TokenClaimsFromContext(ctx)
@@ -406,7 +463,7 @@ func (s *server) Me(ctx context.Context, request *protos.Empty) (*protos.User, e
 		return nil, err
 	}
 
-	return s.cleanUserForResponse(user), nil
+	return s.sanatiseUserForResponse(user), nil
 }
 
 //RunGRPC starts the GRPC server

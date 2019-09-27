@@ -3,6 +3,7 @@ import Router from "vue-router";
 import Login from "./views/auth/Login.vue";
 import Signup from "./views/auth/Signup.vue";
 import SignupComplete from "./views/auth/SignupComplete.vue";
+import VerifyEmail from "./views/auth/VerifyEmail.vue";
 import Dashboard from "./views/Dashboard.vue";
 import Streams from "./views/Streams.vue";
 import Stream from "./views/Stream.vue";
@@ -39,6 +40,11 @@ export default new Router({
       path: "/signup/thanks",
       name: "signup-thanks",
       component: SignupComplete
+    },
+    {
+      path: "/verify/:token",
+      name: "verify",
+      component: VerifyEmail,
     },
     {
       path: "/dashboard",

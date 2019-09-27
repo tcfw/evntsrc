@@ -113,6 +113,8 @@ func (s *server) List(ctx context.Context, request *pb.ListRequest) (*pb.KeyList
 		return nil, err
 	}
 
+	span, _ := tracing.StartSpan(ctx, "query")
+
 	dbConn, err := db.NewMongoDBSession()
 	if err != nil {
 		return nil, err
@@ -132,6 +134,8 @@ func (s *server) List(ctx context.Context, request *pb.ListRequest) (*pb.KeyList
 	if err = query.All(&streamKeys); err != nil {
 		return nil, err
 	}
+
+	span.Finish()
 
 	return &pb.KeyList{Keys: streamKeys}, nil
 }

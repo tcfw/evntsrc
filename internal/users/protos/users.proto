@@ -92,12 +92,23 @@ message MFA {
     }
 }
 
+message ValidateRequest {
+    string email = 1;
+    string token = 2;
+}
+
 message Empty {}
 
 service UserService {
     rpc Create(User) returns (User) {
         option (google.api.http) = {
             post: "/v1/auth/register"
+            body: "*"
+        };
+    };
+    rpc ValidateAccount(ValidateRequest) returns (Empty) {
+        option (google.api.http) = {
+            post: "/v1/auth/validate_account"
             body: "*"
         };
     };

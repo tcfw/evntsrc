@@ -48,7 +48,7 @@
 	}
 }
 
-.pg-signup, .pg-signup-thanks {
+.pg-signup, .pg-signup-thanks, .pg-verify {
 	&:after {
 		@extend .pg-login:after;
 	}

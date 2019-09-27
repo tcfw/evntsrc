@@ -51,7 +51,7 @@ func HandlePub(w http.ResponseWriter, r *http.Request) {
 	pubEvent.Type = eventType
 	pubEvent.TypeVersion = r.URL.Query().Get("version")
 	pubEvent.Metadata = map[string]string{
-		"source-ip": r.RemoteAddr,
+		"source-ip": r.Header.Get("x-forwarded-for"),
 	}
 
 	userMetadata := r.URL.Query().Get("md")

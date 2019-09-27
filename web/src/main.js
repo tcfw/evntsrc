@@ -22,6 +22,7 @@ const publicRoutes = [
   'login',
   'signup',
   'signup-thanks',
+  'verify',
   'terms',
   'privacy'
 ];
@@ -37,6 +38,7 @@ let app = new Vue({
   },
   mounted() {
     if (!this.$root.loggedIn() && publicRoutes.indexOf(this.$route.name) < 0) {
+      console.log("landed on private page...", this.$route.name);
       this.$router.push("/login");
     } else {
       this.fetchMe();

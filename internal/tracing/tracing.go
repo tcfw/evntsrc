@@ -160,3 +160,8 @@ func StartChildSpan(childSpan ot.Span, name string) ot.Span {
 func GlobalTracer() ot.Tracer {
 	return ot.GlobalTracer()
 }
+
+//ActiveSpan gets the current span from the context
+func ActiveSpan(ctx context.Context) ot.Span {
+	return ot.SpanFromContext(ctx)
+}

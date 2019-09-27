@@ -7,6 +7,7 @@ import (
 	pb "github.com/tcfw/evntsrc/internal/passport/protos"
 	"github.com/tcfw/evntsrc/internal/utils/db"
 	events "github.com/tcfw/evntsrc/internal/utils/sysevents"
+	usersEvent "github.com/tcfw/evntsrc/internal/users/events"
 )
 
 const dbName = "passport"
@@ -49,7 +50,7 @@ func revokeToken(claims map[string]interface{}, reason string) error {
 		return err
 	}
 
-	events.BroadcastEvent(context.Background(), &events.UserEvent{
+	events.BroadcastEvent(context.Background(), &usersEvent.Event{
 		Event: &events.Event{
 			Type:     "io.evntsrc.passport.revoked",
 			Metadata: map[string]interface{}{"jti": claims["jti"]},

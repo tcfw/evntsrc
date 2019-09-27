@@ -1,6 +1,6 @@
 #!/bin/bash
 
-selectors="storer websocks stsmetrics streams passport users apigw bridge streamauth ingress billing wui adapter emails";
+selectors="storer websocks stsmetrics streams passport users apigw interconnect streamauth ingress billing wui emails";
 
 for selector in $selectors 
 do

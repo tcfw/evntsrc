@@ -2,6 +2,7 @@ package websocks
 
 import (
 	"context"
+	"regexp"
 
 	streamauth "github.com/tcfw/evntsrc/internal/streamauth/protos"
 	"github.com/tcfw/evntsrc/internal/tracing"
@@ -25,6 +26,9 @@ func (c *Client) validateAuth(ctx context.Context, auth *AuthCommand) error {
 
 	sk, err := cli.ValidateKeySecret(ctx, &streamauth.KSRequest{Stream: auth.Stream, Key: auth.Key, Secret: auth.Secret})
 	c.authKey = sk
+	if c.authKey.Permissions == nil {
+		c.authKey.Permissions = &streamauth.APIPermissions{}
+	}
 	return err
 }
 
@@ -36,4 +40,14 @@ func (c *Client) authFromHeader(ctx context.Context, apiKey string, apiSec strin
 		c.auth = authCmd
 	}
 	return err
+}
+
+func (c *Client) validateRestriction(subject string) bool {
+	if c.authKey.RestrictionFilter == "" {
+		//No restrictions
+		return true
+	}
+
+	restrictionExp := regexp.MustCompile(c.authKey.RestrictionFilter)
+	return restrictionExp.MatchString(subject)
 }

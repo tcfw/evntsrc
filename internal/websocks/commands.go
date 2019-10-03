@@ -97,6 +97,10 @@ func (c *Client) doSubscribe(command *InboundCommand, message []byte) {
 		c.sendStruct(&AckCommand{Ref: command.Ref, Acktype: "Error", Error: "Failed to parse command"})
 		return
 	}
+	if !c.authKey.Permissions.Subscribe {
+		c.sendStruct(&AckCommand{Ref: command.Ref, Acktype: "Error", Error: "Permission denied"})
+		return
+	}
 	c.Subscribe(subcommand.Subject, command)
 }
 
@@ -113,6 +117,10 @@ func (c *Client) doPublish(command *InboundCommand, message []byte) {
 	subcommand := &PublishCommand{}
 	if err := json.Unmarshal(message, subcommand); err != nil {
 		c.sendStruct(&AckCommand{Ref: command.Ref, Acktype: "Error", Error: "Failed to parse command"})
+		return
+	}
+	if !c.authKey.Permissions.Publish || !c.validateRestriction(subcommand.Subject) {
+		c.sendStruct(&AckCommand{Ref: command.Ref, Acktype: "Error", Error: "Permission denied"})
 		return
 	}
 
@@ -152,6 +160,10 @@ func (c *Client) doPublishEvent(command *InboundCommand, message []byte) {
 	subcommand := &PublishEventCommand{}
 	if err := json.Unmarshal(message, subcommand); err != nil {
 		c.sendStruct(&AckCommand{Ref: command.Ref, Acktype: "Error", Error: "Failed to parse command"})
+		return
+	}
+	if !c.authKey.Permissions.Publish || !c.validateRestriction(subcommand.Subject) {
+		c.sendStruct(&AckCommand{Ref: command.Ref, Acktype: "Error", Error: "Permission denied"})
 		return
 	}
 
@@ -238,6 +250,12 @@ func (c *Client) doReplay(command *InboundCommand, message []byte) {
 		c.sendStruct(&AckCommand{Ref: command.Ref, Acktype: "Error", Error: "Failed to parse command"})
 		return
 	}
+
+	if !c.authKey.Permissions.Replay || !c.validateRestriction(subcommand.Subject) {
+		c.sendStruct(&AckCommand{Ref: command.Ref, Acktype: "Error", Error: "Permission denied"})
+		return
+	}
+
 	subcommand.Stream = c.auth.Stream
 
 	if subcommand.JustMe {

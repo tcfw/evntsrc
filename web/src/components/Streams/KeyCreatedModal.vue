@@ -12,10 +12,7 @@
 				</div>
 			</div>
 			<div class="m-4">
-				<b>Key</b> <input type="text" :value="key" class="input-text" readonly/>
-			</div>
-			<div class="m-4">
-				<b>Secret</b> <input type="text" :value="secret" class="input-text" readonly/>
+				<b>Key</b> <input type="text" :value="ks" class="input-text" readonly/>
 			</div>
 			<button @click="downloadJSON" class="mr-4 mb-6 float-right bg-ev-100 text-white hover:bg-ev-700 py-2 px-3 rounded">Download as JSON</button>
 		</div>
@@ -33,15 +30,9 @@ export default {
 		response: Object,
 	},
 	computed: {
-		key() {
+		ks() {
 			if (this.response) {
-				return this.response.key
-			}
-			return ""
-		},
-		secret() {
-			if (this.response) {
-				return this.response.secret
+				return this.response.key+":"+this.response.secret
 			}
 			return ""
 		}
@@ -54,7 +45,7 @@ export default {
 			this.$refs.modal.show()
 		},
 		downloadJSON() {
-			var file = new Blob(["{\n\t\"key\":\""+this.key+"\",\n\t\"secret\":\""+this.secret+"\"\n}"], {type: "application/json"})
+			var file = new Blob(["{\n\t\"key\":\""+this.ks+"\"\n}"], {type: "application/json"})
 			var a = document.createElement("a"), url = URL.createObjectURL(file);
 			a.href=url;
 			a.download = "key.json"

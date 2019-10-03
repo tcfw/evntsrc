@@ -13,7 +13,6 @@
           <th>Restriction</th>
           <th>Last used</th>
           <th>Key</th>
-          <th>Secret</th>
           <th></th>
         </tr>
       </thead>
@@ -26,16 +25,16 @@
           <td class="text-xs" v-if="key.restrictionFilter">{{key.restrictionFilter}}</td>
           <td class="text-xs" v-else><i>None</i></td>
           <td class="text-sm"><i>Never used</i></td>
-          <td>{{ key.key }}</td>
-          <td>•••••••••••••</td>
+          <td>{{ key.key }}:•••••••••••••</td>
           <td class="w-1 actions">
             <button @click="editKey(key)">Edit</button>
             <button @click="confirmDelete(key)">Remove</button>
           </td>
         </tr>
         <tr v-if="keys.length == 0">
-          <td colspan="999">
-            <div class="text-center text-gray-500 text-sm my-6">No keys exist for this stream. Click 'Create key' to create one...</div>
+          <td colspan="999" class="text-center">
+            <div class="text-gray-500 text-sm my-6">No keys exist for this stream. Click 'Create key' to create one...</div>
+            <button @click="showCreate" class="mb-4 bg-ev-100 rounded text-white py-2 px-4 hover:bg-ev-700">Create key</button>
           </td>
         </tr>
       </tbody>
@@ -161,14 +160,20 @@ export default {
     formatPerms(key) {
       var perms = [];
 
-      if (key.permissions.publish) {
+      if(!key.permissions) {
         perms.push("Pub");
-      }
-      if (key.permissions.subscribe) {
         perms.push("Sub");
-      }
-      if (key.permissions.replay) {
         perms.push("Replay");
+      } else {
+        if (key.permissions.publish) {
+          perms.push("Pub");
+        }
+        if (key.permissions.subscribe) {
+          perms.push("Sub");
+        }
+        if (key.permissions.replay) {
+          perms.push("Replay");
+        }
       }
 
       return perms.join(", ")
@@ -211,10 +216,23 @@ export default {
         this.keyCreateResponse = d.data;
         this.$refs.keyModal.close();
         this.$refs.keyCreatedModal.show();
+      }).catch(err => {
+        this.$message.error("Failed to create your key. Please try again")
       })
     },
     submitEdit() {
-
+      this.$http.patch(this.$config.API + "/stream/"+this.$parent.stream.id+"/key/" + this.modalForm.id, {
+        label: this.modalForm.label,
+        permissions: this.modalForm.permissions,
+        restrictionFilter: this.modalForm.restrictionFilter,
+      }).then(d => {
+        this.loading = true;
+        this.load();
+        this.$refs.keyModal.close();
+        this.clearModal();
+      }).catch(err => {
+        this.$message.error("Failed to update your key. Please try again")
+      })
     },
     confirmDelete(key) {
       this.keyToDelete = key.id;
@@ -225,6 +243,8 @@ export default {
         this.hideDelete();
         this.load();
         this.$message.success("Successfully deleted key");
+      }).catch(err => {
+        this.$message.error("Failed to delete your key. Please try again")
       })
     },
     hideDelete() {

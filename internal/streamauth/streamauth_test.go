@@ -25,9 +25,9 @@ func TestCreate(t *testing.T) {
 	md := metadata.Pairs("authorization", jwtToken)
 	ctx := metadata.NewIncomingContext(context.Background(), md)
 
-	stream, _ := s.streamConn.Get(ctx, &evntsrc_streams.GetRequest{ID: 0})
+	stream, _ := s.streamConn.Get(ctx, &evntsrc_streams.GetRequest{Id: 0})
 
-	sk, err := s.Create(ctx, &pb.StreamKey{Stream: stream.GetID(), Label: "test"})
+	sk, err := s.Create(ctx, &pb.StreamKey{Stream: stream.GetId(), Label: "test"})
 	if err != nil {
 		t.Error(err)
 	}
@@ -69,14 +69,14 @@ func TestGet(t *testing.T) {
 	md := metadata.Pairs("authorization", jwtToken)
 	ctx := metadata.NewIncomingContext(context.Background(), md)
 
-	stream, _ := s.streamConn.Get(ctx, &evntsrc_streams.GetRequest{ID: 0})
+	stream, _ := s.streamConn.Get(ctx, &evntsrc_streams.GetRequest{Id: 0})
 
-	sk, err := s.Create(ctx, &pb.StreamKey{Stream: stream.GetID(), Label: "test"})
+	sk, err := s.Create(ctx, &pb.StreamKey{Stream: stream.GetId(), Label: "test"})
 	if err != nil {
 		t.Error(err)
 	}
 
-	skG, err := s.Get(ctx, &pb.GetRequest{Stream: stream.GetID(), Id: sk.GetId()})
+	skG, err := s.Get(ctx, &pb.GetRequest{Stream: stream.GetId(), Id: sk.GetId()})
 	if err != nil {
 		t.Error(err)
 	}
@@ -97,14 +97,14 @@ func TestList(t *testing.T) {
 	md := metadata.Pairs("authorization", jwtToken)
 	ctx := metadata.NewIncomingContext(context.Background(), md)
 
-	stream, _ := s.streamConn.Get(ctx, &evntsrc_streams.GetRequest{ID: 0})
+	stream, _ := s.streamConn.Get(ctx, &evntsrc_streams.GetRequest{Id: 0})
 
-	sk, err := s.Create(ctx, &pb.StreamKey{Stream: stream.GetID(), Label: "test"})
+	sk, err := s.Create(ctx, &pb.StreamKey{Stream: stream.GetId(), Label: "test"})
 	if err != nil {
 		t.Error(err)
 	}
 
-	keyList, err := s.List(ctx, &pb.ListRequest{Stream: stream.GetID()})
+	keyList, err := s.List(ctx, &pb.ListRequest{Stream: stream.GetId()})
 	if err != nil {
 		t.Error(err)
 	}
@@ -136,11 +136,11 @@ func TestValidateOwnership(t *testing.T) {
 	md := metadata.Pairs("authorization", jwtToken)
 	ctx := metadata.NewIncomingContext(context.Background(), md)
 
-	stream, _ := s.streamConn.Get(ctx, &evntsrc_streams.GetRequest{ID: 0})
+	stream, _ := s.streamConn.Get(ctx, &evntsrc_streams.GetRequest{Id: 0})
 
 	ctx = metadata.NewIncomingContext(context.Background(), md)
 
-	err := s.validateOwnership(ctx, stream.GetID())
+	err := s.validateOwnership(ctx, stream.GetId())
 	if err != nil {
 		t.Error(err)
 	}
@@ -168,7 +168,7 @@ type MockStreamClient struct {
 
 func (s *MockStreamClient) Get(ctx context.Context, in *evntsrc_streams.GetRequest, opts ...grpc.CallOption) (*evntsrc_streams.Stream, error) {
 	return &evntsrc_streams.Stream{
-		ID:      999999999,
+		Id:      999999999,
 		Cluster: "test",
 		Name:    "test",
 		Owner:   "000000000000000000000000",
@@ -177,7 +177,7 @@ func (s *MockStreamClient) Get(ctx context.Context, in *evntsrc_streams.GetReque
 
 func (s *MockStreamClient) Create(ctx context.Context, in *evntsrc_streams.Stream, opts ...grpc.CallOption) (*evntsrc_streams.Stream, error) {
 	return &evntsrc_streams.Stream{
-		ID:      999999999,
+		Id:      999999999,
 		Cluster: in.Cluster,
 		Name:    in.Name,
 		Owner:   "000000000000000000000000",
@@ -188,7 +188,7 @@ func (s *MockStreamClient) List(ctx context.Context, in *evntsrc_streams.Empty, 
 	return &evntsrc_streams.StreamList{
 		Streams: []*evntsrc_streams.Stream{
 			{
-				ID:      999999999,
+				Id:      999999999,
 				Cluster: "test",
 				Name:    "test",
 				Owner:   "000000000000000000000000",

@@ -1,14 +1,20 @@
 import Vue from "vue";
 import Router from "vue-router";
+
 import Login from "./views/auth/Login.vue";
 import Signup from "./views/auth/Signup.vue";
 import SignupComplete from "./views/auth/SignupComplete.vue";
+import ForgotPassword from "./views/auth/ForgotPassword.vue";
 import VerifyEmail from "./views/auth/VerifyEmail.vue";
+
 import Dashboard from "./views/Dashboard.vue";
+
 import Streams from "./views/Streams.vue";
 import Stream from "./views/Stream.vue";
 import StreamHistory from "./views/Stream/History.vue";
 import StreamKeys from "./views/Stream/Keys.vue";
+import StreamSettings from "./views/Stream/Settings.vue";
+
 import Settings from "./views/Settings.vue";
 import SettingsAccount from "./views/Settings/Account.vue";
 import SettingsSecurity from "./views/Settings/Security.vue";
@@ -47,6 +53,11 @@ export default new Router({
       component: VerifyEmail,
     },
     {
+      path: "/forgot",
+      name: "forgot",
+      component: ForgotPassword,
+    },
+    {
       path: "/dashboard",
       name: "dashboard",
       component: Dashboard
@@ -64,7 +75,8 @@ export default new Router({
           children: [
             {
               path: "settings",
-              name: "stream-settings"
+              name: "stream-settings",
+              component: StreamSettings
             },
             {
               path: "history",
@@ -119,7 +131,8 @@ export default new Router({
       ]
     },
     {
-      path: '*',
+      path: '/404',
+      alias: '*',
       name: '404',
       component: e404
     }

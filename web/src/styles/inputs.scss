@@ -1,7 +1,42 @@
+.error-text {
+	@apply text-red-800 text-xs -mt-2;
+}
+
 .input {
 	&-text {
 		@apply bg-ev-999 border border-ev-800 rounded py-2 px-3 w-full my-2 outline-none;
+		
+		&.error {
+			@apply border-red-500;
+		}
 	}
+
+	&-check {
+		@apply relative pl-6;
+
+		input[type='checkbox'] {
+			@apply hidden;
+		}
+
+		span {
+			@apply select-none;
+
+			&::before {
+				content: " ";
+				@apply absolute left-0 block border rounded h-4 w-4 cursor-pointer;
+				top: 0.1rem;
+			}
+		}
+
+
+		input:checked + span::after {
+			content: " ";
+			top: 0.1rem;
+			margin: 2px;
+			@apply absolute left-0 block border rounded h-3 w-3 bg-ev-100 cursor-pointer;
+		}
+	}
+
 
 	&-button {
 		&[disabled] {

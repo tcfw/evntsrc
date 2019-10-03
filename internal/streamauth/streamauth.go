@@ -74,6 +74,8 @@ func (s *server) Create(ctx context.Context, request *pb.StreamKey) (*pb.StreamK
 		return nil, err
 	}
 
+	//TODO(tcfw) hash key
+
 	request.Key = key
 	request.Secret = secret
 
@@ -194,6 +196,8 @@ func (s *server) Get(ctx context.Context, request *pb.GetRequest) (*pb.StreamKey
 		return nil, err
 	}
 
+	key.Secret = ""
+
 	return &key, nil
 }
 
@@ -248,7 +252,7 @@ func (s *server) validateOwnership(ctx context.Context, stream int32) error {
 
 	md, _ := metadata.FromIncomingContext(ctx)
 	octx := metadata.NewOutgoingContext(ctx, md)
-	_, err := s.streamConn.Get(octx, &streams.GetRequest{ID: stream})
+	_, err := s.streamConn.Get(octx, &streams.GetRequest{Id: stream})
 
 	if err != nil {
 		return status.Errorf(codes.NotFound, "Unknown stream: "+err.Error())
@@ -277,6 +281,8 @@ func (s *server) ValidateKeySecret(ctx context.Context, request *pb.KSRequest) (
 	if err != nil {
 		return nil, err
 	}
+
+	//TODO(tcfw) record key usage
 
 	return sk, nil
 }

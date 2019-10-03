@@ -71,7 +71,8 @@ proto.evntsrc.streams.Stream.toObject = function(includeInstance, msg) {
     name: jspb.Message.getFieldWithDefault(msg, 3, ""),
     owner: jspb.Message.getFieldWithDefault(msg, 4, ""),
     icon: jspb.Message.getFieldWithDefault(msg, 5, ""),
-    color: jspb.Message.getFieldWithDefault(msg, 6, "")
+    color: jspb.Message.getFieldWithDefault(msg, 6, ""),
+    metadataMap: (f = msg.getMetadataMap()) ? f.toObject(includeInstance, undefined) : []
   };
 
   if (includeInstance) {
@@ -131,6 +132,12 @@ proto.evntsrc.streams.Stream.deserializeBinaryFromReader = function(msg, reader)
     case 6:
       var value = /** @type {string} */ (reader.readString());
       msg.setColor(value);
+      break;
+    case 8:
+      var value = msg.getMetadataMap();
+      reader.readMessage(value, function(message, reader) {
+        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readBytes, null, "");
+         });
       break;
     default:
       reader.skipField();
@@ -203,11 +210,15 @@ proto.evntsrc.streams.Stream.serializeBinaryToWriter = function(message, writer)
       f
     );
   }
+  f = message.getMetadataMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(8, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeBytes);
+  }
 };
 
 
 /**
- * optional int32 ID = 1;
+ * optional int32 id = 1;
  * @return {number}
  */
 proto.evntsrc.streams.Stream.prototype.getId = function() {
@@ -222,7 +233,7 @@ proto.evntsrc.streams.Stream.prototype.setId = function(value) {
 
 
 /**
- * optional string Cluster = 2;
+ * optional string cluster = 2;
  * @return {string}
  */
 proto.evntsrc.streams.Stream.prototype.getCluster = function() {
@@ -237,7 +248,7 @@ proto.evntsrc.streams.Stream.prototype.setCluster = function(value) {
 
 
 /**
- * optional string Name = 3;
+ * optional string name = 3;
  * @return {string}
  */
 proto.evntsrc.streams.Stream.prototype.getName = function() {
@@ -252,7 +263,7 @@ proto.evntsrc.streams.Stream.prototype.setName = function(value) {
 
 
 /**
- * optional string Owner = 4;
+ * optional string owner = 4;
  * @return {string}
  */
 proto.evntsrc.streams.Stream.prototype.getOwner = function() {
@@ -267,7 +278,7 @@ proto.evntsrc.streams.Stream.prototype.setOwner = function(value) {
 
 
 /**
- * optional string Icon = 5;
+ * optional string icon = 5;
  * @return {string}
  */
 proto.evntsrc.streams.Stream.prototype.getIcon = function() {
@@ -282,7 +293,7 @@ proto.evntsrc.streams.Stream.prototype.setIcon = function(value) {
 
 
 /**
- * optional string Color = 6;
+ * optional string color = 6;
  * @return {string}
  */
 proto.evntsrc.streams.Stream.prototype.getColor = function() {
@@ -293,6 +304,24 @@ proto.evntsrc.streams.Stream.prototype.getColor = function() {
 /** @param {string} value */
 proto.evntsrc.streams.Stream.prototype.setColor = function(value) {
   jspb.Message.setProto3StringField(this, 6, value);
+};
+
+
+/**
+ * map<string, bytes> metadata = 8;
+ * @param {boolean=} opt_noLazyCreate Do not create the map if
+ * empty, instead returning `undefined`
+ * @return {!jspb.Map<string,!(string|Uint8Array)>}
+ */
+proto.evntsrc.streams.Stream.prototype.getMetadataMap = function(opt_noLazyCreate) {
+  return /** @type {!jspb.Map<string,!(string|Uint8Array)>} */ (
+      jspb.Message.getMapField(this, 8, opt_noLazyCreate,
+      null));
+};
+
+
+proto.evntsrc.streams.Stream.prototype.clearMetadataMap = function() {
+  this.getMetadataMap().clear();
 };
 
 
@@ -424,7 +453,7 @@ proto.evntsrc.streams.SearchRequest.serializeBinaryToWriter = function(message, 
 
 
 /**
- * optional string Query = 1;
+ * optional string query = 1;
  * @return {string}
  */
 proto.evntsrc.streams.SearchRequest.prototype.getQuery = function() {
@@ -576,7 +605,7 @@ proto.evntsrc.streams.StreamList.serializeBinaryToWriter = function(message, wri
 
 
 /**
- * repeated Stream Streams = 1;
+ * repeated Stream streams = 1;
  * @return {!Array<!proto.evntsrc.streams.Stream>}
  */
 proto.evntsrc.streams.StreamList.prototype.getStreamsList = function() {
@@ -850,7 +879,7 @@ proto.evntsrc.streams.GetRequest.serializeBinaryToWriter = function(message, wri
 
 
 /**
- * optional int32 ID = 1;
+ * optional int32 id = 1;
  * @return {number}
  */
 proto.evntsrc.streams.GetRequest.prototype.getId = function() {
@@ -999,7 +1028,7 @@ proto.evntsrc.streams.IdList.serializeBinaryToWriter = function(message, writer)
 
 
 /**
- * repeated int32 ID = 1;
+ * repeated int32 id = 1;
  * @return {!Array<number>}
  */
 proto.evntsrc.streams.IdList.prototype.getIdList = function() {

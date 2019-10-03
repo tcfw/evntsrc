@@ -6,12 +6,12 @@
 		<router-link to="/login" class="float-right mt-10 text-sm text-text-800">Login</router-link>
 		<h2 class="font-bold text-xl text-text-100 pt-8 pb-6">Verify your email</h2>
 		<div class="mt-6">
-			<p>We’ve sent you an email to validate your account. If you don’t receive the email within a few minutes, double check your Junk/Spam folder.</p>
+			<p>We've sent you an email to validate your account. If you don't receive the email within a few minutes, double check your Junk/Spam folder.</p>
 		</div>
 		<div class="text-center w-full mt-16">
 			<img class="inline max-w-sm" src="@/assets/email_sent.png"/>
 		</div>
-		<a href="#" class="mt-16 text-xs text-ev-100 block font-bold">I still didn't receive my email</a>
+		<!-- TODO(tcfw) <a href="#" class="mt-16 text-xs text-ev-100 block font-bold">I still didn't receive my email</a> -->
 	</div>
 </template>
 <script>

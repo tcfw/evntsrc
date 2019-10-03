@@ -31,7 +31,7 @@ func NewServer() *Server {
 }
 
 func (s *Server) validateCreate(request *pb.Stream) error {
-	if request.GetID() != 0 {
+	if request.GetId() != 0 {
 		return errors.New("ID must not be set")
 	}
 
@@ -70,14 +70,14 @@ func (s *Server) Create(ctx context.Context, request *pb.Stream) (*pb.Stream, er
 	}
 
 	request.Owner = userClaims["sub"].(string)
-	request.ID = int32(time.Now().Unix())
+	request.Id = int32(time.Now().Unix())
 
 	if err = collection.Insert(request); err != nil {
 		log.Println(err.Error())
 		return nil, err
 	}
 
-	return s.Get(ctx, &pb.GetRequest{ID: request.ID})
+	return s.Get(ctx, &pb.GetRequest{Id: request.Id})
 }
 
 //List provides a list of streams the user is an owner of
@@ -120,17 +120,17 @@ func (s *Server) ListIds(ctx context.Context, searchRequest *pb.SearchRequest) (
 
 	collection := dbConn.DB(dBName).C(collectionName)
 	query := collection.Find(nil).Select(bson.M{"_id": 1})
-	streams := []struct{ ID int32 }{}
+	streams := []struct{ Id int32 }{}
 	if err = query.All(&streams); err != nil {
 		return nil, err
 	}
 
 	final := []int32{}
 	for _, stream := range streams {
-		final = append(final, stream.ID)
+		final = append(final, stream.Id)
 	}
 
-	return &pb.IdList{ID: final}, nil
+	return &pb.IdList{Id: final}, nil
 }
 
 //Get fetches the stream from DB
@@ -150,7 +150,7 @@ func (s *Server) Get(ctx context.Context, request *pb.GetRequest) (*pb.Stream, e
 	}
 
 	//Validate ownership
-	bsonq := bson.M{"owner": userClaims["sub"], "_id": request.GetID()}
+	bsonq := bson.M{"owner": userClaims["sub"], "_id": request.GetId()}
 	query := collection.Find(bsonq)
 
 	if c, _ := query.Count(); c == 0 {
@@ -176,11 +176,11 @@ func (s *Server) Update(ctx context.Context, request *pb.Stream) (*pb.Stream, er
 	collection := dbConn.DB(dBName).C(collectionName)
 
 	//Validate ownership via Get
-	if _, err = s.Get(ctx, &pb.GetRequest{ID: request.ID}); err != nil {
+	if _, err = s.Get(ctx, &pb.GetRequest{Id: request.Id}); err != nil {
 		return request, err
 	}
 
-	err = collection.Update(bson.M{"_id": request.ID}, request)
+	err = collection.Update(bson.M{"_id": request.Id}, request)
 
 	return request, err
 }
@@ -200,7 +200,7 @@ func (s *Server) Delete(ctx context.Context, request *pb.Stream) (*pb.Empty, err
 		return nil, err
 	}
 
-	bsonq := bson.M{"owner": userClaims["sub"], "_id": request.GetID()}
+	bsonq := bson.M{"owner": userClaims["sub"], "_id": request.GetId()}
 	err = collection.Remove(bsonq)
 
 	//TODO(tcfw) broadcast delete

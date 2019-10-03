@@ -11,26 +11,27 @@
     </div>
     <div class="stream-list" v-if="!loading">
       <router-link
-        :to="'/streams/' + stream.ID"
+        :to="'/streams/' + stream.id"
         v-for="stream in filteredStreams"
-        :key="stream.ID"
+        :key="stream.id"
         class="stream"
       >
         <div class="icon" :style="iconStyling(stream)">
           <i
-            v-if="'Icon' in stream && stream.Icon == ''"
-            :class="'fas fa-' + stream.Icon"
+            v-if="'icon' in stream && stream.icon == ''"
+            :class="'fas fa-' + stream.icon"
           ></i>
           <i v-else class="fas fa-bolt"></i>
         </div>
         <div class="info">
-          <div class="name">{{ stream.Name }}</div>
-          <div class="cluster">{{ stream.Cluster }}</div>
+          <div class="name">{{ stream.name }}</div>
+          <div class="cluster">{{ stream.cluster }}</div>
         </div>
-        <router-link :to="'/streams/' + stream.ID + '/settings'"
+        <router-link :to="'/streams/' + stream.id + '/settings'"
           ><i class="fas fa-cog config"></i
         ></router-link>
       </router-link>
+      <div class="create-button" @click="openCreate"><i class="fas fa-plus"></i></div>
     </div>
     <div class="searching-loader" v-if="loading">
       <i class="fas fa-sync fa-spin"></i>
@@ -40,21 +41,37 @@
       <p>{{ error }}</p>
       <el-button type="danger" size="mini" @click="retry">Retry</el-button>
     </div>
+    <create-modal ref="createModal"></create-modal>
+    <key-created-modal :response="keyCreateResponse" @hidden="clearKeyCreateResponse" ref="keyCreatedModal"></key-created-modal>
   </div>
 </template>
 <script>
+import createModal from '@/components/Streams/CreateModal.vue'
+import keyCreatedModal from '@/components/Streams/KeyCreatedModal.vue'
+
 export default {
   name: "stream-side-menu",
+  components: {
+      createModal,
+      keyCreatedModal
+  },
   data() {
     return {
       searchInput: "",
       loading: false,
       error: null,
       isSearchResults: false,
-      streams: []
+      streams: [],
+      keyCreateResponse: {},
     };
   },
   methods: {
+    clearKeyCreateResponse() {
+      this.keyCreateResponse = {};
+    },
+    openCreate() {
+      this.$refs.createModal.show();
+    },
     clearSearch() {
       this.searchInput = "";
       this.load();
@@ -62,7 +79,7 @@ export default {
     iconStyling(stream) {
       var styling = {};
       if ("Color" in stream) {
-        styling.background = stream.Color;
+        styling.background = stream.color;
       }
       return styling;
     },
@@ -93,7 +110,7 @@ export default {
         });
     },
     buildList(streams) {
-      this.streams = streams.Streams;
+      this.streams = streams.streams;
     },
     retry() {
       if (this.searchInput != "") {
@@ -110,7 +127,7 @@ export default {
       }
       return this._.filter(
         this.streams,
-        stream => stream.Name.search(new RegExp(this.searchInput, "gi")) >= 0
+        stream => stream.name.search(new RegExp(this.searchInput, "gi")) >= 0
       );
     }
   },
@@ -122,13 +139,19 @@ export default {
 
 <style lang="scss" scoped>
 .stream-side-menu {
-  @apply bg-white w-full h-full shadow-lg relative;
+  @apply bg-white w-full h-full shadow-lg relative float-left;
+}
+
+.create-button {
+  @apply mx-4 mt-8 p-2 bg-ev-100 rounded text-white block text-center text-sm cursor-pointer;
+
+  &:hover {
+    @apply bg-ev-50;
+  }
 }
 
 .search-container {
-  @apply absolute shadow-inner rounded border;
-  border-color: #eee;
-  margin: 15px;
+  @apply absolute shadow-inner rounded border border-gray-200 m-4;
   width: calc(100% - 30px);
   height: 36px;
   background: #fafafa;

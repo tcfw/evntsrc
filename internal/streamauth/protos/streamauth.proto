@@ -17,9 +17,9 @@ option (gogoproto.goproto_registration) = true;
 option (gogoproto.messagename_all) = true;
 
 message APIPermissions {
-	bool Publish = 1;
-	bool Subscribe = 2;
-	bool Replay = 3;
+	bool publish = 1;
+	bool subscribe = 2;
+	bool replay = 3;
 }
 
 message Empty {}
@@ -41,6 +41,7 @@ message StreamKey {
 	string secret = 5;
 	string restrictionFilter = 6;
 	APIPermissions permissions = 7;
+	map<string,bytes> metadata = 8;
 }
 
 message KSRequest {

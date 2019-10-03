@@ -143,8 +143,19 @@ func (s *server) validateUserRequest(request *protos.User, checkPassword bool) e
 		return fmt.Errorf("Email is required")
 	}
 
-	if checkPassword && request.Password == "" {
-		return fmt.Errorf("Password is required")
+	if checkPassword {
+		if request.Password == "" {
+			return fmt.Errorf("Password is required")
+		}
+
+		//Positive lookaheads currently not supported in regexp
+		// reg, err := regexp.Compile(`(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%&*()_]).{8,}`)
+		// if err != nil {
+		// 	return err
+		// }
+		// if !reg.Match([]byte(request.Password)) {
+		// 	return fmt.Errorf("Password not complex enough")
+		// }
 	}
 
 	//picture should not be larger than 5MB

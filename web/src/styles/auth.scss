@@ -8,12 +8,17 @@
 		left: -10px;
 		height: calc(100% + 20px);
 		width: calc(100% + 20px);
-		background: url('../assets/login_bg.jpg') no-repeat center;
+		background-image: url('../assets/login_bg.jpg');
+		background-repeat: no-repeat;
+		background-position: center;
 		background-size: cover;
 
 		@media(min-width:1280px) {
-			background: url('../assets/login_bg_x4.jpg') no-repeat center;
-			background-size: cover;
+			background-image: url('../assets/login_bg_x2.jpg');
+		}
+
+		@media(min-width: 1340px) {
+			background-image: url('../assets/login_bg_x4.jpg');
 		}
 	}
 
@@ -48,7 +53,7 @@
 	}
 }
 
-.pg-signup, .pg-signup-thanks, .pg-verify {
+.pg-signup, .pg-signup-thanks, .pg-verify, .pg-forgot {
 	&:after {
 		@extend .pg-login:after;
 	}

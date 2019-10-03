@@ -172,7 +172,7 @@ proto.evntsrc.streamauth.APIPermissions.serializeBinaryToWriter = function(messa
 
 
 /**
- * optional bool Publish = 1;
+ * optional bool publish = 1;
  * Note that Boolean fields may be set to 0/1 when serialized from a Java server.
  * You should avoid comparisons like {@code val === true/false} in those cases.
  * @return {boolean}
@@ -189,7 +189,7 @@ proto.evntsrc.streamauth.APIPermissions.prototype.setPublish = function(value) {
 
 
 /**
- * optional bool Subscribe = 2;
+ * optional bool subscribe = 2;
  * Note that Boolean fields may be set to 0/1 when serialized from a Java server.
  * You should avoid comparisons like {@code val === true/false} in those cases.
  * @return {boolean}
@@ -206,7 +206,7 @@ proto.evntsrc.streamauth.APIPermissions.prototype.setSubscribe = function(value)
 
 
 /**
- * optional bool Replay = 3;
+ * optional bool replay = 3;
  * Note that Boolean fields may be set to 0/1 when serialized from a Java server.
  * You should avoid comparisons like {@code val === true/false} in those cases.
  * @return {boolean}
@@ -702,7 +702,8 @@ proto.evntsrc.streamauth.StreamKey.toObject = function(includeInstance, msg) {
     key: jspb.Message.getFieldWithDefault(msg, 4, ""),
     secret: jspb.Message.getFieldWithDefault(msg, 5, ""),
     restrictionfilter: jspb.Message.getFieldWithDefault(msg, 6, ""),
-    permissions: (f = msg.getPermissions()) && proto.evntsrc.streamauth.APIPermissions.toObject(includeInstance, f)
+    permissions: (f = msg.getPermissions()) && proto.evntsrc.streamauth.APIPermissions.toObject(includeInstance, f),
+    metadataMap: (f = msg.getMetadataMap()) ? f.toObject(includeInstance, undefined) : []
   };
 
   if (includeInstance) {
@@ -767,6 +768,12 @@ proto.evntsrc.streamauth.StreamKey.deserializeBinaryFromReader = function(msg, r
       var value = new proto.evntsrc.streamauth.APIPermissions;
       reader.readMessage(value,proto.evntsrc.streamauth.APIPermissions.deserializeBinaryFromReader);
       msg.setPermissions(value);
+      break;
+    case 8:
+      var value = msg.getMetadataMap();
+      reader.readMessage(value, function(message, reader) {
+        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readBytes, null, "");
+         });
       break;
     default:
       reader.skipField();
@@ -846,6 +853,10 @@ proto.evntsrc.streamauth.StreamKey.serializeBinaryToWriter = function(message, w
       f,
       proto.evntsrc.streamauth.APIPermissions.serializeBinaryToWriter
     );
+  }
+  f = message.getMetadataMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(8, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeBytes);
   }
 };
 
@@ -967,6 +978,24 @@ proto.evntsrc.streamauth.StreamKey.prototype.clearPermissions = function() {
  */
 proto.evntsrc.streamauth.StreamKey.prototype.hasPermissions = function() {
   return jspb.Message.getField(this, 7) != null;
+};
+
+
+/**
+ * map<string, bytes> metadata = 8;
+ * @param {boolean=} opt_noLazyCreate Do not create the map if
+ * empty, instead returning `undefined`
+ * @return {!jspb.Map<string,!(string|Uint8Array)>}
+ */
+proto.evntsrc.streamauth.StreamKey.prototype.getMetadataMap = function(opt_noLazyCreate) {
+  return /** @type {!jspb.Map<string,!(string|Uint8Array)>} */ (
+      jspb.Message.getMapField(this, 8, opt_noLazyCreate,
+      null));
+};
+
+
+proto.evntsrc.streamauth.StreamKey.prototype.clearMetadataMap = function() {
+  this.getMetadataMap().clear();
 };
 
 

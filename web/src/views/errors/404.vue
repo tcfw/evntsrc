@@ -5,3 +5,8 @@
 		You look lost :(<br/> Time to go <router-link to="/" class="text-ev-100">home</router-link> or go <a @click="$router.go(-1)" class="text-ev-100 cursor-pointer">back</a> the way you came...
 	</div>
 </template>
+<script>
+export default {
+	name: 'err-404'
+}
+</script>

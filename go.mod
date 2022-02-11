@@ -13,7 +13,7 @@ require (
 	github.com/gogo/googleapis v1.3.0
 	github.com/gogo/protobuf v1.3.0
 	github.com/golang/mock v1.3.1
-	github.com/golang/protobuf v1.3.2
+	github.com/golang/protobuf v1.4.2
 	github.com/google/uuid v1.1.1
 	github.com/gophercloud/gophercloud v0.4.0 // indirect
 	github.com/gorilla/handlers v1.4.2
@@ -25,8 +25,8 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway v1.11.1
 	github.com/icrowley/fake v0.0.0-20180203215853-4178557ae428
 	github.com/lib/pq v1.2.0
-	github.com/nats-io/nats-server/v2 v2.0.4
-	github.com/nats-io/nats.go v1.8.1
+	github.com/nats-io/nats-server/v2 v2.7.2
+	github.com/nats-io/nats.go v1.13.1-0.20220121202836-972a071d373d
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/prometheus/client_golang v1.1.0
 	github.com/prometheus/common v0.6.0
@@ -44,8 +44,8 @@ require (
 	github.com/uber/jaeger-client-go v2.18.1+incompatible
 	github.com/uber/jaeger-lib v2.1.1+incompatible
 	go.uber.org/zap v1.10.0
-	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
-	golang.org/x/net v0.0.0-20190916140828-c8589233b77d
+	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce
+	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2
 	google.golang.org/grpc v1.23.1
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	k8s.io/apimachinery v0.0.0-20190917163033-a891081239f5
